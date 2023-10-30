@@ -95,7 +95,7 @@ ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion,
 ShockLocation, Uncer = SA.FindTheShockwaveImproved(ShockwaveRegion, 
                                                    reviewInterval = [210,215], 
                                                    Signalfilter = 'med-Wiener')
-print(Uncer)
+# print(Uncer)
 print('uncertainty ratio:', round((len(Uncer)/len(ShockLocation))*100,2),'%')
 # print(Uncer)
 

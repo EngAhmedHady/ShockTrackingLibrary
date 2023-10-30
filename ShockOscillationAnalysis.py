@@ -179,6 +179,7 @@ class SOA:
     def ShockTraking(self, SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
         # Start processing the slice
         avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice
+        MinimumPoint = min(SnapshotSlice)
         
         if Plot: # to plot slice illumination values with location and Avg. line
             fig, ax = plt.subplots(figsize=(10,5))
@@ -208,9 +209,11 @@ class SOA:
             # bounded local minimum
             elif SnapshotSlice[pixel] >= avg and len(localmin) > 1: 
                 A = abs(np.trapz(avg-localmin))
-                AeraSet.append(A)                    
+                SetMinPoint = min(localmin)
+                AeraSet.append(A)
                 if Plot:ax.fill_between(LocMinI, localmin,avg , alpha=0.5)                        
-                if A > MinA:
+                if A > MinA and SetMinPoint/MinimumPoint > 0.2:
+                    if count == 213: print(SetMinPoint, SetMinPoint/MinimumPoint)
                     MinA = A;   ShockRegion = [LocMinI,localmin]
                 localmin = []; LocMinI = []
                 
@@ -224,6 +227,7 @@ class SOA:
         LocMinI2 = [] # ............................ sub-local minimum location
         SubLocalMinSet = [] # ......... Sub-local minimum set [Location, Value]
         n = 0 # ................ number of valleys in the sub-local minimum set
+        # if Plot: print(min(ShockRegion[1])/MinimumPoint)
         for k in range(len(ShockRegion[1])):
             # check all pixels lays under the Valley average line
             if ShockRegion[1][k] < LocMinAvg:
@@ -233,7 +237,6 @@ class SOA:
                 n += 1; localmin2 = []; LocMinI2 = []
             else:
                 localmin2 = []; LocMinI2 = []
-        
         
         # if there is more than one peak in the local minimum, 
         # the closest to the preivous location will be choosen
@@ -274,8 +277,8 @@ class SOA:
             if count > -1: ax.set_title(count)
             if LastShockLoc > -1:
                 ax.axvline(LastShockLoc,linestyle = '--',color = 'orange') 
-        
-        
+       
+        # uncertainity calculation
         certainLoc = True
         for Area in AeraSet:
             Ra = Area/MinA
@@ -285,24 +288,10 @@ class SOA:
         if n > 1 and certainLoc:
             for Area in AreaSet2:
                 if MaxArea2 > 0: Ra = Area/MaxArea2
-                if count == 5: print(Area)
                 if Ra > 0.5 and Ra < 1 and certainLoc:
-                    certainLoc = False
-            
-                
+                    certainLoc = False               
         
-        return minLoc, certainLoc
-        # if n > 1 and sign < 1:
-        #     MinA2 = max(AreaSet2)
-        #     for Area in AreaSet2:
-        #         if MinA2 > 0: Ra2 = Area/MinA2
-        #         else: Ra2 = 0.9;
-        #         if Ra2 > 0.6 and Ra2 < 1: 
-        #             uncertain.append([count,minLoc])
-        #             sign = 1
-                
-    
-    
+        return minLoc, certainLoc    
                 
     
     def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False, OutputDirectory = '',comment='', SliceThickness = 0):
