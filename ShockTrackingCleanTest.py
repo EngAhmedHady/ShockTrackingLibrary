@@ -67,6 +67,7 @@ print('Image scale: ', Scale, 'mm/px') # indicates the displacement accuracy
 print('Shock Regions:',NewRef,'\t Represents:' ,xPixls, 'px \t Shock Regions in mm:', ShockResionScale)
 
 # Image cleaning [subtracting the average, subtracting ambiant light frequency]
+print('Subtracting the average slice ...')
 ShockwaveRegion = SA.Average(ShockwaveRegion)
 
 # CleanIlluminationEffects
@@ -74,15 +75,16 @@ ShockwaveRegion = SA.Average(ShockwaveRegion)
 #                   2- location/center of the light frequency peak in FFT domain (Spectlocation)
 #                   3- butterworth function parameter (D = circle diameter, n = function power)
 #                   4- see the FFT domain before and after filtering (True/False)
+print('Cleaning illumination instability ...')
 ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion, 
-                                              Spectlocation = [0, 250], 
+                                              Spectlocation = [0, 230], 
                                               D = 20, n = 5, 
                                               ShowIm = False)
 
-ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion, 
-                                              Spectlocation = [0, 180], 
-                                              D = 20, n = 5, 
-                                              ShowIm = False)
+# ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion, 
+#                                               Spectlocation = [0, 180], 
+#                                               D = 20, n = 5, 
+#                                               ShowIm = False)
 
 
 # Find shock location
@@ -91,9 +93,9 @@ ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion,
 #                     [defult is [0,0] which mean notheing to review]
 #                  3- Signalfilter: ['median','Wiener','med-Wiener']
 ShockLocation, Uncer = SA.FindTheShockwaveImproved(ShockwaveRegion, 
-                                                   reviewInterval = [0,19], 
+                                                   reviewInterval = [210,215], 
                                                    Signalfilter = 'med-Wiener')
-
+print(Uncer)
 print('uncertainty ratio:', round((len(Uncer)/len(ShockLocation))*100,2),'%')
 # print(Uncer)
 
@@ -197,6 +199,7 @@ ax2.minorticks_on()
 ax2.grid(True, which='minor', color='#D8D8D8', linestyle='-', alpha=0.2)
 
 fig1, ax1 = plt.subplots(figsize=(30,400))
+ax1.set_yticks(np.arange(0, n+1, 250))
 xPixls = (NewRef[1]-NewRef[0])
 ShockResionScale = xPixls*Scale
 ax1.imshow(ShockwaveRegion, extent=[0, ShockResionScale, n, 0], aspect='0.1', cmap='gray');

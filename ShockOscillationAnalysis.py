@@ -176,7 +176,7 @@ class SOA:
         cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
         return self.Reference
     
-    def ShockTraking(self, SnapshotSlice, LastShockLoc = -1, Plot = False):
+    def ShockTraking(self, SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
         # Start processing the slice
         avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice
         
@@ -234,19 +234,22 @@ class SOA:
             else:
                 localmin2 = []; LocMinI2 = []
         
+        
         # if there is more than one peak in the local minimum, 
         # the closest to the preivous location will be choosen
-        if n > 1 : 
-            MinDis = Pixels;  # the minimum distance between the sub-valley and last shock location
+        if n > 1 :
+            # The minimum distance between the sub-valley and last shock location
+            # initiated with the full lenght 
+            MinDis = Pixels;  
             AreaSet2 = [] # ......................... Set of sub-local minimums
-            MinArea2 = 0 # ................. minimum area in sub-local minimums
+            MaxArea2 = 0 # ................. minimum area in sub-local minimums
             for pixel in SubLocalMinSet:
-                
-                A2 = abs(np.trapz(LocMinAvg-localmin2))
+                A2 = abs(np.trapz(LocMinAvg-pixel[1]))
                 AreaSet2.append(A2)
-                if A2 > MinArea2: MinArea2 = A2
-                minValue = min(pixel[1])
-                minLoc = pixel[1].index(minValue)
+                if A2 > MaxArea2: MaxArea2 = A2
+                
+                minValue = min(pixel[0])
+                minLoc = pixel[0].index(minValue)
                 if LastShockLoc > -1 : Distance = abs(LastShockLoc-pixel[0][minLoc])
                 if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
                 
@@ -268,7 +271,7 @@ class SOA:
         minLoc = np.mean(shockLoc) 
         if Plot:
             ax.axvline(minLoc, linestyle = '--', color = 'b')
-            # ax.set_title(count)
+            if count > -1: ax.set_title(count)
             if LastShockLoc > -1:
                 ax.axvline(LastShockLoc,linestyle = '--',color = 'orange') 
         
@@ -276,8 +279,17 @@ class SOA:
         certainLoc = True
         for Area in AeraSet:
             Ra = Area/MinA
-            if Ra > 0.6 and Ra < 1 and certainLoc: 
+            if Ra > 0.6 and Ra < 1 and certainLoc and n < 1:
                 certainLoc = False
+        
+        if n > 1 and certainLoc:
+            for Area in AreaSet2:
+                if MaxArea2 > 0: Ra = Area/MaxArea2
+                if count == 5: print(Area)
+                if Ra > 0.5 and Ra < 1 and certainLoc:
+                    certainLoc = False
+            
+                
         
         return minLoc, certainLoc
         # if n > 1 and sign < 1:
@@ -486,7 +498,8 @@ class SOA:
             else : LastShockLocation = -1
             minLoc, certain = self.ShockTraking(SnapshotSlice, 
                                                 LastShockLoc = LastShockLocation, 
-                                                Plot = Plot)
+                                                Plot = Plot,
+                                                count = count)
             ShockLocation.append(minLoc)
             if not certain: uncertain.append([count,minLoc])
             count += 1
