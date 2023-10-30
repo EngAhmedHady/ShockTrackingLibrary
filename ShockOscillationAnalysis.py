@@ -1,0 +1,621 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Dec 20 09:32:30 2022
+
+@author: Ahmed Hady
+"""
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime
+from scipy import signal
+import glob
+import sys 
+px = 1/plt.rcParams['figure.dpi']
+plt.rcParams.update({'font.size': 30})
+plt.rcParams["text.usetex"] =  True
+plt.rcParams["font.family"] = "Times New Roman"
+
+
+class SOA:
+    def __init__(self, f, D = 1, pixelScale = 1, Type = 'single pixel raw'):
+        self.f = f # ----------------------- sampling rate (fps)
+        self.D = D # ----------------------- refrence distance (mm)
+        self.pixelScale = pixelScale # ----- initialize scale of the pixels 
+        self.ClickCount = 0 # -------------- initialize the mouse clicks
+        self.TempLine = [] # --------------- initialize the temporary line recording array
+        self.Temp = cv2.vconcat([]) # ------ initialize the temporary image
+        self.clone = cv2.vconcat([]) # ----- initialize the editable image copy
+        self.Reference = [] # -------------- initialize croping limits or line set
+        self.line_coordinates = [] # ------- initialize Line coordinate
+        self.outputPath = '' # ------------- Image output
+        self.Type = Type # ----------------- Type of shock analysis ['single pixel raw', 'multi point traking']
+        # Window titles
+        self.LineName = ["First Reference Line (left)",
+                         "Second Reference Line (right)",
+                         "Horizontal Reference Line",
+                         "Inclined Line"] 
+    
+    def XCheck(self,x,Shp,slope,a):
+        if   x >= 0 and x <= Shp[1]:                           p2 = (x, Shp[0])
+        elif x >= 0 and x >  Shp[1]: y2 = int(Shp[1]*slope+a); p2 = (Shp[1],y2)
+        elif x <  0 and x <= Shp[1]: y2 = int(a);              p2 = (0,y2)
+        return p2    
+        
+    def InclinedLine(self,P1,P2,imgShape):
+        # Generates the inclind line equation from two points and image boundary points 
+        # inputs : P1       => first point tuple (a1,b1)
+        # ........ P2       => second point tuple (a2,b2)
+        # ........ imgShape => image size (y-length 'Number of raws', x-length'Number of columns')
+        # outputs: - first boundary point tuple
+        # ........ - second boundary point tuple
+        # ........ - line slope  (equal to zero in case of vertical or horizontal)
+        # ........ - y-intersept (equal to zero in case of vertical or horizontal)
+        dx = P1[0]-P2[0]
+        dy = P1[1]-P2[1]
+        if  dy != 0 and  dx !=0:
+            slope = dy/dx
+            a = P1[1] - slope*P1[0]
+            Xmax = int((imgShape[0]-a)/slope)
+            Xmin = int(-a/slope)
+            if   Xmin >= 0 and Xmin <= imgShape[1]:
+                p1 = (Xmin,0)
+                p2 = self.XCheck(Xmax,imgShape,slope,a)
+            elif Xmin >= 0 and Xmin >  imgShape[1]:
+                y = int(imgShape[1]*slope+a)
+                p1 = (imgShape[1],y)
+                p2 = self.XCheck(Xmax,imgShape,slope,a)
+            else:
+                y1 = int(a);
+                p1 = (0,y1)
+                p2 = self.XCheck(Xmax,imgShape,slope,a)
+            return p1, p2, slope, a
+        elif dx == 0:
+            return (P1[0],0), (P1[0],imgShape[0]), 0, np.Inf
+        else:
+            return (0,P1[1]), (imgShape[1],P1[1]), 0, 0   
+    
+    def extract_coordinates(self, event, x, y, flags, parameters):
+        # Record starting (x,y) coordinates on left mouse button click and draw
+        # line that cross allover the image and store it in a global variable in case
+        # of Horizontal or Vertical lines it takes the average between points
+        # Drawing steps: 1- push the left mouse on the first point
+        # .............. 2- pull the mouse cursor to the second point
+        # .............. 3- the software will draw a thick red line (indecating the mouse locations)
+        # ................. and green line indecating the generated averaged line 
+        # .............. 4- to confrim press left click anywhere on the image, or
+        # ................. to delete the line press right click anywhere on the image
+        # .............. 5- press anykey to proceed
+        
+        if event == cv2.EVENT_LBUTTONDOWN:
+            self.ClickCount += 1
+            if len(self.TempLine) == 2: 
+                self.line_coordinates = self.TempLine;
+            elif len(self.TempLine) == 0: self.TempLine = [(x,y)]
+            
+        # Record ending (x,y) coordintes on left mouse bottom release
+        elif event == cv2.EVENT_LBUTTONUP: 
+            if len(self.TempLine) < 2:
+                self.TempLine.append((x,y))
+                # print('Starting: {}, Ending: {}'.format(self.TempLine[0], self.TempLine[1]))
+                
+                # Draw temprary line
+                cv2.line(self.Temp, self.TempLine[0], self.TempLine[1], (0,0,255), 2)
+                if parameters[2] == 'V':
+                    avg = int((self.TempLine[0][0]+self.TempLine[1][0])/2)
+                    cv2.line(self.Temp, (avg,0), (avg,parameters[1]), (0,255,0), 1)
+                elif parameters[2] == 'H':
+                    avg = int((self.TempLine[0][1]+self.TempLine[1][1])/2)
+                    cv2.line(self.Temp, (0,avg), (parameters[1],avg), (0,255,255), 1)
+                elif parameters[2] == 'Inc':
+                    P1,P2,m,a = self.InclinedLine(self.TempLine[0],self.TempLine[1],parameters[1])
+                    cv2.line(self.Temp, P1, P2, (0,255,0), 1)
+                    
+                cv2.imshow(parameters[0], self.Temp)
+            elif self.ClickCount == 2:
+                   
+                self.Temp = self.clone.copy()
+                cv2.imshow(parameters[0], self.clone)
+                # storing the vertical line
+                if parameters[2] == 'V':
+                    avg = int((self.line_coordinates[0][0]+self.line_coordinates[1][0])/2)
+                    cv2.line(self.Temp, (avg,0), (avg,parameters[1]), (0,255,0), 1)
+                
+                # storing the Horizontal line
+                elif parameters[2] == 'H':
+                    avg = int((self.line_coordinates[0][1]+self.line_coordinates[1][1])/2)
+                    cv2.line(self.Temp, (0,avg), (parameters[1],avg), (0,255,255), 1)
+                    
+                elif parameters[2] == 'Inc':
+                    P1,P2,m,a = self.InclinedLine(self.line_coordinates[0],self.line_coordinates[1],parameters[1])
+                    cv2.line(self.Temp, P1, P2, (0,255,0), 1)
+                    avg = [P1, P2, m,a]
+                
+                    
+                self.Reference.append(avg)
+                self.clone = self.Temp.copy()
+                cv2.imshow(parameters[0], self.clone)
+                
+        # Delete draw line before storing    
+        elif event == cv2.EVENT_RBUTTONDOWN:
+            self.TempLine = []
+            if self.ClickCount>0: self.ClickCount -= 1
+            self.Temp = self.clone.copy()
+            cv2.imshow(parameters[0], self.Temp)
+               
+    def LineDraw(self, img, lineType, LineNameInd, Intialize = False):
+        # This function drive the extract_coordinates fucntion to draw lines 
+        # Inputs: img         => is a single openCV image
+        # ....... lineType    => 'V'   -> Vertical line 'starts from top to bottom of the image'
+        # ...................... 'H'   -> Horizontal line 'starts from the left to the right'
+        # ...................... 'Inc' -> Inclind line 'not averaging take the exact selected points'
+        # ....... LineNameInd =>  Window title from the list 
+        # ....... Intialize   => to rest the values of Reference and line_coordinates for new line set
+        # ...................... True or False (Default: False)
+        # Outputs: croping limits or (line set) 
+        
+        self.clone = img.copy(); 
+        self.Temp = self.clone.copy();
+        self.TempLine = [];
+        self.ClickCount = 0
+        if Intialize:
+            self.Reference = []
+            self.line_coordinates = []
+        shp = img.shape
+        if   lineType == 'V':
+            prams = [self.LineName[LineNameInd],shp[0],lineType]
+        elif lineType == 'H':
+            prams = [self.LineName[LineNameInd],shp[1],lineType]
+        elif lineType == 'Inc':
+            prams = [self.LineName[LineNameInd],shp,lineType]
+            
+        cv2.imshow(self.LineName[LineNameInd], self.clone)
+        cv2.setMouseCallback(self.LineName[LineNameInd], self.extract_coordinates,prams)
+        # Wait until user press some key
+        cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
+        return self.Reference
+                
+    
+    def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False, OutputDirectory = '',comment='', SliceThickness = 0):
+        # This function is importing a seuqnce of image to perform single horizontal line shock wave analysis
+        # for efficient and optimizied analysis the function extract only one pixel slice from each image
+        # defined by the user and append one to another and finally generates a single image where each raw 
+        # represent a snap shoot
+        # Importing steps: 1- define the reference vertical boundaries which can be used for scaling as well
+        # ................ 2- define the reference horizontal line [the slice is shifted by HLP from the reference]
+        # ................ 3- The function will import all files, slice them and store the generated slices list into image
+        # ...............................................................................................................
+        # Inputs: path        => image path for sequence 'Ex: "Directory/FileName*.img"' of any image extensions 
+        #....................... * referes to any
+        # ....... ScalePixels => wheater scale the pixels with vertical limits by refrence distance (D/pixel)
+        # ...................... in that case user should define D otherwise D will be 1 mm - (Default: True)
+        # ....... HLP         => Horizontal line shift from the reference horizontal line in [mm] if ScalePixels is true
+        # ...................... or pixels if ScalePixels is false (Default: 0)
+        # ....... OutputDirectory => output directory to store slices list as png image but if it is empaty quetes 
+        # .......................... slices list will not be stored  (Default: '')
+        # Outputs: openCV image slices list, number of slices, horizontal slice location on the image [pixels]
+        img_list=[]
+        n = 0
+        # Find all files in the directory with the sequence and sorth them by name
+        files = sorted(glob.glob(path))
+        n1 = len(files)
+        
+        if n1 > 1:
+            img = cv2.imread(files[0])
+            # Open first file and set the limits and scale
+            self.Reference = []
+            
+            if len(WorkingRange) < 2:
+                # Vertical limits and scale 
+                self.LineDraw(img, 'V', 0)
+                self.LineDraw(self.clone, 'V', 1)
+                if len(self.Reference) < 2: 
+                    print('Reference length is not sufficient!')
+                    sys.exit()
+            else:
+                shp = img.shape
+                self.clone = img.copy(); 
+                cv2.line(self.clone, (WorkingRange[0],0), (WorkingRange[0],shp[0]), (0,255,0), 1)
+                cv2.line(self.clone, (WorkingRange[1],0), (WorkingRange[1],shp[0]), (0,255,0), 1)
+                self.Reference = WorkingRange[0:2].copy()
+                
+            self.Reference.sort() # to make sure that the limits are properly assigned
+            if ScalePixels:  self.pixelScale = self.D / abs(self.Reference[1]-self.Reference[0])
+            #----------------------------------------------------------
+            # Alocate Horizontal reference
+            if len(WorkingRange) < 3:
+                self.LineDraw(self.clone, 'H', 2)
+                H_line = self.Reference[2]-round(HLP/self.pixelScale)
+            else:
+                self.Reference = WorkingRange
+                H_line = WorkingRange[2]
+                cv2.line(self.clone, (0     ,H_line+round(HLP/self.pixelScale)), 
+                                     (shp[1],H_line+round(HLP/self.pixelScale)), 
+                                     (0,255,255), 1)
+                
+            cv2.line(self.clone, (0,H_line), (img.shape[1],H_line), (0,0,255), 1)
+            
+            if SliceThickness > 0:
+                Ht = int(SliceThickness/2)  # Half Thickness
+                cv2.line(self.clone, (0,H_line+Ht), (img.shape[1],H_line+Ht), (0, 128, 255), 1)
+                cv2.line(self.clone, (0,H_line-Ht), (img.shape[1],H_line-Ht), (0, 128, 255), 1)
+            cv2.imshow(self.LineName[2], self.clone)
+            cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
+            if len(OutputDirectory) > 0:
+                if len(comment) > 0:
+                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_'+comment+'.png'
+                else:
+                    now = datetime.now()
+                    now = now.strftime("%d%m%Y%H%M")
+                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_'+now+'.png'
+                cv2.imwrite(self.outputPath, self.clone)
+                
+            
+            
+            if FullImWidth: 
+                WorkingRange = [0,img.shape[1],H_line]
+                print ('scaling lines:', [self.Reference[0],self.Reference[1],H_line])
+            elif len(WorkingRange) < 3: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
+            
+            print('working range is: ', WorkingRange)
+            
+            for name in files:
+                with open(name):
+                    img = cv2.imread(name)
+                    if SliceThickness > 0:
+                        cropped_image = np.zeros([1,WorkingRange[1]-WorkingRange[0],3])
+                        for i in range(SliceThickness): cropped_image += img[WorkingRange[2]-(Ht+1)+i:WorkingRange[2]-Ht+i,WorkingRange[0]:WorkingRange[1]]
+                        cropped_image /= SliceThickness
+                    else:
+                        cropped_image = img[WorkingRange[2]-1:WorkingRange[2],
+                                            WorkingRange[0]  :WorkingRange[1]]
+                    img_list.append(cropped_image.astype('float32'))
+                n += 1
+                sys.stdout.write('\r')
+                sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n1/20)), int(5*n/(n1/20))))
+                sys.stdout.flush()
+            print('')
+            ImgList = cv2.vconcat(img_list)
+            if len(OutputDirectory) > 0:
+                if len(comment) > 0:
+                    self.outputPath = OutputDirectory+'\\'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_'+comment+'.png'
+                else:
+                    now = datetime.now()
+                    now = now.strftime("%d%m%Y%H%M")
+                    self.outputPath = OutputDirectory+'\\'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_'+now+'.png'
+                cv2.imwrite(self.outputPath, ImgList)
+                print('File was stored:', self.outputPath)
+        else:
+            # In case no file found end the progress and eleminate the program
+            print('No files found!')
+            sys.exit()
+        return ImgList,n,H_line,self.pixelScale
+    
+    def Average(self,img):
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        width = len(img[0])
+        Avg = np.zeros(width)
+        for i in img: Avg += i
+        Avg /= img.shape[0]
+        Newimg = np.zeros(img.shape)
+        for i in range(img.shape[0]):  Newimg[i] = img[i] - Avg
+        return Newimg
+        
+    def CleanIlluminationEffects(self, img, Spectlocation = [0, 233], D = 10, n=10, ShowIm = False ):
+        dft = cv2.dft(np.float32(img),flags = cv2.DFT_COMPLEX_OUTPUT)
+        magnitude_spectrum = np.fft.fftshift(dft)
+        imShp = magnitude_spectrum.shape
+        x = imShp[1];   y = imShp[0]
+        
+        if ShowIm:
+            fig, ax = plt.subplots(figsize=(30,20))
+            spectrum_im = 20*np.log(np.abs(magnitude_spectrum)+1)
+            im = ax.imshow(spectrum_im[:,:,0])
+            ax.set_ylim([int(y/2)-20,int(y/2)+Spectlocation[1]+50])
+            fig.colorbar(im)
+            ax.set_title('Row Image FFT')
+
+        LowpassFilter = np.ones([imShp[0],imShp[1],2])
+              
+        for i in range(y):
+            for j in range(x):
+                if i > y/2:
+                    y_shift = int(y/2)+Spectlocation[1]
+                    x_shift = int(x/2)+Spectlocation[0]
+                    denominator = np.sqrt((i-y_shift)**2+(j-x_shift)**2)
+                    if denominator <= 0: LowpassFilter[i][j] = 0
+                    else: LowpassFilter[i][j]= 1/(1+(D/denominator)**(n*2))
+                else: LowpassFilter[i][j]= 0
+        
+        CleanFFT = magnitude_spectrum*LowpassFilter
+        
+        if ShowIm:
+            fig, ax = plt.subplots(figsize=(30,20))
+            CleanFFT_im = 20*np.log(np.abs(CleanFFT)+1)
+            im = ax.imshow(CleanFFT_im[:,:,0])
+            ax.set_ylim([int(y/2)-20,int(y/2)+Spectlocation[1]+50])
+            ax.set_title('Cleaned Image FFT')
+            fig.colorbar(im)
+            
+        f_ishift = np.fft.ifftshift(CleanFFT)
+        img_back = cv2.idft(f_ishift)
+        CleanedImage = img_back[:,:,0]/np.amax(img_back[:,:,0])
+        return CleanedImage
+    
+    def FindTheShockwaveImproved(self, img, reviewInterval = [0,0], Signalfilter=None):
+        # Initiating Variables
+        ShockLocation = [] # ........................... set of shock locations
+        uncertain = [] # set of uncertain shock locations [snapshot value, uncertain location]
+        count = 0 # ................................ Processed snapshot counter
+        
+        # check ploting conditions
+        reviewInterval.sort(); start = reviewInterval[0]; end = reviewInterval[1]
+        plotingInterval = abs(end-start)
+        if plotingInterval > 0: ploting = True
+        else: ploting= False
+        
+        # check if the image on grayscale or not and convert if not
+        if len(img.shape) > 2: img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        nShoots = img.shape[0] # .................... total number of snapshots
+        print('Processing the shock location')
+        for SnapshotSlice in img:
+            # check ploting conditions
+            if ploting and count >= start and count<end: Plot = True
+            else: Plot = False
+
+            # Start processing the slice
+            avg = np.mean(SnapshotSlice) # ....... Average illumination on the slice
+            
+            if Plot: # to plot slice illumination values with location and Avg. line
+                fig, ax = plt.subplots(figsize=(10,5))
+                ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
+            
+            # Initiating Variables 
+            MinA = 0 # ........................................... Minimum Area
+            Pixels = len(SnapshotSlice) # ......................... Slice width
+            localmin = [] # .......... Local Minimum set of illumination values
+            LocMinI = [] # ..................... Local Minimum set of Locations 
+            AeraSet = [] # ........................... local minimum areas list
+           
+            # Loop through the slice illumination values
+            for pixel in range(Pixels):
+                if SnapshotSlice[pixel] < avg: 
+                    # find the local minimum and store illumination values and location
+                    localmin.append(SnapshotSlice[pixel]); LocMinI.append(pixel)
+                    
+                    # find open local minimum at the end of the slice
+                    if pixel == Pixels-1 and len(localmin) >1: 
+                        A = abs(np.trapz(avg-localmin))
+                        AeraSet.append(A)
+                        if Plot: ax.fill_between(LocMinI, localmin,avg , alpha=0.5)
+                        if A > MinA: MinA = A;   ShockRegion = [LocMinI,localmin]
+                        localmin = []; LocMinI = []
+                
+                # bounded local minimum
+                elif SnapshotSlice[pixel] >= avg and len(localmin) > 1: 
+                    A = abs(np.trapz(avg-localmin))
+                    AeraSet.append(A)                    
+                    if Plot:ax.fill_between(LocMinI, localmin,avg , alpha=0.5)                        
+                    if A > MinA:
+                        MinA = A;   ShockRegion = [LocMinI,localmin]
+                    localmin = []; LocMinI = []
+                    
+                else: localmin = [];  LocMinI = []
+            
+            # check if there is more than one peak in the local minimum
+            LocMinAvg = np.mean(ShockRegion[1])
+            if Plot: ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinAvg,LocMinAvg],'-.r')
+            
+            localmin2 = []; LocMinI2 = []
+            localmins = []; n = 0
+            for k in range(len(ShockRegion[1])):
+                if ShockRegion[1][k] < LocMinAvg:
+                    localmin2.append(ShockRegion[1][k]); LocMinI2.append(ShockRegion[0][k])
+                elif ShockRegion[1][k] >= LocMinAvg and len(localmin2) > 1:
+                    localmins.append([LocMinI2,localmin2])
+                    n += 1; localmin2 = []; LocMinI2 = []
+                else:
+                    localmin2 = []; LocMinI2 = []
+            # if there is more than one peak in the local minimum, 
+            # the closest to the preivous location will be choosen
+            
+            if n > 1 : 
+                MinDis = Pixels;  AreaSet2 = []
+                MinArea2 = 0
+                for l in localmins:
+                    AreaSet2.append(abs(np.trapz(LocMinAvg-localmin2)))
+                    if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
+                    minValue = min(l[1])
+                    minLoc = l[1].index(minValue)
+                    if len(ShockLocation) > 0 and abs(ShockLocation[-1]-l[0][minLoc]) < MinDis:
+                        MinDis = abs(ShockLocation[-1]-l[0][minLoc])
+                        ShockRegion = l
+            
+            LocMinRMS = avg-np.sqrt(np.mean(np.array(avg-ShockRegion[1])**2))
+            if Plot: 
+                ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinRMS,LocMinRMS],'-.k') 
+                ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='///') 
+            shockLoc = [];
+            for elment in range(len(ShockRegion[1])):
+                if ShockRegion[1][elment] <= LocMinRMS: 
+                    shockLoc.append(ShockRegion[0][elment])
+            minLoc = np.mean(shockLoc) 
+            if Plot:
+                ax.axvline(minLoc, linestyle = '--', color = 'b')
+                ax.set_title(count)
+                if len(ShockLocation) > 0:
+                    ax.axvline(ShockLocation[-1],linestyle = '--',color = 'orange') 
+            ShockLocation.append(minLoc)
+            
+            sign = 0
+            for Area in AeraSet:
+                Ra = Area/MinA
+                if Ra > 0.6 and Ra < 1 and sign < 1: 
+                    uncertain.append([count,minLoc])
+                    sign = 1
+                    
+            # if n > 1 and sign < 1:
+            #     MinA2 = max(AreaSet2)
+            #     for Area in AreaSet2:
+            #         if MinA2 > 0: Ra2 = Area/MinA2
+            #         else: Ra2 = 0.9;
+            #         if Ra2 > 0.6 and Ra2 < 1: 
+            #             uncertain.append([count,minLoc])
+            #             sign = 1
+                    
+            count += 1
+            sys.stdout.write('\r')
+            sys.stdout.write("[%-20s] %d%%" % ('='*int(count/(nShoots/20)), int(5*count/(nShoots/20))))
+            sys.stdout.flush()
+        print('')
+        
+        if Signalfilter == 'median':
+            print('Appling median filter...')
+            ShockLocation = signal.medfilt(ShockLocation)
+        elif Signalfilter == 'Wiener':
+            print('Appling Wiener filter...')
+            ShockLocation = signal.wiener(ShockLocation)
+        elif Signalfilter == 'med-Wiener':
+            print('Appling med-Wiener filter...')
+            ShockLocation = signal.medfilt(ShockLocation)
+            ShockLocation = signal.wiener(ShockLocation)  
+            
+        # for pnt in uncertain:
+        #     if ShockLocation[pnt[0]] == pnt[1]: print('Uncorrected point at',pnt[0])
+            
+
+        return ShockLocation, uncertain
+    
+    
+    
+    def FindShockwaveOnline(self, img, reviewInterval = [0,0], Signalfilter=None):
+        ShockLocation = []; count = 0
+        uncertain = []
+        # check ploting conditions
+        reviewInterval.sort(); start = reviewInterval[0]; end = reviewInterval[1]
+        plotingInterval = abs(end-start)
+        if plotingInterval > 0: ploting = True
+        else: ploting= False
+        if len(img.shape) > 2: img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        nShoots = img.shape[0]
+        print('Processing the shock location')
+        for i in img:
+            # check ploting conditions
+            if ploting and count >= start and count<end: Plot = True
+            else: Plot = False
+
+            # Start processing the slice
+            avg = np.mean(i)
+            l = 0; MinA = 0; x = len(i);
+            localmin = []; LocMinI = [];
+            AeraSet = []
+            if Plot: 
+                fig, ax = plt.subplots(figsize=(10,5))
+                ax.plot(i); ax.axhline(avg,linestyle = ':');
+                
+            for j in range(x):
+                if i[j] < avg: 
+                    localmin.append(i[j]); LocMinI.append(j)
+                    
+                    # Open local minimum at the end of the slice
+                    if j == x-1 and len(localmin) >1: 
+                        A = abs(np.trapz(avg-localmin))
+                        AeraSet.append(A)
+                        if Plot: ax.fill_between(LocMinI, localmin,avg , alpha=0.5)
+                        if A > MinA: MinA = A;   ShockRegion = [LocMinI,localmin]
+                        localmin = []; LocMinI = []
+                
+                # bounded local minimum
+                elif i[j] >= avg and len(localmin) >1: 
+                    A = abs(np.trapz(avg-localmin))
+                    AeraSet.append(A)                    
+                    if Plot:ax.fill_between(LocMinI, localmin,avg , alpha=0.5)                        
+                    if A > MinA:
+                        MinA = A;   ShockRegion = [LocMinI,localmin]
+                    localmin = []; LocMinI = []
+                    
+                else: localmin = [];  LocMinI = []
+            
+            # check if there is more than one peak in the local minimum
+            LocMinAvg = np.mean(ShockRegion[1])
+            if Plot: ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinAvg,LocMinAvg],'-.r')
+            
+            localmin2 = []; LocMinI2 = []
+            localmins = []; n = 0
+            for k in range(len(ShockRegion[1])):
+                if ShockRegion[1][k] < LocMinAvg:
+                    localmin2.append(ShockRegion[1][k]); LocMinI2.append(ShockRegion[0][k])
+                elif ShockRegion[1][k] >= LocMinAvg and len(localmin2) > 1:
+                    localmins.append([LocMinI2,localmin2])
+                    n += 1; localmin2 = []; LocMinI2 = []
+                else:
+                    localmin2 = []; LocMinI2 = []
+            # if there is more than one peak in the local minimum, 
+            # the closest to the preivous location will be choosen
+            
+            if n > 1 : 
+                MinDis = x;  AreaSet2 = []
+                for l in localmins:
+                    AreaSet2.append(abs(np.trapz(LocMinAvg-localmin2)))
+                    if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
+                    minValue = min(l[1])
+                    minLoc = l[1].index(minValue)
+                    if len(ShockLocation) > 0 and abs(ShockLocation[-1]-l[0][minLoc]) < MinDis:
+                        MinDis = abs(ShockLocation[-1]-l[0][minLoc])
+                        ShockRegion = l
+            
+            LocMinRMS = avg-np.sqrt(np.mean(np.array(avg-ShockRegion[1])**2))
+            if Plot: 
+                ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinRMS,LocMinRMS],'-.k') 
+                ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='///') 
+            shockLoc = [];
+            for elment in range(len(ShockRegion[1])):
+                if ShockRegion[1][elment] <= LocMinRMS: 
+                    shockLoc.append(ShockRegion[0][elment])
+            minLoc = np.mean(shockLoc) 
+            if Plot:
+                ax.axvline(minLoc, linestyle = '--', color = 'b')
+                ax.set_title(count)
+                if len(ShockLocation) > 0:
+                    ax.axvline(ShockLocation[-1],linestyle = '--',color = 'orange') 
+            ShockLocation.append(minLoc)
+            
+            sign = 0
+            for Area in AeraSet:
+                Ra = Area/MinA
+                if Ra > 0.6 and Ra < 1 and sign < 1: 
+                    uncertain.append([count,minLoc])
+                    sign = 1
+                    
+            if n > 1 and sign < 1:
+                MinA2 = max(AreaSet2)
+                for Area in AreaSet2:
+                    Ra2 = Area/MinA2
+                    if Ra2 > 0.6 and Ra2 < 1: 
+                        uncertain.append([count,minLoc])
+                        sign = 1
+                    
+            count += 1
+            sys.stdout.write('\r')
+            sys.stdout.write("[%-20s] %d%%" % ('='*int(count/(nShoots/20)), int(5*count/(nShoots/20))))
+            sys.stdout.flush()
+        print('')
+        
+        if Signalfilter == 'median':
+            print('Appling median filter...')
+            ShockLocation = signal.medfilt(ShockLocation)
+        elif Signalfilter == 'Wiener':
+            print('Appling Wiener filter...')
+            ShockLocation = signal.wiener(ShockLocation)
+        elif Signalfilter == 'med-Wiener':
+            print('Appling med-Wiener filter...')
+            ShockLocation = signal.medfilt(ShockLocation)
+            ShockLocation = signal.wiener(ShockLocation)  
+            
+        # for pnt in uncertain:
+        #     if ShockLocation[pnt[0]] == pnt[1]: print('Uncorrected point at',pnt[0])
+            
+
+        return ShockLocation, uncertain
