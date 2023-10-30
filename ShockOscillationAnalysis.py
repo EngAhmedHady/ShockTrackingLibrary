@@ -175,6 +175,122 @@ class SOA:
         # Wait until user press some key
         cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
         return self.Reference
+    
+    def ShockTraking(self, SnapshotSlice, LastShockLoc = -1, Plot = False):
+        # Start processing the slice
+        avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice
+        
+        if Plot: # to plot slice illumination values with location and Avg. line
+            fig, ax = plt.subplots(figsize=(10,5))
+            ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
+        
+        # Initiating Variables 
+        MinA = 0 # ............................................... Minimum Area
+        Pixels = len(SnapshotSlice) # ............................. Slice width
+        localmin = [] # .............. Local Minimum set of illumination values
+        LocMinI = [] # ......................... Local Minimum set of Locations 
+        AeraSet = [] # ............................... local minimum areas list
+       
+        # Loop through the slice illumination values
+        for pixel in range(Pixels):
+            if SnapshotSlice[pixel] < avg: 
+                # find the local minimum and store illumination values and location
+                localmin.append(SnapshotSlice[pixel]); LocMinI.append(pixel)
+                
+                # find open local minimum at the end of the slice
+                if pixel == Pixels-1 and len(localmin) >1: 
+                    A = abs(np.trapz(avg-localmin))
+                    AeraSet.append(A)
+                    if Plot: ax.fill_between(LocMinI, localmin,avg , alpha=0.5)
+                    if A > MinA: MinA = A;   ShockRegion = [LocMinI,localmin]
+                    localmin = []; LocMinI = []
+            
+            # bounded local minimum
+            elif SnapshotSlice[pixel] >= avg and len(localmin) > 1: 
+                A = abs(np.trapz(avg-localmin))
+                AeraSet.append(A)                    
+                if Plot:ax.fill_between(LocMinI, localmin,avg , alpha=0.5)                        
+                if A > MinA:
+                    MinA = A;   ShockRegion = [LocMinI,localmin]
+                localmin = []; LocMinI = []
+                
+            else: localmin = [];  LocMinI = []
+        
+        # check if there is more than one valley in the local minimum
+        LocMinAvg = np.mean(ShockRegion[1])
+        if Plot: ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinAvg,LocMinAvg],'-.r')
+        
+        localmin2 = [] # .............................. sub-local minimum value
+        LocMinI2 = [] # ............................ sub-local minimum location
+        SubLocalMinSet = [] # ......... Sub-local minimum set [Location, Value]
+        n = 0 # ................ number of valleys in the sub-local minimum set
+        for k in range(len(ShockRegion[1])):
+            # check all pixels lays under the Valley average line
+            if ShockRegion[1][k] < LocMinAvg:
+                localmin2.append(ShockRegion[1][k]); LocMinI2.append(ShockRegion[0][k])
+            elif ShockRegion[1][k] >= LocMinAvg and len(localmin2) > 1:
+                SubLocalMinSet.append([LocMinI2,localmin2])
+                n += 1; localmin2 = []; LocMinI2 = []
+            else:
+                localmin2 = []; LocMinI2 = []
+        
+        # if there is more than one peak in the local minimum, 
+        # the closest to the preivous location will be choosen
+        if n > 1 : 
+            MinDis = Pixels;  # the minimum distance between the sub-valley and last shock location
+            AreaSet2 = [] # ......................... Set of sub-local minimums
+            MinArea2 = 0 # ................. minimum area in sub-local minimums
+            for pixel in SubLocalMinSet:
+                
+                A2 = abs(np.trapz(LocMinAvg-localmin2))
+                AreaSet2.append(A2)
+                if A2 > MinArea2: MinArea2 = A2
+                minValue = min(pixel[1])
+                minLoc = pixel[1].index(minValue)
+                if LastShockLoc > -1 : Distance = abs(LastShockLoc-pixel[0][minLoc])
+                if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
+                
+                minValue = min(pixel[1])
+                minLoc = pixel[1].index(minValue)
+                
+                if Distance < MinDis:  
+                    MinDis = Distance
+                    ShockRegion = pixel
+    
+        LocMinRMS = avg-np.sqrt(np.mean(np.array(avg-ShockRegion[1])**2))
+        if Plot: 
+            ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinRMS,LocMinRMS],'-.k') 
+            ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='///') 
+        shockLoc = [];
+        for elment in range(len(ShockRegion[1])):
+            if ShockRegion[1][elment] <= LocMinRMS: 
+                shockLoc.append(ShockRegion[0][elment])
+        minLoc = np.mean(shockLoc) 
+        if Plot:
+            ax.axvline(minLoc, linestyle = '--', color = 'b')
+            # ax.set_title(count)
+            if LastShockLoc > -1:
+                ax.axvline(LastShockLoc,linestyle = '--',color = 'orange') 
+        
+        
+        certainLoc = True
+        for Area in AeraSet:
+            Ra = Area/MinA
+            if Ra > 0.6 and Ra < 1 and certainLoc: 
+                certainLoc = False
+        
+        return minLoc, certainLoc
+        # if n > 1 and sign < 1:
+        #     MinA2 = max(AreaSet2)
+        #     for Area in AreaSet2:
+        #         if MinA2 > 0: Ra2 = Area/MinA2
+        #         else: Ra2 = 0.9;
+        #         if Ra2 > 0.6 and Ra2 < 1: 
+        #             uncertain.append([count,minLoc])
+        #             sign = 1
+                
+    
+    
                 
     
     def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False, OutputDirectory = '',comment='', SliceThickness = 0):
@@ -360,117 +476,27 @@ class SOA:
         
         nShoots = img.shape[0] # .................... total number of snapshots
         print('Processing the shock location')
+        # check ploting conditions
+        
+        
         for SnapshotSlice in img:
-            # check ploting conditions
             if ploting and count >= start and count<end: Plot = True
             else: Plot = False
-
-            # Start processing the slice
-            avg = np.mean(SnapshotSlice) # ....... Average illumination on the slice
-            
-            if Plot: # to plot slice illumination values with location and Avg. line
-                fig, ax = plt.subplots(figsize=(10,5))
-                ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
-            
-            # Initiating Variables 
-            MinA = 0 # ........................................... Minimum Area
-            Pixels = len(SnapshotSlice) # ......................... Slice width
-            localmin = [] # .......... Local Minimum set of illumination values
-            LocMinI = [] # ..................... Local Minimum set of Locations 
-            AeraSet = [] # ........................... local minimum areas list
-           
-            # Loop through the slice illumination values
-            for pixel in range(Pixels):
-                if SnapshotSlice[pixel] < avg: 
-                    # find the local minimum and store illumination values and location
-                    localmin.append(SnapshotSlice[pixel]); LocMinI.append(pixel)
-                    
-                    # find open local minimum at the end of the slice
-                    if pixel == Pixels-1 and len(localmin) >1: 
-                        A = abs(np.trapz(avg-localmin))
-                        AeraSet.append(A)
-                        if Plot: ax.fill_between(LocMinI, localmin,avg , alpha=0.5)
-                        if A > MinA: MinA = A;   ShockRegion = [LocMinI,localmin]
-                        localmin = []; LocMinI = []
-                
-                # bounded local minimum
-                elif SnapshotSlice[pixel] >= avg and len(localmin) > 1: 
-                    A = abs(np.trapz(avg-localmin))
-                    AeraSet.append(A)                    
-                    if Plot:ax.fill_between(LocMinI, localmin,avg , alpha=0.5)                        
-                    if A > MinA:
-                        MinA = A;   ShockRegion = [LocMinI,localmin]
-                    localmin = []; LocMinI = []
-                    
-                else: localmin = [];  LocMinI = []
-            
-            # check if there is more than one peak in the local minimum
-            LocMinAvg = np.mean(ShockRegion[1])
-            if Plot: ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinAvg,LocMinAvg],'-.r')
-            
-            localmin2 = []; LocMinI2 = []
-            localmins = []; n = 0
-            for k in range(len(ShockRegion[1])):
-                if ShockRegion[1][k] < LocMinAvg:
-                    localmin2.append(ShockRegion[1][k]); LocMinI2.append(ShockRegion[0][k])
-                elif ShockRegion[1][k] >= LocMinAvg and len(localmin2) > 1:
-                    localmins.append([LocMinI2,localmin2])
-                    n += 1; localmin2 = []; LocMinI2 = []
-                else:
-                    localmin2 = []; LocMinI2 = []
-            # if there is more than one peak in the local minimum, 
-            # the closest to the preivous location will be choosen
-            
-            if n > 1 : 
-                MinDis = Pixels;  AreaSet2 = []
-                MinArea2 = 0
-                for l in localmins:
-                    AreaSet2.append(abs(np.trapz(LocMinAvg-localmin2)))
-                    if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
-                    minValue = min(l[1])
-                    minLoc = l[1].index(minValue)
-                    if len(ShockLocation) > 0 and abs(ShockLocation[-1]-l[0][minLoc]) < MinDis:
-                        MinDis = abs(ShockLocation[-1]-l[0][minLoc])
-                        ShockRegion = l
-            
-            LocMinRMS = avg-np.sqrt(np.mean(np.array(avg-ShockRegion[1])**2))
-            if Plot: 
-                ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinRMS,LocMinRMS],'-.k') 
-                ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='///') 
-            shockLoc = [];
-            for elment in range(len(ShockRegion[1])):
-                if ShockRegion[1][elment] <= LocMinRMS: 
-                    shockLoc.append(ShockRegion[0][elment])
-            minLoc = np.mean(shockLoc) 
-            if Plot:
-                ax.axvline(minLoc, linestyle = '--', color = 'b')
-                ax.set_title(count)
-                if len(ShockLocation) > 0:
-                    ax.axvline(ShockLocation[-1],linestyle = '--',color = 'orange') 
+            if len(ShockLocation) > 1: LastShockLocation = ShockLocation[-1]
+            else : LastShockLocation = -1
+            minLoc, certain = self.ShockTraking(SnapshotSlice, 
+                                                LastShockLoc = LastShockLocation, 
+                                                Plot = Plot)
             ShockLocation.append(minLoc)
-            
-            sign = 0
-            for Area in AeraSet:
-                Ra = Area/MinA
-                if Ra > 0.6 and Ra < 1 and sign < 1: 
-                    uncertain.append([count,minLoc])
-                    sign = 1
-                    
-            # if n > 1 and sign < 1:
-            #     MinA2 = max(AreaSet2)
-            #     for Area in AreaSet2:
-            #         if MinA2 > 0: Ra2 = Area/MinA2
-            #         else: Ra2 = 0.9;
-            #         if Ra2 > 0.6 and Ra2 < 1: 
-            #             uncertain.append([count,minLoc])
-            #             sign = 1
-                    
+            if not certain: uncertain.append([count,minLoc])
             count += 1
             sys.stdout.write('\r')
             sys.stdout.write("[%-20s] %d%%" % ('='*int(count/(nShoots/20)), int(5*count/(nShoots/20))))
             sys.stdout.flush()
         print('')
-        
+            
+        # for pnt in uncertain:
+        #     if ShockLocation[pnt[0]] == pnt[1]: print('Uncorrected point at',pnt[0])
         if Signalfilter == 'median':
             print('Appling median filter...')
             ShockLocation = signal.medfilt(ShockLocation)
@@ -480,11 +506,7 @@ class SOA:
         elif Signalfilter == 'med-Wiener':
             print('Appling med-Wiener filter...')
             ShockLocation = signal.medfilt(ShockLocation)
-            ShockLocation = signal.wiener(ShockLocation)  
-            
-        # for pnt in uncertain:
-        #     if ShockLocation[pnt[0]] == pnt[1]: print('Uncorrected point at',pnt[0])
-            
+            ShockLocation = signal.wiener(ShockLocation)
 
         return ShockLocation, uncertain
     
