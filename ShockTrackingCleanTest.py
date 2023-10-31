@@ -93,8 +93,8 @@ ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion,
 #                     [defult is [0,0] which mean notheing to review]
 #                  3- Signalfilter: ['median','Wiener','med-Wiener']
 ShockLocation, Uncer = SA.FindTheShockwaveImproved(ShockwaveRegion, 
-                                                   reviewInterval = [210,215], 
-                                                   Signalfilter = 'med-Wiener')
+                                                   reviewInterval = [14045,14050])#, 
+                                                   # Signalfilter = 'med-Wiener')
 # print(Uncer)
 print('uncertainty ratio:', round((len(Uncer)/len(ShockLocation))*100,2),'%')
 # print(Uncer)
@@ -199,7 +199,7 @@ ax2.minorticks_on()
 ax2.grid(True, which='minor', color='#D8D8D8', linestyle='-', alpha=0.2)
 
 fig1, ax1 = plt.subplots(figsize=(30,400))
-ax1.set_yticks(np.arange(0, n+1, 250))
+ax1.set_yticks(np.arange(0, n+1, 100))
 xPixls = (NewRef[1]-NewRef[0])
 ShockResionScale = xPixls*Scale
 ax1.imshow(ShockwaveRegion, extent=[0, ShockResionScale, n, 0], aspect='0.1', cmap='gray');

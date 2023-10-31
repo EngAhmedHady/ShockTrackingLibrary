@@ -201,9 +201,11 @@ class SOA:
                 # find open local minimum at the end of the slice
                 if pixel == Pixels-1 and len(localmin) >1: 
                     A = abs(np.trapz(avg-localmin))
+                    SetMinPoint = min(localmin)
                     AeraSet.append(A)
                     if Plot: ax.fill_between(LocMinI, localmin,avg , alpha=0.5)
-                    if A > MinA: MinA = A;   ShockRegion = [LocMinI,localmin]
+                    if A > MinA and SetMinPoint/MinimumPoint > 0.3: 
+                        MinA = A;   ShockRegion = [LocMinI,localmin]
                     localmin = []; LocMinI = []
             
             # bounded local minimum
@@ -212,8 +214,7 @@ class SOA:
                 SetMinPoint = min(localmin)
                 AeraSet.append(A)
                 if Plot:ax.fill_between(LocMinI, localmin,avg , alpha=0.5)                        
-                if A > MinA and SetMinPoint/MinimumPoint > 0.2:
-                    if count == 213: print(SetMinPoint, SetMinPoint/MinimumPoint)
+                if A > MinA and SetMinPoint/MinimumPoint > 0.3:
                     MinA = A;   ShockRegion = [LocMinI,localmin]
                 localmin = []; LocMinI = []
                 
