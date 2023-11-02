@@ -179,11 +179,32 @@ class SOA:
     def ShockTraking(self, SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
         # Start processing the slice
         avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice
+       
+        Step = 3
+        AvgIllumination = []; AvgLocation = []
+        Illumination = 0
+        for elment in range(len(SnapshotSlice)): 
+            if elment%Step != 0:
+                Illumination += SnapshotSlice[elment]
+            elif elment%Step == 0 and Illumination/Step > avg:
+                AvgIllumination.append(Illumination/Step)
+                AvgLocation.append(elment)
+                Illumination = 0
+            elif elment%Step == 0 and Illumination/Step < avg and len(AvgIllumination) > 0 and AvgIllumination[-1] > avg:
+                AvgIllumination.append(AvgIllumination [-1])
+                AvgLocation.append(elment)
+                Illumination = 0
+            else:
+                AvgIllumination.append(avg)
+                AvgLocation.append(elment)
+                Illumination = 0
+        
         MinimumPoint = min(SnapshotSlice)
         
         if Plot: # to plot slice illumination values with location and Avg. line
             fig, ax = plt.subplots(figsize=(10,5))
             ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
+            ax.plot(SnapshotSlice); ax.plot(AvgLocation,AvgIllumination,linestyle = '-.');
         
         # Initiating Variables 
         MinA = 0 # ............................................... Minimum Area
@@ -283,13 +304,16 @@ class SOA:
         certainLoc = True
         for Area in AeraSet:
             Ra = Area/MinA
-            if Ra > 0.6 and Ra < 1 and certainLoc and n < 1:
+            # if count == 14047: print(Ra, certainLoc, n)
+            if Ra > 0.6 and Ra < 1 and certainLoc and n < 2:
+                
                 certainLoc = False
         
         if n > 1 and certainLoc:
             for Area in AreaSet2:
                 if MaxArea2 > 0: Ra = Area/MaxArea2
                 if Ra > 0.5 and Ra < 1 and certainLoc:
+                    
                     certainLoc = False               
         
         return minLoc, certainLoc    
