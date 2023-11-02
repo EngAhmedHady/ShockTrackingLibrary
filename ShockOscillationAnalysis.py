@@ -180,31 +180,35 @@ class SOA:
         # Start processing the slice
         avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice
        
-        Step = 3
-        AvgIllumination = []; AvgLocation = []
-        Illumination = 0
-        for elment in range(len(SnapshotSlice)): 
-            if elment%Step != 0:
-                Illumination += SnapshotSlice[elment]
-            elif elment%Step == 0 and Illumination/Step > avg:
-                AvgIllumination.append(Illumination/Step)
-                AvgLocation.append(elment)
-                Illumination = 0
-            elif elment%Step == 0 and Illumination/Step < avg and len(AvgIllumination) > 0 and AvgIllumination[-1] > avg:
-                AvgIllumination.append(AvgIllumination [-1])
-                AvgLocation.append(elment)
-                Illumination = 0
-            else:
-                AvgIllumination.append(avg)
-                AvgLocation.append(elment)
-                Illumination = 0
+        # Step = 5
+        # AvgIllumination = []; AvgLocation = []
+        # Illumination = 0
+        # for elment in range(len(SnapshotSlice)): 
+        #     if elment%Step != 0:
+        #         Illumination += SnapshotSlice[elment]
+        #     elif elment%Step == 0 and Illumination/Step > avg:
+        #         AvgIllumination.append(Illumination/Step)
+        #         AvgLocation.append(elment-int(Step/2))
+        #         Illumination = 0
+        #     elif elment%Step == 0 and Illumination/Step < avg and len(AvgIllumination) > 0 and AvgIllumination[-1] > avg:
+        #         AvgIllumination.append(AvgIllumination [-1])
+        #         AvgLocation.append(elment-int(Step/2))
+        #         Illumination = 0
+        #     else:
+        #         AvgIllumination.append(avg)
+        #         AvgLocation.append(elment-int(Step/2))
+        #         Illumination = 0
+                
+        # b, a = signal.butter(10,0.3)
+        # AvgIllumination = signal.filtfilt(b, a, AvgIllumination)
         
         MinimumPoint = min(SnapshotSlice)
         
         if Plot: # to plot slice illumination values with location and Avg. line
             fig, ax = plt.subplots(figsize=(10,5))
             ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
-            ax.plot(SnapshotSlice); ax.plot(AvgLocation,AvgIllumination,linestyle = '-.');
+            ax.plot(SnapshotSlice); 
+            # ax.plot(AvgLocation,AvgIllumination,linestyle = '-.');
         
         # Initiating Variables 
         MinA = 0 # ............................................... Minimum Area
