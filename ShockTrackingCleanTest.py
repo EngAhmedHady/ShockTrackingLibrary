@@ -93,8 +93,8 @@ ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion,
 #                     [defult is [0,0] which mean notheing to review]
 #                  3- Signalfilter: ['median','Wiener','med-Wiener']
 ShockLocation, Uncer = SA.FindTheShockwaveImproved(ShockwaveRegion, 
-                                                   reviewInterval = [14045,14050])#, 
-                                                   # Signalfilter = 'med-Wiener')
+                                                   reviewInterval = [6210,6230], 
+                                                    Signalfilter = 'med-Wiener')
 # print(Uncer)
 print('uncertainty ratio:', round((len(Uncer)/len(ShockLocation))*100,2),'%')
 # print(Uncer)
@@ -205,6 +205,6 @@ ShockResionScale = xPixls*Scale
 ax1.imshow(ShockwaveRegion, extent=[0, ShockResionScale, n, 0], aspect='0.1', cmap='gray');
 ax1.plot(A, range(n),'x', lw = 1, color = 'g', ms = 3)
 ax1.plot(uncertain, Loc,'x', lw = 1, color = 'r', ms = 2)
-
+# ax1.set_ylim([2900,3000])
 plt.show()
 
