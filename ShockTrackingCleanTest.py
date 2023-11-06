@@ -13,10 +13,10 @@ import matplotlib.pyplot as plt
 from ShockOscillationAnalysis import SOA
 from scipy import signal
 
-f = 10000
+f = 15000
 D = 80      # distance in mm
 HLP = 7     # Horizontal line position [slice location to a reference line]
-Scale = 0.12364760432766615
+Scale = 0.12944983818770225
 n = 0;
 # imgPath = 'C:\\Users\\Hady-PC\\Desktop\\PhD\\Schlieren\\2kHz_2_20220729\\*.png'
 imgPath = '*.png'
@@ -43,7 +43,7 @@ SA = SOA(f,D)
 #                                                               comment = 'ts_35_slice')
 
 # ImgList = cv2.imread(NewFileDirectory+'\\2.0kHz_50mm_0.1360544217687075mm-px_ts_10_slice.png')
-File = str(f/1000)+'kHz_'+str(HLP)+'mm_'+str(Scale)+'mm-px_ts_35_slice.png'
+File = 'P4_' +str(f/1000)+'kHz_'+str(HLP)+'mm_'+str(Scale)+'mm-px_ts_35_slice.png'
 print(NewFileDirectory+'\\'+File)
 if os.path.exists(NewFileDirectory+'\\'+File): ImgList = cv2.imread(NewFileDirectory+'\\'+File)
 else: 
@@ -58,7 +58,8 @@ else:
     
     
 # or (Spacify x location of 2 vertical lines)
-NewRef = [262, 520]
+# NewRef = [262, 520]
+NewRef = [262, 480]
 
 ShockwaveRegion = ImgList[:,NewRef[0]:NewRef[1]]
 xPixls = (NewRef[1]-NewRef[0])
@@ -67,7 +68,7 @@ print('Image scale: ', Scale, 'mm/px') # indicates the displacement accuracy
 print('Shock Regions:',NewRef,'\t Represents:' ,xPixls, 'px \t Shock Regions in mm:', ShockResionScale)
 
 # Image cleaning [subtracting the average, subtracting ambiant light frequency]
-print('Subtracting the average slice ...')
+
 ShockwaveRegion = SA.Average(ShockwaveRegion)
 
 # CleanIlluminationEffects

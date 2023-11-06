@@ -230,7 +230,7 @@ class SOA:
         
         localmin2 = [] # .............................. sub-local minimum value
         LocMinI2 = [] # ............................ sub-local minimum location
-        SubLocalMinSets = [] # ......... Sub-local minimum set [Location, Value]
+        SubLocalMinSets = [] # ........ Sub-local minimum set [Location, Value]
         n = 0 # ................ number of valleys in the sub-local minimum set
         # if Plot: print(min(ShockRegion[1])/MinimumPoint)
         for k in range(len(ShockRegion[1])):
@@ -242,10 +242,12 @@ class SOA:
                 n += 1; localmin2 = []; LocMinI2 = []
             else:
                 localmin2 = []; LocMinI2 = []
+        # uncertainity calculation
+        certainLoc = True
         
         # if there is more than one valley in the local minimum, 
         # the closest to the preivous location will be choosen
-        if n > 1 :
+        if n > 1 and LastShockLoc > -1:
             # The minimum distance between the sub-valley and last shock location
             # initiated with the full lenght 
             MinDis = Pixels;  
@@ -261,14 +263,16 @@ class SOA:
                 minValue = min(SubLocalMinSet[0]) # ........ find minimam illumination in the sub-set
                 minLoc = SubLocalMinSet[0].index(minValue) # find the location of the minimam illumination in the sub-set
                 
-                if LastShockLoc > -1 : Distance = abs(LastShockLoc-SubLocalMinSet[0][minLoc])
-                if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
-                
-                # minValue = min(SubLocalMinSet[1])
-                # minLoc = SubLocalMinSet[1].index(minValue)
-                
+                Distance = abs(LastShockLoc-SubLocalMinSet[0][minLoc])                
                 if Distance < MinDis: MinDis = Distance;  ShockRegion = SubLocalMinSet
-    
+                if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
+        elif LastShockLoc == -1: 
+            n = 1; 
+            certainLoc = False
+            reason = 'First pexil slice, No shock location history'
+        
+        
+        # Find the middel of the shock wave as middle point of RMS
         LocMinRMS = avg-np.sqrt(np.mean(np.array(avg-ShockRegion[1])**2))
         if Plot: 
             ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinRMS,LocMinRMS],'-.k') 
@@ -284,11 +288,10 @@ class SOA:
             if LastShockLoc > -1:
                 ax.axvline(LastShockLoc,linestyle = '--',color = 'orange') 
        
-        # uncertainity calculation
-        certainLoc = True
+        
         for Area in AeraSet:
             Ra = Area/MinA
-            if Ra > 0.6 and Ra < 1 and certainLoc and n < 2:
+            if Ra > 0.6 and Ra < 1 and certainLoc:
                 certainLoc = False
                 reason = 'Almost equal Valleys'
         
