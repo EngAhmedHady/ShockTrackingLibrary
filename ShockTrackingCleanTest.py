@@ -44,6 +44,7 @@ SA = SOA(f,D)
 
 # ImgList = cv2.imread(NewFileDirectory+'\\2.0kHz_50mm_0.1360544217687075mm-px_ts_10_slice.png')
 File = 'P4_' +str(f/1000)+'kHz_'+str(HLP)+'mm_'+str(Scale)+'mm-px_ts_35_slice.png'
+
 print(NewFileDirectory+'\\'+File)
 if os.path.exists(NewFileDirectory+'\\'+File): ImgList = cv2.imread(NewFileDirectory+'\\'+File)
 else: 
@@ -94,8 +95,8 @@ ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion,
 #                     [defult is [0,0] which mean notheing to review]
 #                  3- Signalfilter: ['median','Wiener','med-Wiener']
 ShockLocation, Uncer = SA.FindTheShockwaveImproved(ShockwaveRegion, 
-                                                   reviewInterval = [6210,6230], 
-                                                    Signalfilter = 'med-Wiener')
+                                                   reviewInterval = [0,3], 
+                                                   Signalfilter = 'med-Wiener')
 # print(Uncer)
 print('uncertainty ratio:', round((len(Uncer)/len(ShockLocation))*100,2),'%')
 # print(Uncer)
@@ -199,7 +200,7 @@ ax2.grid(True, which='major', color='#D8D8D8', linestyle='-', alpha=0.3, lw = 1.
 ax2.minorticks_on()
 ax2.grid(True, which='minor', color='#D8D8D8', linestyle='-', alpha=0.2)
 
-fig1, ax1 = plt.subplots(figsize=(30,400))
+fig1, ax1 = plt.subplots(figsize=(40,500))
 ax1.set_yticks(np.arange(0, n+1, 100))
 xPixls = (NewRef[1]-NewRef[0])
 ShockResionScale = xPixls*Scale

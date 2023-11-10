@@ -37,7 +37,7 @@ class SOA:
         self.LineName = ["First Reference Line (left)",
                          "Second Reference Line (right)",
                          "Horizontal Reference Line",
-                         "Inclined Line"] 
+                         "estimated shock location"] 
     
     def XCheck(self,x,Shp,slope,a):
         if   x >= 0 and x <= Shp[1]:                           p2 = (x, Shp[0])
@@ -244,6 +244,7 @@ class SOA:
                 localmin2 = []; LocMinI2 = []
         # uncertainity calculation
         certainLoc = True
+        reason = ''
         
         # if there is more than one valley in the local minimum, 
         # the closest to the preivous location will be choosen
@@ -260,11 +261,12 @@ class SOA:
                 if A2 > MaxArea2: MaxArea2 = A2 # ...... Check the minimum area
                 
                 # check the location of the minimum illumination point from last snapshot location and choose the closest
-                minValue = min(SubLocalMinSet[0]) # ........ find minimam illumination in the sub-set
-                minLoc = SubLocalMinSet[0].index(minValue) # find the location of the minimam illumination in the sub-set
+                minValue = min(SubLocalMinSet[1]) # ........ find minimam illumination in the sub-set
+                minLoc = SubLocalMinSet[1].index(minValue) # find the location of the minimam illumination in the sub-set
                 
                 Distance = abs(LastShockLoc-SubLocalMinSet[0][minLoc])                
-                if Distance < MinDis: MinDis = Distance;  ShockRegion = SubLocalMinSet
+                if Distance < MinDis: 
+                    MinDis = Distance;  ShockRegion = SubLocalMinSet
                 if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
         elif LastShockLoc == -1: 
             n = 1; 
@@ -282,12 +284,12 @@ class SOA:
         for elment in range(len(ShockRegion[1])):
             if ShockRegion[1][elment] <= LocMinRMS: shockLoc.append(ShockRegion[0][elment])
         minLoc = np.mean(shockLoc) 
+        
         if Plot:
             ax.axvline(minLoc, linestyle = '--', color = 'b')
             if count > -1: ax.set_title(count)
             if LastShockLoc > -1:
-                ax.axvline(LastShockLoc,linestyle = '--',color = 'orange') 
-       
+                ax.axvline(LastShockLoc,linestyle = '--',color = 'orange')  
         
         for Area in AeraSet:
             Ra = Area/MinA
@@ -303,12 +305,62 @@ class SOA:
                     certainLoc = False; reason = 'different sub-Valleys than smallest'
         
         if (not certainLoc) and Plot: 
-            ax.text(Pixels-120,0.55, 'uncertain: '+ reason, color = 'red', fontsize=16)
-            ax.set_ylim([-0.6,0.6])
-        return minLoc, certainLoc    
-                
+            ax.text(Pixels-130,0.55, 'uncertain: '+ reason, color = 'red', fontsize=14)
+            ax.set_ylim([-1,1])
+        return minLoc, certainLoc, reason                    
     
-    def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False, OutputDirectory = '',comment='', SliceThickness = 0):
+    def InclinedShockTracking(self, imgSet, HalfSliceWidth, reviewInterval = [0,0], CheckSolutionTime = True, OutputDirectory = ''):
+       
+        # Ploting conditions
+        reviewInterval.sort(); start = reviewInterval[0]; end = reviewInterval[1]
+        plotingInterval = abs(end-start)
+        if plotingInterval > 0: ploting = True
+        else: ploting = False        
+        
+        # Define the estimated shock line using 2 points P1, P2 --> User defined
+        P1 = (int(self.Reference[3][0][0]), int(self.Reference[3][0][1]))
+        P2 = (int(self.Reference[3][1][0]), int(self.Reference[3][1][1]))
+        
+        # Define the shock domain of tracking ** the line upstream
+        P1Up = (P1[0]-HalfSliceWidth, P1[1])
+        P2Up = (P2[0]-HalfSliceWidth, P2[1])
+        aUp = P1Up[1] - self.Reference[3][2]*P1Up[0] # y-intercept
+        cv2.line(self.clone, P1Up, P2Up, (0,0,255), 1)
+        
+        # Define the shock domain of tracking ** the line downstream
+        P1Down = (P1[0]-HalfSliceWidth, P1[1])
+        P2Down = (P2[0]-HalfSliceWidth, P2[1])
+        aDown = P1Down[1] - self.Reference[3][2]*P1Down[0] # y-intercept
+        cv2.line(self.clone, P1Down, P2Down, (0,0,255), 1)
+        
+        
+        imgSize = imgSet.shape
+        # generat the points
+        if imgSize[0] > 10:         Pnts = np.linspace(0, imgSize[0], 10)
+        elif imgSize[0] > 2 and imgSize[0] < 10: Pnts = range(imgSize[0])
+        else: 
+            print('escaping the shock angle checking... \n Slice thickness is not sufficient for check the shock angle')
+            return
+        
+        Ref = []
+        for i in Pnts: 
+            y_i = int(i)
+            x_i1 = int((i-aUp)*self.Reference[3][2])
+            cv2.circle(self.clone, (x_i1,y_i), radius=3, color=(0, 0, 255), thickness=-1)
+            
+            x_i2 = int((i-aDown)*self.Reference[3][2])
+            cv2.circle(self.clone, (x_i2,y_i), radius=3, color=(0, 0, 255), thickness=-1)
+            Ref.append([x_i1,x_i2])
+            
+        if ploting and len(OutputDirectory)> 0: cv2.imwrite(OutputDirectory+'\\AnalysisDomain-Points.jpg', self.clone)
+        cv2.imshow('Measuring Domain', self.clone)
+        cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
+            
+         
+        
+        
+    def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False,
+                              OutputDirectory = '',comment='', SliceThickness = 0, ShockType = 'Normal', nt = -1, Mode = -1):
         # This function is importing a seuqnce of image to perform single horizontal line shock wave analysis
         # for efficient and optimizied analysis the function extract only one pixel slice from each image
         # defined by the user and append one to another and finally generates a single image where each raw 
@@ -327,24 +379,26 @@ class SOA:
         # .......................... slices list will not be stored  (Default: '')
         # Outputs: openCV image slices list, number of slices, horizontal slice location on the image [pixels]
         img_list=[]
-        n = 0
+        n = 0; o = 0
         # Find all files in the directory with the sequence and sorth them by name
         files = sorted(glob.glob(path))
         n1 = len(files)
+        WorkingRangeLen = len(WorkingRange)
         
         if n1 > 1:
             img = cv2.imread(files[0])
             # Open first file and set the limits and scale
             self.Reference = []
             
-            if len(WorkingRange) < 2:
+            # Defining the working range
+            if WorkingRangeLen < 2:
                 # Vertical limits and scale 
                 self.LineDraw(img, 'V', 0)
                 self.LineDraw(self.clone, 'V', 1)
                 if len(self.Reference) < 2: 
-                    print('Reference length is not sufficient!')
+                    print('Reference lines is not sufficient!')
                     sys.exit()
-            else:
+            elif WorkingRangeLen > 1:
                 shp = img.shape
                 self.clone = img.copy(); 
                 cv2.line(self.clone, (WorkingRange[0],0), (WorkingRange[0],shp[0]), (0,255,0), 1)
@@ -355,7 +409,7 @@ class SOA:
             if ScalePixels:  self.pixelScale = self.D / abs(self.Reference[1]-self.Reference[0])
             #----------------------------------------------------------
             # Alocate Horizontal reference
-            if len(WorkingRange) < 3:
+            if WorkingRangeLen < 3:
                 self.LineDraw(self.clone, 'H', 2)
                 H_line = self.Reference[2]-round(HLP/self.pixelScale)
             else:
@@ -364,22 +418,71 @@ class SOA:
                 cv2.line(self.clone, (0     ,H_line+round(HLP/self.pixelScale)), 
                                      (shp[1],H_line+round(HLP/self.pixelScale)), 
                                      (0,255,255), 1)
-                
+             
             cv2.line(self.clone, (0,H_line), (img.shape[1],H_line), (0,0,255), 1)
             
             if SliceThickness > 0:
                 Ht = int(SliceThickness/2)  # Half Thickness
                 cv2.line(self.clone, (0,H_line+Ht), (img.shape[1],H_line+Ht), (0, 128, 255), 1)
                 cv2.line(self.clone, (0,H_line-Ht), (img.shape[1],H_line-Ht), (0, 128, 255), 1)
+            
+            if (WorkingRangeLen == 1 or  WorkingRangeLen == 4) and ShockType != 'Normal':
+                
+                self.LineDraw(self.clone, 'Inc', 3)                
+                HalfSliceWidth = int(WorkingRange[0]/2) 
+                if len(self.Reference) < 2: 
+                    print('Reference lines is not sufficient!')
+                    sys.exit()
+                
+                # Define the estimated shock line using 2 points P1, P2 --> User defined
+                P1 = (int(self.Reference[3][0][0]), int(self.Reference[3][0][1]))
+                P2 = (int(self.Reference[3][1][0]), int(self.Reference[3][1][1]))
+                
+                # Define the shock domain of tracking ** the line upstream
+                P1Up = (P1[0]-HalfSliceWidth, P1[1])
+                P2Up = (P2[0]-HalfSliceWidth, P2[1])
+                aUp = P1Up[1] - self.Reference[3][2]*P1Up[0] # y-intercept
+                cv2.line(self.clone, P1Up, P2Up, (0,0,255), 1)
+                
+                # Define the shock domain of tracking ** the line downstream
+                P1Down = (P1[0]+HalfSliceWidth, P1[1])
+                P2Down = (P2[0]+HalfSliceWidth, P2[1])
+                aDown = P1Down[1] - self.Reference[3][2]*P1Down[0] # y-intercept
+                cv2.line(self.clone, P1Down, P2Down, (0,0,255), 1)
+                
+                # generat the points
+                if SliceThickness > 10:             Pnts = np.linspace(0, SliceThickness, 10)
+                elif SliceThickness > 2 and SliceThickness < 10: Pnts = range(SliceThickness)
+                else: 
+                    print('escaping the shock angle checking... \n Slice thickness is not sufficient for check the shock angle')
+                    return
+                
+                Ref = []
+                print(self.Reference[3])
+                for i in Pnts: 
+                    y_i = int(i+(H_line-Ht))
+                    x_i1 = int((i-aUp)/self.Reference[3][2])
+                    cv2.circle(self.clone, (x_i1,y_i), radius=3, color=(0, 0, 255), thickness=-1)
+                    
+                    x_i2 = int((i-aDown)/self.Reference[3][2])
+                    cv2.circle(self.clone, (x_i2,y_i), radius=3, color=(0, 0, 255), thickness=-1)
+                    print([x_i1,x_i2],y_i)
+                    
+                    Ref.append([x_i1,x_i2])
+    
+                
+                
+                
+                
             cv2.imshow(self.LineName[2], self.clone)
             cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
             if len(OutputDirectory) > 0:
                 if len(comment) > 0:
-                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_'+comment+'.png'
+                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+comment+'.png'
                 else:
                     now = datetime.now()
                     now = now.strftime("%d%m%Y%H%M")
-                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_'+now+'.png'
+                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+str(SliceThickness)+'_slice'+now+'.png'
                 cv2.imwrite(self.outputPath, self.clone)
                 
             
@@ -387,34 +490,41 @@ class SOA:
             if FullImWidth: 
                 WorkingRange = [0,img.shape[1],H_line]
                 print ('scaling lines:', [self.Reference[0],self.Reference[1],H_line])
-            elif len(WorkingRange) < 3: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
+            elif WorkingRangeLen < 1: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
             
             print('working range is: ', WorkingRange)
             
+            if  nt == -1 and Mode == -1: n1 = len(files)    
+            elif Mode > 0 and nt > 0: n1 = int(nt/Mode)
+            elif Mode > 0 and nt < 0: n1 = int(len(files)/Mode)
+            else: n1 = nt
+            
             for name in files:
-                with open(name):
-                    img = cv2.imread(name)
-                    if SliceThickness > 0:
-                        cropped_image = np.zeros([1,WorkingRange[1]-WorkingRange[0],3])
-                        for i in range(SliceThickness): cropped_image += img[WorkingRange[2]-(Ht+1)+i:WorkingRange[2]-Ht+i,WorkingRange[0]:WorkingRange[1]]
-                        cropped_image /= SliceThickness
-                    else:
-                        cropped_image = img[WorkingRange[2]-1:WorkingRange[2],
-                                            WorkingRange[0]  :WorkingRange[1]]
-                    img_list.append(cropped_image.astype('float32'))
-                n += 1
-                sys.stdout.write('\r')
-                sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n1/20)), int(5*n/(n1/20))))
-                sys.stdout.flush()
+                if o%Mode == 0 and n < n1:
+                    with open(name):
+                        img = cv2.imread(name)
+                        if SliceThickness > 0:
+                            cropped_image = np.zeros([1,WorkingRange[1]-WorkingRange[0],3])
+                            for i in range(SliceThickness): cropped_image += img[WorkingRange[2]-(Ht+1)+i:WorkingRange[2]-Ht+i,WorkingRange[0]:WorkingRange[1]]
+                            cropped_image /= SliceThickness
+                        else:
+                            cropped_image = img[WorkingRange[2]-1:WorkingRange[2],
+                                                WorkingRange[0]  :WorkingRange[1]]
+                        img_list.append(cropped_image.astype('float32'))
+                    n += 1
+                    sys.stdout.write('\r')
+                    sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n1/20)), int(5*n/(n1/20))))
+                    sys.stdout.flush()
+                o += 1
             print('')
             ImgList = cv2.vconcat(img_list)
             if len(OutputDirectory) > 0:
                 if len(comment) > 0:
-                    self.outputPath = OutputDirectory+'\\'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_'+comment+'.png'
+                    self.outputPath = OutputDirectory+'\\'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+comment+'.png'
                 else:
                     now = datetime.now()
                     now = now.strftime("%d%m%Y%H%M")
-                    self.outputPath = OutputDirectory+'\\'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_'+now+'.png'
+                    self.outputPath = OutputDirectory+'\\'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+now+'.png'
                 cv2.imwrite(self.outputPath, ImgList)
                 print('File was stored:', self.outputPath)
         else:
@@ -498,14 +608,16 @@ class SOA:
         for SnapshotSlice in img:
             if ploting and count >= start and count<end: Plot = True
             else: Plot = False
-            if len(ShockLocation) > 1: LastShockLocation = ShockLocation[-1]
-            else : LastShockLocation = -1
-            minLoc, certain = self.ShockTraking(SnapshotSlice, 
+            if len(ShockLocation) > 0: LastShockLocation = ShockLocation[-1]
+            else :
+                print(count)
+                LastShockLocation = -1
+            minLoc, certain, reason = self.ShockTraking(SnapshotSlice, 
                                                 LastShockLoc = LastShockLocation, 
                                                 Plot = Plot,
                                                 count = count)
             ShockLocation.append(minLoc)
-            if not certain: uncertain.append([count,minLoc])
+            if not certain: uncertain.append([count,minLoc,reason])
             count += 1
             sys.stdout.write('\r')
             sys.stdout.write("[%-20s] %d%%" % ('='*int(count/(nShoots/20)), int(5*count/(nShoots/20))))

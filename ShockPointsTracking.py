@@ -8,6 +8,7 @@ Created on Tue Dec 20 19:51:47 2022
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from ShockOscillationAnalysis import SOA
 import glob
 import sys
 # import gc # ............................................. To clean the memory
@@ -355,6 +356,9 @@ print('Number of imported snapshoots: %s' %n)
    
 P1 = (int(Reference[2][0][0]/reductionRatio), int(Reference[2][0][1]/reductionRatio))
 P2 = (int(Reference[2][1][0]/reductionRatio), int(Reference[2][1][1]/reductionRatio))
+
+
+print(Reference)
 HalfSliceWidth = int(SliceWidth/2)
 NewP1 = (P1[0]-HalfSliceWidth, P1[1])
 NewP2 = (P2[0]-HalfSliceWidth, P2[1])
@@ -404,6 +408,11 @@ for j in ImgList:
         # fig1, ax1 = plt.subplots(figsize=(10, 5))
         # ax1.plot(Slice[0])
         # xLoc.append(int(ShockLoc(Slice[0]))+Ref[i][0])
+        # minLoc, certain, reason = SOA.ShockTraking(Slice, 
+        #                                            LastShockLoc = -1, 
+        #                                            Plot = False, 
+        #                                            count = -1)
+        
         xLoc.append(int(ShockLoc(Slice[0]))+Ref[i][0])
         
         if i > 0 and i < N_Slices-1:
@@ -416,7 +425,7 @@ for j in ImgList:
                 else: AngDeg = 180-(AngRad*180/np.pi)
                 
                     
-                
+            # ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1)    
             DAlfa = (AngDeg + Alfa)*np.pi/180
             aOfAlfa = y_i - DAlfa*xLoc[i]
             y2 = DAlfa*(xLoc[i]+80)+aOfAlfa
