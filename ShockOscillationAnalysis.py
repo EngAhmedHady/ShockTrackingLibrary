@@ -309,58 +309,63 @@ class SOA:
             ax.set_ylim([-1,1])
         return minLoc, certainLoc, reason                    
     
+    def InclinedShockCheck(self, WorkingRange, H_line, ShockType, SliceThickness):
+        WorkingRangeLen = len(WorkingRange)
+        Ht = int(SliceThickness/2)
+        Ref = []
+        if (WorkingRangeLen == 1 or  WorkingRangeLen == 4) and ShockType != 'Normal':
+            
+            # generat the points
+            if SliceThickness > 10:              Pnts = np.linspace(0, SliceThickness, 10)
+            elif SliceThickness > 2 and SliceThickness <= 10: Pnts = range(SliceThickness)
+            else: 
+                print('escaping the shock angle checking... \nSlice thickness is not sufficient for check the shock angle')
+                return Ref
+            
+            self.LineDraw(self.clone, 'Inc', 3)                
+            HalfSliceWidth = int(WorkingRange[0]/2) 
+            if len(self.Reference) < 3: 
+                print('Reference lines is not sufficient!')
+                sys.exit()
+            
+            # Define the estimated shock line using 2 points P1, P2 --> User defined
+            P1 = (int(self.Reference[3][0][0]), int(self.Reference[3][0][1]))
+            P2 = (int(self.Reference[3][1][0]), int(self.Reference[3][1][1]))
+            
+            # Define the shock domain of tracking ** the line upstream
+            P1Up = (P1[0]-HalfSliceWidth, P1[1])
+            P2Up = (P2[0]-HalfSliceWidth, P2[1])
+            aUp = P1Up[1] - self.Reference[3][2]*P1Up[0] # y-intercept
+            cv2.line(self.clone, P1Up, P2Up, (0,0,255), 1)
+            
+            # Define the shock domain of tracking ** the line downstream
+            P1Down = (P1[0]+HalfSliceWidth, P1[1])
+            P2Down = (P2[0]+HalfSliceWidth, P2[1])
+            aDown = P1Down[1] - self.Reference[3][2]*P1Down[0] # y-intercept
+            cv2.line(self.clone, P1Down, P2Down, (0,0,255), 1)
+            
+            pointTranslation = H_line-Ht
+            print(self.Reference[3])
+            for i in Pnts: 
+                y_i = int(i+pointTranslation)
+                x_i1 = int((i+pointTranslation-aUp)/self.Reference[3][2])
+                cv2.circle(self.clone, (x_i1,y_i), radius=3, color=(0, 0, 255), thickness=-1)
+                
+                x_i2 = int((i+pointTranslation-aDown)/self.Reference[3][2])
+                cv2.circle(self.clone, (x_i2,y_i), radius=3, color=(0, 0, 255), thickness=-1)
+                print([x_i1,x_i2],y_i)
+                
+                Ref.append([x_i1,x_i2])
+        return Ref
+    
     def InclinedShockTracking(self, imgSet, HalfSliceWidth, reviewInterval = [0,0], CheckSolutionTime = True, OutputDirectory = ''):
-       
         # Ploting conditions
         reviewInterval.sort(); start = reviewInterval[0]; end = reviewInterval[1]
-        plotingInterval = abs(end-start)
-        if plotingInterval > 0: ploting = True
-        else: ploting = False        
-        
-        # Define the estimated shock line using 2 points P1, P2 --> User defined
-        P1 = (int(self.Reference[3][0][0]), int(self.Reference[3][0][1]))
-        P2 = (int(self.Reference[3][1][0]), int(self.Reference[3][1][1]))
-        
-        # Define the shock domain of tracking ** the line upstream
-        P1Up = (P1[0]-HalfSliceWidth, P1[1])
-        P2Up = (P2[0]-HalfSliceWidth, P2[1])
-        aUp = P1Up[1] - self.Reference[3][2]*P1Up[0] # y-intercept
-        cv2.line(self.clone, P1Up, P2Up, (0,0,255), 1)
-        
-        # Define the shock domain of tracking ** the line downstream
-        P1Down = (P1[0]-HalfSliceWidth, P1[1])
-        P2Down = (P2[0]-HalfSliceWidth, P2[1])
-        aDown = P1Down[1] - self.Reference[3][2]*P1Down[0] # y-intercept
-        cv2.line(self.clone, P1Down, P2Down, (0,0,255), 1)
-        
-        
-        imgSize = imgSet.shape
-        # generat the points
-        if imgSize[0] > 10:         Pnts = np.linspace(0, imgSize[0], 10)
-        elif imgSize[0] > 2 and imgSize[0] < 10: Pnts = range(imgSize[0])
-        else: 
-            print('escaping the shock angle checking... \n Slice thickness is not sufficient for check the shock angle')
-            return
-        
-        Ref = []
-        for i in Pnts: 
-            y_i = int(i)
-            x_i1 = int((i-aUp)*self.Reference[3][2])
-            cv2.circle(self.clone, (x_i1,y_i), radius=3, color=(0, 0, 255), thickness=-1)
-            
-            x_i2 = int((i-aDown)*self.Reference[3][2])
-            cv2.circle(self.clone, (x_i2,y_i), radius=3, color=(0, 0, 255), thickness=-1)
-            Ref.append([x_i1,x_i2])
-            
-        if ploting and len(OutputDirectory)> 0: cv2.imwrite(OutputDirectory+'\\AnalysisDomain-Points.jpg', self.clone)
-        cv2.imshow('Measuring Domain', self.clone)
-        cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
-            
-         
-        
+                
         
     def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False,
-                              OutputDirectory = '',comment='', SliceThickness = 0, ShockType = 'Normal', nt = -1, Mode = -1):
+                              OutputDirectory = '',comment='', SliceThickness = 0, ShockType = 'Normal', 
+                              nt = -1, Mode = -1, ShockAngleSamples = 30):
         # This function is importing a seuqnce of image to perform single horizontal line shock wave analysis
         # for efficient and optimizied analysis the function extract only one pixel slice from each image
         # defined by the user and append one to another and finally generates a single image where each raw 
@@ -425,54 +430,12 @@ class SOA:
                 Ht = int(SliceThickness/2)  # Half Thickness
                 cv2.line(self.clone, (0,H_line+Ht), (img.shape[1],H_line+Ht), (0, 128, 255), 1)
                 cv2.line(self.clone, (0,H_line-Ht), (img.shape[1],H_line-Ht), (0, 128, 255), 1)
+                
             
-            if (WorkingRangeLen == 1 or  WorkingRangeLen == 4) and ShockType != 'Normal':
-                
-                self.LineDraw(self.clone, 'Inc', 3)                
-                HalfSliceWidth = int(WorkingRange[0]/2) 
-                if len(self.Reference) < 2: 
-                    print('Reference lines is not sufficient!')
-                    sys.exit()
-                
-                # Define the estimated shock line using 2 points P1, P2 --> User defined
-                P1 = (int(self.Reference[3][0][0]), int(self.Reference[3][0][1]))
-                P2 = (int(self.Reference[3][1][0]), int(self.Reference[3][1][1]))
-                
-                # Define the shock domain of tracking ** the line upstream
-                P1Up = (P1[0]-HalfSliceWidth, P1[1])
-                P2Up = (P2[0]-HalfSliceWidth, P2[1])
-                aUp = P1Up[1] - self.Reference[3][2]*P1Up[0] # y-intercept
-                cv2.line(self.clone, P1Up, P2Up, (0,0,255), 1)
-                
-                # Define the shock domain of tracking ** the line downstream
-                P1Down = (P1[0]+HalfSliceWidth, P1[1])
-                P2Down = (P2[0]+HalfSliceWidth, P2[1])
-                aDown = P1Down[1] - self.Reference[3][2]*P1Down[0] # y-intercept
-                cv2.line(self.clone, P1Down, P2Down, (0,0,255), 1)
-                
-                # generat the points
-                if SliceThickness > 10:             Pnts = np.linspace(0, SliceThickness, 10)
-                elif SliceThickness > 2 and SliceThickness < 10: Pnts = range(SliceThickness)
-                else: 
-                    print('escaping the shock angle checking... \n Slice thickness is not sufficient for check the shock angle')
-                    return
-                
-                Ref = []
-                print(self.Reference[3])
-                for i in Pnts: 
-                    y_i = int(i+(H_line-Ht))
-                    x_i1 = int((i-aUp)/self.Reference[3][2])
-                    cv2.circle(self.clone, (x_i1,y_i), radius=3, color=(0, 0, 255), thickness=-1)
-                    
-                    x_i2 = int((i-aDown)/self.Reference[3][2])
-                    cv2.circle(self.clone, (x_i2,y_i), radius=3, color=(0, 0, 255), thickness=-1)
-                    print([x_i1,x_i2],y_i)
-                    
-                    Ref.append([x_i1,x_i2])
+            Ref = self.InclinedShockCheck(WorkingRange, H_line, ShockType, SliceThickness)
+            
+            
     
-                
-                
-                
                 
             cv2.imshow(self.LineName[2], self.clone)
             cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
