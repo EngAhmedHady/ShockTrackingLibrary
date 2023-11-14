@@ -14,6 +14,8 @@ from scipy import signal
 import glob
 import sys
 import time
+import random
+from sklearn.linear_model import LinearRegression
 px = 1/plt.rcParams['figure.dpi']
 plt.rcParams.update({'font.size': 30})
 plt.rcParams["text.usetex"] =  True
@@ -355,12 +357,44 @@ class SOA:
                 cv2.circle(self.clone, (x_i2,y_i), radius=3, color=(0, 0, 255), thickness=-1)
                 print([x_i1,x_i2],y_i)
                 
-                Ref.append([x_i1,x_i2])
-        return Ref
+                Ref.append([[x_i1,x_i2],y_i])
+        return Ref, Pnts
     
-    def InclinedShockTracking(self, imgSet, HalfSliceWidth, reviewInterval = [0,0], CheckSolutionTime = True, OutputDirectory = ''):
+    def InclinedShockTracking(self, imgSet, nSlices, Ref,
+                              reviewInterval = [0,0], CheckSolutionTime = True, OutputDirectory = ''):
         # Ploting conditions
-        reviewInterval.sort(); start = reviewInterval[0]; end = reviewInterval[1]
+        # reviewInterval.sort(); start = reviewInterval[0]; end = reviewInterval[1]
+        AvgAngleGlob= 0
+        for img in imgSet:
+            xLoc = []
+            for i in range(nSlices):
+                y_i = Ref[1]
+                x_i1 = Ref[0][i][0];x_i2 = Ref[0][i][1]
+                
+                Slice = img[y_i-1:y_i,x_i1:x_i2]
+                ShockLoc, certainLoc, reason  = self.ShockTraking(Slice)
+                
+                xLoc.append(ShockLoc + Ref[0][i][0])
+                # if i > 0 and i < nSlices-1:
+                #     dx = xLoc[i+1]-xLoc[i]
+                #     dy = nSlices[i+1]-nSlices[i]
+                #     if  dy != 0 and  dx !=0:
+                #         slope = dy/dx
+                #         AngRad = np.arctan(slope)
+                #         if AngRad < 0: AngDeg = AngRad*180/np.pi
+                #         else: AngDeg = 180-(AngRad*180/np.pi)
+            ColumnXLoc = np.array(xLoc).reshape((-1, 1))
+            model = LinearRegression().fit(ColumnXLoc, nSlices)
+            r_sq = model.score(ColumnXLoc, nSlices)
+            # print(r_sq)
+            m = model.coef_[0]
+            if m < 0:   AngReg = np.arctan(m)*180/np.pi
+            else: AngReg = 180 - np.arctan(m)*180/np.pi
+            AvgAngleGlob += AngReg
+        return AvgAngleGlob
+        
+            
+            
                 
         
     def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False,
@@ -432,10 +466,7 @@ class SOA:
                 cv2.line(self.clone, (0,H_line-Ht), (img.shape[1],H_line-Ht), (0, 128, 255), 1)
                 
             
-            Ref = self.InclinedShockCheck(WorkingRange, H_line, ShockType, SliceThickness)
-            
-            
-    
+            Ref, nSlices = self.InclinedShockCheck(WorkingRange, H_line, ShockType, SliceThickness)    
                 
             cv2.imshow(self.LineName[2], self.clone)
             cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
@@ -448,13 +479,10 @@ class SOA:
                     self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+str(SliceThickness)+'_slice'+now+'.png'
                 cv2.imwrite(self.outputPath, self.clone)
                 
-            
-            
             if FullImWidth: 
                 WorkingRange = [0,img.shape[1],H_line]
                 print ('scaling lines:', [self.Reference[0],self.Reference[1],H_line])
             elif WorkingRangeLen < 1: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
-            
             print('working range is: ', WorkingRange)
             
             if  nt == -1 and Mode == -1: n1 = len(files)    
@@ -462,6 +490,24 @@ class SOA:
             elif Mode > 0 and nt < 0: n1 = int(len(files)/Mode)
             else: n1 = nt
             
+            randomIndx=[]
+            if n1 >= 50: NSamples = 50
+            else:  NSamples = n1
+            
+            
+            for i in range(NSamples):
+               r =random.randint(0,n1) # ....................................... generating a random number in the range 1 to 100
+               # checking whether the generated random number is not in the randomList
+               if r not in randomIndx: randomIndx.append(r) # ................. appending the random number to the resultant list, if the condition is true
+            
+            samplesList = []
+            for indx in randomIndx:
+                with open(files[indx]):
+                    samplesList.append(cv2.imread(files[indx]))
+                sys.stdout.write('\r')
+                sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n1/20)), int(5*n/(n1/20))))
+                sys.stdout.flush()
+                
             for name in files:
                 if o%Mode == 0 and n < n1:
                     with open(name):
