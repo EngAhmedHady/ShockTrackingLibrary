@@ -182,7 +182,7 @@ class SOA:
     
     def ShockTraking(self, SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
         # Start processing the slice
-        avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice        
+        avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice   
         MinimumPoint = min(SnapshotSlice) # ........... minimum (darkest) point
         
         if Plot: # to plot slice illumination values with location and Avg. line
@@ -270,7 +270,7 @@ class SOA:
                 if Distance < MinDis: 
                     MinDis = Distance;  ShockRegion = SubLocalMinSet
                 if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
-        elif LastShockLoc == -1: 
+        elif n > 1 and LastShockLoc == -1: 
             n = 1; 
             certainLoc = False
             reason = 'First pexil slice, No shock location history'
@@ -308,7 +308,7 @@ class SOA:
         
         if (not certainLoc) and Plot: 
             ax.text(Pixels-130,0.55, 'uncertain: '+ reason, color = 'red', fontsize=14)
-            ax.set_ylim([-1,1])
+            # ax.set_ylim([-1,1])
         return minLoc, certainLoc, reason                    
     
     def InclinedShockCheck(self, WorkingRange, H_line, ShockType, SliceThickness):
@@ -354,11 +354,9 @@ class SOA:
                 cv2.circle(self.clone, (x_i1,y_i), radius=3, color=(0, 0, 255), thickness=-1)
                 
                 x_i2 = int((i+pointTranslation-aDown)/self.Reference[3][2])
-                cv2.circle(self.clone, (x_i2,y_i), radius=3, color=(0, 0, 255), thickness=-1)
-                print([x_i1,x_i2],y_i)
-                
+                cv2.circle(self.clone, (x_i2,y_i), radius=3, color=(0, 0, 255), thickness=-1)                
                 Ref.append([[x_i1,x_i2],y_i])
-        return Ref, Pnts
+        return Ref, len(Pnts)
     
     def InclinedShockTracking(self, imgSet, nSlices, Ref,
                               reviewInterval = [0,0], CheckSolutionTime = True, OutputDirectory = ''):
@@ -366,15 +364,14 @@ class SOA:
         # reviewInterval.sort(); start = reviewInterval[0]; end = reviewInterval[1]
         AvgAngleGlob= 0
         for img in imgSet:
-            xLoc = []
+            xLoc = []; ColumnY = []
             for i in range(nSlices):
-                y_i = Ref[1]
-                x_i1 = Ref[0][i][0];x_i2 = Ref[0][i][1]
-                
+                y_i = Ref[i][1]
+                x_i1 = Ref[i][0][0];x_i2 = Ref[i][0][1]
                 Slice = img[y_i-1:y_i,x_i1:x_i2]
-                ShockLoc, certainLoc, reason  = self.ShockTraking(Slice)
-                
-                xLoc.append(ShockLoc + Ref[0][i][0])
+                ShockLoc, certainLoc, reason  = self.ShockTraking(Slice[0])
+                ColumnY.append(y_i)
+                xLoc.append(ShockLoc + Ref[i][0][0])
                 # if i > 0 and i < nSlices-1:
                 #     dx = xLoc[i+1]-xLoc[i]
                 #     dy = nSlices[i+1]-nSlices[i]
@@ -384,14 +381,16 @@ class SOA:
                 #         if AngRad < 0: AngDeg = AngRad*180/np.pi
                 #         else: AngDeg = 180-(AngRad*180/np.pi)
             ColumnXLoc = np.array(xLoc).reshape((-1, 1))
-            model = LinearRegression().fit(ColumnXLoc, nSlices)
-            r_sq = model.score(ColumnXLoc, nSlices)
-            # print(r_sq)
+            ColumnY = np.array(ColumnY).reshape((-1, 1))
+            # print(ColumnXLoc,ColumnY)
+            model = LinearRegression().fit(ColumnXLoc, ColumnY)
+            # r_sq = model.score(ColumnXLoc, ColumnY)
+            # print('r_sq:', r_sq)
             m = model.coef_[0]
-            if m < 0:   AngReg = np.arctan(m)*180/np.pi
-            else: AngReg = 180 - np.arctan(m)*180/np.pi
-            AvgAngleGlob += AngReg
-        return AvgAngleGlob
+            if m > 0:   AngReg = np.arctan(m)*180/np.pi
+            else: AngReg = 90 + np.arctan(m)*180/np.pi
+            AvgAngleGlob += AngReg[0]
+        return AvgAngleGlob/len(imgSet)
         
             
             
@@ -450,6 +449,9 @@ class SOA:
             # Alocate Horizontal reference
             if WorkingRangeLen < 3:
                 self.LineDraw(self.clone, 'H', 2)
+                if len(self.Reference) < 3: 
+                    print('Reference lines is not sufficient!')
+                    sys.exit()
                 H_line = self.Reference[2]-round(HLP/self.pixelScale)
             else:
                 self.Reference = WorkingRange
@@ -465,7 +467,7 @@ class SOA:
                 cv2.line(self.clone, (0,H_line+Ht), (img.shape[1],H_line+Ht), (0, 128, 255), 1)
                 cv2.line(self.clone, (0,H_line-Ht), (img.shape[1],H_line-Ht), (0, 128, 255), 1)
                 
-            
+            print('Shock inclination test')
             Ref, nSlices = self.InclinedShockCheck(WorkingRange, H_line, ShockType, SliceThickness)    
                 
             cv2.imshow(self.LineName[2], self.clone)
@@ -490,24 +492,37 @@ class SOA:
             elif Mode > 0 and nt < 0: n1 = int(len(files)/Mode)
             else: n1 = nt
             
+            print('Shock inclination estimate ... ')
             randomIndx=[]
             if n1 >= 50: NSamples = 50
             else:  NSamples = n1
             
-            
-            for i in range(NSamples):
+            k = 0
+            while k < NSamples:
                r =random.randint(0,n1) # ....................................... generating a random number in the range 1 to 100
                # checking whether the generated random number is not in the randomList
-               if r not in randomIndx: randomIndx.append(r) # ................. appending the random number to the resultant list, if the condition is true
+               if r not in randomIndx: 
+                   randomIndx.append(r) # ................. appending the random number to the resultant list, if the condition is true
+                   k += 1
             
-            samplesList = []
+            print(len(randomIndx))
+            samplesList = []; k = 0
             for indx in randomIndx:
                 with open(files[indx]):
-                    samplesList.append(cv2.imread(files[indx]))
+                    Sample = cv2.imread(files[indx])
+                    # check if the image on grayscale or not and convert if not
+                    if len(Sample.shape) > 2: Sample = cv2.cvtColor(Sample, cv2.COLOR_BGR2GRAY)
+                    samplesList.append(Sample)
+                k += 1
                 sys.stdout.write('\r')
-                sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n1/20)), int(5*n/(n1/20))))
+                sys.stdout.write("[%-20s] %d%%" % ('='*int(k/(NSamples/20)), int(5*k/(NSamples/20))))
                 sys.stdout.flush()
+            print('')   
                 
+            AvgAngleGlob = self.InclinedShockTracking(samplesList, nSlices, Ref)
+            print(AvgAngleGlob)
+            
+            print('Importing images ... ')
             for name in files:
                 if o%Mode == 0 and n < n1:
                     with open(name):
