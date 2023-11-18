@@ -350,7 +350,9 @@ class SOA:
             print(self.Reference[3])
             for i in Pnts: 
                 y_i = int(i+pointTranslation)
-                x_i1 = int((i+pointTranslation-aUp)/self.Reference[3][2])
+                
+                if self.Reference[3][2] != 0: x_i1 = int((i+pointTranslation-aUp)/self.Reference[3][2])
+                
                 cv2.circle(self.clone, (x_i1,y_i), radius=3, color=(0, 0, 255), thickness=-1)
                 
                 x_i2 = int((i+pointTranslation-aDown)/self.Reference[3][2])
@@ -359,12 +361,13 @@ class SOA:
         return Ref, len(Pnts)
     
     def InclinedShockTracking(self, imgSet, nSlices, Ref,
-                              reviewInterval = [0,0], CheckSolutionTime = True, OutputDirectory = ''):
+                              nReview = 0, CheckSolutionTime = True, OutputDirectory = ''):
         # Ploting conditions
         # reviewInterval.sort(); start = reviewInterval[0]; end = reviewInterval[1]
-        AvgAngleGlob= 0
+        AvgAngleGlob= 0;   count = 0
+        imgShp = imgSet[0].shape
         for img in imgSet:
-            xLoc = []; ColumnY = []
+            xLoc = []; ColumnY = []; uncertain = [];uncertainY = []
             for i in range(nSlices):
                 y_i = Ref[i][1]
                 x_i1 = Ref[i][0][0];x_i2 = Ref[i][0][1]
@@ -372,6 +375,11 @@ class SOA:
                 ShockLoc, certainLoc, reason  = self.ShockTraking(Slice[0])
                 ColumnY.append(y_i)
                 xLoc.append(ShockLoc + Ref[i][0][0])
+                if not certainLoc:
+                    uncertain.append(xLoc[-1])
+                    uncertainY.append(y_i)
+                
+                
                 # if i > 0 and i < nSlices-1:
                 #     dx = xLoc[i+1]-xLoc[i]
                 #     dy = nSlices[i+1]-nSlices[i]
@@ -382,14 +390,22 @@ class SOA:
                 #         else: AngDeg = 180-(AngRad*180/np.pi)
             ColumnXLoc = np.array(xLoc).reshape((-1, 1))
             ColumnY = np.array(ColumnY).reshape((-1, 1))
-            # print(ColumnXLoc,ColumnY)
             model = LinearRegression().fit(ColumnXLoc, ColumnY)
-            # r_sq = model.score(ColumnXLoc, ColumnY)
-            # print('r_sq:', r_sq)
-            m = model.coef_[0]
-            if m > 0:   AngReg = np.arctan(m)*180/np.pi
-            else: AngReg = 90 + np.arctan(m)*180/np.pi
-            AvgAngleGlob += AngReg[0]
+            m = model.coef_[0][0]
+            if m > 0:   
+                AngReg = 180 - np.arctan(m)*180/np.pi
+            elif m < 0: 
+                AngReg = abs(np.arctan(m)*180/np.pi)
+            else:
+                AngReg = 90
+                
+            AvgAngleGlob += AngReg
+            if nReview > 0 and count < nReview:                 
+                fig, ax = plt.subplots(figsize=(int(imgShp[1]*1.5*px), int(imgShp[0]*1.5*px)))
+                ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB));
+                ax.plot(xLoc, ColumnY,'-o',color = 'yellow' ,ms = 10)
+                ax.plot(uncertain, uncertainY,'o',color = 'r' ,ms = 10)
+            count += 1
         return AvgAngleGlob/len(imgSet)
         
             
@@ -398,7 +414,7 @@ class SOA:
         
     def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False,
                               OutputDirectory = '',comment='', SliceThickness = 0, ShockType = 'Normal', 
-                              nt = -1, Mode = -1, ShockAngleSamples = 30):
+                              nt = -1, Mode = -1, ShockAngleSamples = 30, AngleSamplesReview = 10):
         # This function is importing a seuqnce of image to perform single horizontal line shock wave analysis
         # for efficient and optimizied analysis the function extract only one pixel slice from each image
         # defined by the user and append one to another and finally generates a single image where each raw 
@@ -505,7 +521,6 @@ class SOA:
                    randomIndx.append(r) # ................. appending the random number to the resultant list, if the condition is true
                    k += 1
             
-            print(len(randomIndx))
             samplesList = []; k = 0
             for indx in randomIndx:
                 with open(files[indx]):
@@ -518,9 +533,16 @@ class SOA:
                 sys.stdout.write("[%-20s] %d%%" % ('='*int(k/(NSamples/20)), int(5*k/(NSamples/20))))
                 sys.stdout.flush()
             print('')   
+            
+
+            if AngleSamplesReview < NSamples: NSamplingReview = AngleSamplesReview
+            else:
+                NSamplingReview = NSamples
+                print('Warning: Numper of samples is larger than requested to review, all samples will be reviewed')
+            
                 
-            AvgAngleGlob = self.InclinedShockTracking(samplesList, nSlices, Ref)
-            print(AvgAngleGlob)
+            AvgAngleGlob = self.InclinedShockTracking(samplesList, nSlices, Ref, nReview = NSamplingReview)
+            print('Average inclination angle',AvgAngleGlob)
             
             print('Importing images ... ')
             for name in files:
