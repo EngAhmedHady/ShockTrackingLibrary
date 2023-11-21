@@ -9,11 +9,9 @@ import os
 from ShockOscillationAnalysis import SOA
 
 
-f = 15000
+f = 2000
 D = 80      # distance in mm
 HLP = 10     # Horizontal line position [slice location to a reference line]
-Scale = 0.12944983818770225
-n = 0;
 # imgPath = 'C:\\Users\\super\\Desktop\\PhD\\TEAMAero\\25-05-2023_2kHz_smooth P1 (Test 5)\\*.png'
 # imgPath = '*.png'
 imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
@@ -32,11 +30,11 @@ ShockwaveRegion ,n ,H_line, Scale = SA.ImportSchlierenImages(imgPath,
                                                              FullImWidth = True,
                                                              ScalePixels= True,
                                                              OutputDirectory = NewFileDirectory,
-                                                             SliceThickness = 128,
+                                                             SliceThickness = 50,
                                                              WorkingRange = [80],
                                                              ShockType = 'Oblique',
                                                              nt = 100,
                                                              ShockAngleSamples = 50,
-                                                             AngleSamplesReview = 20,
+                                                             AngleSamplesReview = 5,
                                                              comment = '-')
 

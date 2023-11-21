@@ -46,17 +46,36 @@ class SOA:
         elif x >= 0 and x >  Shp[1]: y2 = int(Shp[1]*slope+a); p2 = (Shp[1],y2)
         elif x <  0 and x <= Shp[1]: y2 = int(a);              p2 = (0,y2)
         return p2    
+    
+    def TimeCalculation(self, timeInSec):
+        if timeInSec > 60: 
+            timeInMin = timeInSec/60
+            if timeInMin > 60:
+                timeInHr = int(timeInMin/60)
+                Min = int((timeInSec%3600)/60)
+                sec = (timeInSec%3600)%60
+                print("Total run time: %s Hr, %s Min, %s Sec" % (timeInHr,Min,round(sec)))
+            else:
+                Min = int(timeInSec/60)
+                sec = timeInSec%60
+                print("Total run time: %s Min, %s Sec" % (Min,round(sec)))
+        else: print("Total run time:  %s Sec" % round(timeInSec))
         
     def InclinedLine(self,P1, P2 = (), slope = None, imgShape = ()):
-        # Generates the inclind line equation from two points and image boundary points 
+        # Generates the inclind line equation from two points or one point,slope 
+        # The image boundary/shape should be given
         # inputs : P1       => first point tuple (a1,b1)
         # ........ P2       => second point tuple (a2,b2)
+        # ........ slope    => second point tuple (a2,b2)
         # ........ imgShape => image size (y-length 'Number of raws', x-length'Number of columns')
         # outputs: - first boundary point tuple
         # ........ - second boundary point tuple
         # ........ - line slope  (equal to zero in case of vertical or horizontal)
         # ........ - y-intersept (equal to zero in case of vertical or horizontal)
-        
+        if len(imgShape) < 1: 
+            print('Image shape is not provided, program aborting ...')
+            sys.exit()
+            
         if len(P2) > 1 and slope is None:
             dx = P1[0]-P2[0];   dy = P1[1]-P2[1]
             if dx != 0: slope = dy/dx
@@ -349,7 +368,6 @@ class SOA:
             cv2.line(self.clone, P1Down, P2Down, (0,0,255), 1)
             
             pointTranslation = H_line-Ht
-            print(self.Reference[3])
             for i in Pnts: 
                 y_i = int(i+pointTranslation)
                 
@@ -363,11 +381,12 @@ class SOA:
         return Ref, len(Pnts)
     
     def InclinedShockTracking(self, imgSet, nSlices, Ref,
-                              nReview = 0, CheckSolutionTime = True, OutputDirectory = ''):
+                              nReview = 0, CheckSolutionTime = False, OutputDirectory = ''):
+        if CheckSolutionTime: start_time = time.time()
         # Ploting conditions
         # reviewInterval.sort(); start = reviewInterval[0]; end = reviewInterval[1]
         AvgAngleGlob= 0;   count = 0; xLoc = [];
-        imgShp = imgSet[0].shape
+        imgShp = imgSet[0].shape; AvgSlope = 0; AvgMidLoc = 0;
         for img in imgSet:
             if count > 1: xLocOld = xLoc.copy()
             xLoc = []; ColumnY = []; uncertain = [];uncertainY = []
@@ -383,6 +402,18 @@ class SOA:
                 if not certainLoc:
                     uncertain.append(xLoc[-1])
                     uncertainY.append(y_i)
+            
+            # finding the middle point
+            if nSlices%2 != 0:
+                midIndx = int(nSlices/2) + 1
+                midLoc = xLoc[midIndx]
+                y = ColumnY[midIndx]
+            else: 
+                midIndx = int(nSlices/2)
+                # The average location between two points
+                midLoc = ((xLoc[midIndx-1]+xLoc[midIndx])/2)
+                y = (ColumnY[midIndx-1]+ColumnY[midIndx])/2
+                
             ColumnXLoc = np.array(xLoc).reshape((-1, 1))
             ColumnY = np.array(ColumnY).reshape((-1, 1))
             model = LinearRegression().fit(ColumnXLoc, ColumnY)
@@ -394,16 +425,25 @@ class SOA:
             else:
                 AngReg = 90
                 
+            AvgMidLoc += midLoc
             AvgAngleGlob += AngReg
+            AvgSlope += m
             if nReview > 0 and count < nReview:                 
                 fig, ax = plt.subplots(figsize=(int(imgShp[1]*1.5*px), int(imgShp[0]*1.5*px)))
                 ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB));
                 ax.plot(xLoc, ColumnY,'-o',color = 'yellow' ,ms = 10)
                 ax.plot(uncertain, uncertainY,'o',color = 'r' ,ms = 10)
+                ax.plot(midLoc, y,'*',color = 'g' ,ms = 10)
+                
+                if len(OutputDirectory)> 0:
+                    fig.savefig(OutputDirectory +'\\ShockAngleReview_'+str(f"{count:04d}")+'.png')
             count += 1
-        return AvgAngleGlob/len(imgSet)
-                     
-        
+        # Shock tracking time
+        if CheckSolutionTime:
+            timeInSec =  time.time() - start_time  
+            self.TimeCalculation(timeInSec)
+        return AvgAngleGlob/count, AvgSlope/count, AvgMidLoc/count
+                           
     def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False,
                               OutputDirectory = '',comment='', SliceThickness = 0, ShockType = 'Normal', 
                               nt = -1, Mode = -1, ShockAngleSamples = 30, AngleSamplesReview = 10):
@@ -480,14 +520,6 @@ class SOA:
                 
             cv2.imshow(self.LineName[2], self.clone)
             cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
-            if len(OutputDirectory) > 0:
-                if len(comment) > 0:
-                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+comment+'.png'
-                else:
-                    now = datetime.now()
-                    now = now.strftime("%d%m%Y%H%M")
-                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+str(SliceThickness)+'_slice'+now+'.png'
-                cv2.imwrite(self.outputPath, self.clone)
                 
             if FullImWidth: 
                 WorkingRange = [0,shp[1],H_line]
@@ -533,11 +565,37 @@ class SOA:
                 print('Warning: Numper of samples is larger than requested to review, all samples will be reviewed')
             
                 
-            AvgAngleGlob = self.InclinedShockTracking(samplesList, nSlices, Ref, nReview = NSamplingReview)
+            AvgAngleGlob, AvgSlopeGlob, AvgShockLocGlob = self.InclinedShockTracking(samplesList, nSlices, Ref, 
+                                                                                     nReview = NSamplingReview, 
+                                                                                     OutputDirectory = OutputDirectory)
             print('Average inclination angle {:.2f} deg'.format(AvgAngleGlob))
+            print(AvgShockLocGlob, np.arctan(AvgSlopeGlob)*180/np.pi)
+            P1Avg, P2Avg, mAvg, aAvg = self.InclinedLine((AvgShockLocGlob, H_line), slope = AvgSlopeGlob, imgShape = shp)
+            cv2.line(self.clone, P1Avg, P2Avg, (255, 0, 255), 1)
+            newAvgSlope = -(1/AvgSlopeGlob)
+            
+            P1S, P2S, mS, aS = self.InclinedLine((AvgShockLocGlob, H_line), slope = newAvgSlope, imgShape = shp)
+            cv2.line(self.clone, P1S, P2S, (255, 255, 0), 1)
+            
+            NewSTP1 = () # New slice thickness point 1 (upper range)
+            NewSTP1 += ((AvgShockLocGlob + Ht*np.cos(AvgAngleGlob*np.pi/180)),)
+            NewSTP1 += ((mAvg*NewSTP1[0]+aAvg),)
+            
+            print(Ht,int(np.sqrt((NewSTP1[0]-AvgShockLocGlob)**2 + (NewSTP1[1]-H_line)**2)))
+            # cv2.circle(self.clone, NewSTP1, radius=3, color=(0, 255, 255), thickness=-1)
             
             
+            cv2.imshow(self.LineName[2], self.clone)
+            cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
             
+            if len(OutputDirectory) > 0:
+                if len(comment) > 0:
+                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+comment+'.png'
+                else:
+                    now = datetime.now()
+                    now = now.strftime("%d%m%Y%H%M")
+                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+str(SliceThickness)+'_slice'+now+'.png'
+                cv2.imwrite(self.outputPath, self.clone)
             
             
             print('Importing images ... ')
@@ -681,19 +739,8 @@ class SOA:
         
         # Shock tracking time
         if CheckSolutionTime:
-            timeInSec =  time.time() - start_time  
-            if timeInSec > 60: 
-                timeInMin = timeInSec/60
-                if timeInMin > 60:
-                    timeInHr = int(timeInMin/60)
-                    Min = int((timeInSec%3600)/60)
-                    sec = (timeInSec%3600)%60
-                    print("Total run time: %s Hr, %s Min, %s Sec" % (timeInHr,Min,round(sec)))
-                else:
-                    Min = int(timeInSec/60)
-                    sec = timeInSec%60
-                    print("Total run time: %s Min, %s Sec" % (Min,round(sec)))
-            else: print("Total run time:  %s Sec" % round(timeInSec))
-
+            timeInSec =  time.time() - start_time
+            self.TimeCalculation(timeInSec)
+            
         return ShockLocation, uncertain
     

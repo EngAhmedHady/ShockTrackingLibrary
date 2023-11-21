@@ -493,7 +493,6 @@ for j in ImgList:
         
         ax.plot([Xmin,Xmax], [0,imgSize[1]],'-.w', lw = 3)
     
-    
         arc1 = Arc((X, AvgAngleYloc),80, 80, theta1=AngReg, theta2=0, color = 'w')
         ax.add_patch(arc1);
         ax.text(X+45 ,AvgAngleYloc-10 , str(abs(round(AngReg,2)))+'$^o$',size = 50, color = 'w');
