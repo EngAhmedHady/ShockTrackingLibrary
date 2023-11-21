@@ -47,7 +47,7 @@ class SOA:
         elif x <  0 and x <= Shp[1]: y2 = int(a);              p2 = (0,y2)
         return p2    
         
-    def InclinedLine(self,P1,P2,imgShape):
+    def InclinedLine(self,P1, P2 = (), slope = None, imgShape = ()):
         # Generates the inclind line equation from two points and image boundary points 
         # inputs : P1       => first point tuple (a1,b1)
         # ........ P2       => second point tuple (a2,b2)
@@ -56,10 +56,12 @@ class SOA:
         # ........ - second boundary point tuple
         # ........ - line slope  (equal to zero in case of vertical or horizontal)
         # ........ - y-intersept (equal to zero in case of vertical or horizontal)
-        dx = P1[0]-P2[0]
-        dy = P1[1]-P2[1]
-        if  dy != 0 and  dx !=0:
-            slope = dy/dx
+        
+        if len(P2) > 1 and slope is None:
+            dx = P1[0]-P2[0];   dy = P1[1]-P2[1]
+            if dx != 0: slope = dy/dx
+            
+        if slope != 0 and slope is not None:
             a = P1[1] - slope*P1[0]
             Xmax = int((imgShape[0]-a)/slope)
             Xmin = int(-a/slope)
@@ -113,7 +115,7 @@ class SOA:
                     avg = int((self.TempLine[0][1]+self.TempLine[1][1])/2)
                     cv2.line(self.Temp, (0,avg), (parameters[1],avg), (0,255,255), 1)
                 elif parameters[2] == 'Inc':
-                    P1,P2,m,a = self.InclinedLine(self.TempLine[0],self.TempLine[1],parameters[1])
+                    P1,P2,m,a = self.InclinedLine(self.TempLine[0],self.TempLine[1],imgShape = parameters[1])
                     cv2.line(self.Temp, P1, P2, (0,255,0), 1)
                     
                 cv2.imshow(parameters[0], self.Temp)
@@ -132,7 +134,7 @@ class SOA:
                     cv2.line(self.Temp, (0,avg), (parameters[1],avg), (0,255,255), 1)
                     
                 elif parameters[2] == 'Inc':
-                    P1,P2,m,a = self.InclinedLine(self.line_coordinates[0],self.line_coordinates[1],parameters[1])
+                    P1,P2,m,a = self.InclinedLine(self.line_coordinates[0],self.line_coordinates[1],imgShape = parameters[1])
                     cv2.line(self.Temp, P1, P2, (0,255,0), 1)
                     avg = [P1, P2, m,a]
                 
@@ -311,7 +313,7 @@ class SOA:
             # ax.set_ylim([-1,1])
         return minLoc, certainLoc, reason                    
     
-    def InclinedShockCheck(self, WorkingRange, H_line, ShockType, SliceThickness):
+    def InclinedShockCheck(self, WorkingRange, H_line, ShockType, SliceThickness, imgShape):
         WorkingRangeLen = len(WorkingRange)
         Ht = int(SliceThickness/2)
         Ref = []
@@ -331,19 +333,19 @@ class SOA:
                 sys.exit()
             
             # Define the estimated shock line using 2 points P1, P2 --> User defined
-            P1 = (int(self.Reference[3][0][0]), int(self.Reference[3][0][1]))
-            P2 = (int(self.Reference[3][1][0]), int(self.Reference[3][1][1]))
+            P1 = (int(self.Reference[3][0][0]), int(self.Reference[3][0][1]))            
+            LineSlope = self.Reference[3][2]
             
             # Define the shock domain of tracking ** the line upstream
-            P1Up = (P1[0]-HalfSliceWidth, P1[1])
-            P2Up = (P2[0]-HalfSliceWidth, P2[1])
-            aUp = P1Up[1] - self.Reference[3][2]*P1Up[0] # y-intercept
+            P1Up = (P1[0] - HalfSliceWidth, P1[1])
+            aUp = P1Up[1] - LineSlope*P1Up[0] # y-intercept
+            P1Up,P2Up,m,a = self.InclinedLine(P1Up, slope = LineSlope, imgShape=imgShape)            
             cv2.line(self.clone, P1Up, P2Up, (0,0,255), 1)
             
             # Define the shock domain of tracking ** the line downstream
-            P1Down = (P1[0]+HalfSliceWidth, P1[1])
-            P2Down = (P2[0]+HalfSliceWidth, P2[1])
+            P1Down = (P1[0] + HalfSliceWidth, P1[1])
             aDown = P1Down[1] - self.Reference[3][2]*P1Down[0] # y-intercept
+            P1Down,P2Down,m,a = self.InclinedLine(P1Down, slope = LineSlope, imgShape=imgShape) 
             cv2.line(self.clone, P1Down, P2Down, (0,0,255), 1)
             
             pointTranslation = H_line-Ht
@@ -364,30 +366,23 @@ class SOA:
                               nReview = 0, CheckSolutionTime = True, OutputDirectory = ''):
         # Ploting conditions
         # reviewInterval.sort(); start = reviewInterval[0]; end = reviewInterval[1]
-        AvgAngleGlob= 0;   count = 0
+        AvgAngleGlob= 0;   count = 0; xLoc = [];
         imgShp = imgSet[0].shape
         for img in imgSet:
+            if count > 1: xLocOld = xLoc.copy()
             xLoc = []; ColumnY = []; uncertain = [];uncertainY = []
             for i in range(nSlices):
                 y_i = Ref[i][1]
                 x_i1 = Ref[i][0][0];x_i2 = Ref[i][0][1]
                 Slice = img[y_i-1:y_i,x_i1:x_i2]
-                ShockLoc, certainLoc, reason  = self.ShockTraking(Slice[0])
+                if count > 1: LastShockLoc = xLocOld[i]
+                else: LastShockLoc = -1
+                ShockLoc, certainLoc, reason  = self.ShockTraking(Slice[0], LastShockLoc = LastShockLoc)
                 ColumnY.append(y_i)
                 xLoc.append(ShockLoc + Ref[i][0][0])
                 if not certainLoc:
                     uncertain.append(xLoc[-1])
                     uncertainY.append(y_i)
-                
-                
-                # if i > 0 and i < nSlices-1:
-                #     dx = xLoc[i+1]-xLoc[i]
-                #     dy = nSlices[i+1]-nSlices[i]
-                #     if  dy != 0 and  dx !=0:
-                #         slope = dy/dx
-                #         AngRad = np.arctan(slope)
-                #         if AngRad < 0: AngDeg = AngRad*180/np.pi
-                #         else: AngDeg = 180-(AngRad*180/np.pi)
             ColumnXLoc = np.array(xLoc).reshape((-1, 1))
             ColumnY = np.array(ColumnY).reshape((-1, 1))
             model = LinearRegression().fit(ColumnXLoc, ColumnY)
@@ -407,10 +402,7 @@ class SOA:
                 ax.plot(uncertain, uncertainY,'o',color = 'r' ,ms = 10)
             count += 1
         return AvgAngleGlob/len(imgSet)
-        
-            
-            
-                
+                     
         
     def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False,
                               OutputDirectory = '',comment='', SliceThickness = 0, ShockType = 'Normal', 
@@ -443,6 +435,7 @@ class SOA:
             img = cv2.imread(files[0])
             # Open first file and set the limits and scale
             self.Reference = []
+            shp = img.shape
             
             # Defining the working range
             if WorkingRangeLen < 2:
@@ -453,7 +446,6 @@ class SOA:
                     print('Reference lines is not sufficient!')
                     sys.exit()
             elif WorkingRangeLen > 1:
-                shp = img.shape
                 self.clone = img.copy(); 
                 cv2.line(self.clone, (WorkingRange[0],0), (WorkingRange[0],shp[0]), (0,255,0), 1)
                 cv2.line(self.clone, (WorkingRange[1],0), (WorkingRange[1],shp[0]), (0,255,0), 1)
@@ -476,15 +468,15 @@ class SOA:
                                      (shp[1],H_line+round(HLP/self.pixelScale)), 
                                      (0,255,255), 1)
              
-            cv2.line(self.clone, (0,H_line), (img.shape[1],H_line), (0,0,255), 1)
+            cv2.line(self.clone, (0,H_line), (shp[1],H_line), (0,0,255), 1)
             
             if SliceThickness > 0:
                 Ht = int(SliceThickness/2)  # Half Thickness
-                cv2.line(self.clone, (0,H_line+Ht), (img.shape[1],H_line+Ht), (0, 128, 255), 1)
-                cv2.line(self.clone, (0,H_line-Ht), (img.shape[1],H_line-Ht), (0, 128, 255), 1)
+                cv2.line(self.clone, (0,H_line+Ht), (shp[1],H_line+Ht), (0, 128, 255), 1)
+                cv2.line(self.clone, (0,H_line-Ht), (shp[1],H_line-Ht), (0, 128, 255), 1)
                 
             print('Shock inclination test')
-            Ref, nSlices = self.InclinedShockCheck(WorkingRange, H_line, ShockType, SliceThickness)    
+            Ref, nSlices = self.InclinedShockCheck(WorkingRange, H_line, ShockType, SliceThickness, shp)    
                 
             cv2.imshow(self.LineName[2], self.clone)
             cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
@@ -498,7 +490,7 @@ class SOA:
                 cv2.imwrite(self.outputPath, self.clone)
                 
             if FullImWidth: 
-                WorkingRange = [0,img.shape[1],H_line]
+                WorkingRange = [0,shp[1],H_line]
                 print ('scaling lines:', [self.Reference[0],self.Reference[1],H_line])
             elif WorkingRangeLen < 1: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
             print('working range is: ', WorkingRange)
@@ -542,7 +534,11 @@ class SOA:
             
                 
             AvgAngleGlob = self.InclinedShockTracking(samplesList, nSlices, Ref, nReview = NSamplingReview)
-            print('Average inclination angle',AvgAngleGlob)
+            print('Average inclination angle {:.2f} deg'.format(AvgAngleGlob))
+            
+            
+            
+            
             
             print('Importing images ... ')
             for name in files:
