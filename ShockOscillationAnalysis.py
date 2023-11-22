@@ -476,7 +476,7 @@ class SOA:
             # Open first file and set the limits and scale
             self.Reference = []
             shp = img.shape
-            
+            print('Img Shape is:', shp)
             # Defining the working range
             if WorkingRangeLen < 2:
                 # Vertical limits and scale 
@@ -521,12 +521,7 @@ class SOA:
             cv2.imshow(self.LineName[2], self.clone)
             cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
                 
-            if FullImWidth: 
-                WorkingRange = [0,shp[1],H_line]
-                print ('scaling lines:', [self.Reference[0],self.Reference[1],H_line])
-            elif WorkingRangeLen < 1: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
-            print('working range is: ', WorkingRange)
-            
+                        
             if  nt == -1 and Mode == -1: n1 = len(files)    
             elif Mode > 0 and nt > 0: n1 = int(nt/Mode)
             elif Mode > 0 and nt < 0: n1 = int(len(files)/Mode)
@@ -569,23 +564,33 @@ class SOA:
                                                                                      nReview = NSamplingReview, 
                                                                                      OutputDirectory = OutputDirectory)
             print('Average inclination angle {:.2f} deg'.format(AvgAngleGlob))
-            print(AvgShockLocGlob, np.arctan(AvgSlopeGlob)*180/np.pi)
             P1Avg, P2Avg, mAvg, aAvg = self.InclinedLine((AvgShockLocGlob, H_line), slope = AvgSlopeGlob, imgShape = shp)
             cv2.line(self.clone, P1Avg, P2Avg, (255, 0, 255), 1)
+                        
             newAvgSlope = -(1/AvgSlopeGlob)
             
             P1S, P2S, mS, aS = self.InclinedLine((AvgShockLocGlob, H_line), slope = newAvgSlope, imgShape = shp)
             cv2.line(self.clone, P1S, P2S, (255, 255, 0), 1)
             
-            NewSTP1 = () # New slice thickness point 1 (upper range)
-            NewSTP1 += ((AvgShockLocGlob + Ht*np.cos(AvgAngleGlob*np.pi/180)),)
-            NewSTP1 += ((mAvg*NewSTP1[0]+aAvg),)
+            M = cv2.getRotationMatrix2D((AvgShockLocGlob, H_line), 90-AvgAngleGlob, 1.0)
+            NewImg = cv2.warpAffine(img, M, (shp[1],shp[0]))
             
-            print(Ht,int(np.sqrt((NewSTP1[0]-AvgShockLocGlob)**2 + (NewSTP1[1]-H_line)**2)))
+            cv2.line(NewImg, (0,H_line-Ht), (shp[1],H_line-Ht), (255, 128, 0), 1)
+            cv2.line(NewImg, (0,H_line+Ht), (shp[1],H_line+Ht), (255, 128, 0), 1)
+            cv2.line(NewImg, (0,H_line), (shp[1],H_line), (255, 128, 255), 1)
+            cv2.line(NewImg, (round(AvgShockLocGlob),0), (round(AvgShockLocGlob),shp[0]), (255,255,0), 1)
+            cv2.line(NewImg, (self.Reference[0],0), (self.Reference[0],shp[0]), (0,255,0), 1)
+            cv2.line(NewImg, (self.Reference[1],0), (self.Reference[1],shp[0]), (0,255,0), 1)
+            
+            # NewSTP1 = () # New slice thickness point 1 (upper range)
+            # NewSTP1 += ((AvgShockLocGlob + Ht*np.cos(AvgAngleGlob*np.pi/180)),)
+            # NewSTP1 += ((mAvg*NewSTP1[0]+aAvg),)
+            
+            # print(Ht,int(np.sqrt((NewSTP1[0]-AvgShockLocGlob)**2 + (NewSTP1[1]-H_line)**2)))
             # cv2.circle(self.clone, NewSTP1, radius=3, color=(0, 255, 255), thickness=-1)
             
             
-            cv2.imshow(self.LineName[2], self.clone)
+            cv2.imshow(self.LineName[2], NewImg)
             cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
             
             if len(OutputDirectory) > 0:
@@ -595,7 +600,13 @@ class SOA:
                     now = datetime.now()
                     now = now.strftime("%d%m%Y%H%M")
                     self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+str(SliceThickness)+'_slice'+now+'.png'
-                cv2.imwrite(self.outputPath, self.clone)
+                cv2.imwrite(self.outputPath, NewImg)
+            
+            if FullImWidth: 
+                WorkingRange = [0,shp[1],H_line]
+                print ('scaling lines:', [self.Reference[0],self.Reference[1],H_line])
+            elif WorkingRangeLen < 1: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
+            print('working range is: ', WorkingRange)
             
             
             print('Importing images ... ')
@@ -603,6 +614,7 @@ class SOA:
                 if o%Mode == 0 and n < n1:
                     with open(name):
                         img = cv2.imread(name)
+                        if AvgAngleGlob != 90: img = cv2.warpAffine(img, M, (shp[1],shp[0]))
                         if SliceThickness > 0:
                             cropped_image = np.zeros([1,WorkingRange[1]-WorkingRange[0],3])
                             for i in range(SliceThickness): cropped_image += img[WorkingRange[2]-(Ht+1)+i:WorkingRange[2]-Ht+i,WorkingRange[0]:WorkingRange[1]]
