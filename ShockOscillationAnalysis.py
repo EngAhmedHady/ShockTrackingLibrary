@@ -76,11 +76,14 @@ class SOA:
             print('Image shape is not provided, program aborting ...')
             sys.exit()
             
-        if len(P2) > 1 and slope is None:
+        if len(P2) > 0 and slope is None:
             dx = P1[0]-P2[0];   dy = P1[1]-P2[1]
             if dx != 0: slope = dy/dx
+        elif len(P2) == 0 and slope is np.inf: dx = 0;
+        else: dx = -1 
+        
             
-        if slope != 0 and slope is not None:
+        if slope != 0 and slope is not None and slope is not np.inf:
             a = P1[1] - slope*P1[0]
             Xmax = int((imgShape[0]-a)/slope)
             Xmin = int(-a/slope)
@@ -97,7 +100,7 @@ class SOA:
                 p2 = self.XCheck(Xmax,imgShape,slope,a)
             return p1, p2, slope, a
         elif dx == 0:
-            return (P1[0],0), (P1[0],imgShape[0]), 0, np.Inf
+            return (P1[0],0), (P1[0],imgShape[0]), np.Inf, 0 
         else:
             return (0,P1[1]), (imgShape[1],P1[1]), 0, 0   
     
@@ -332,53 +335,57 @@ class SOA:
             # ax.set_ylim([-1,1])
         return minLoc, certainLoc, reason                    
     
-    def InclinedShockCheck(self, WorkingRange, H_line, ShockType, SliceThickness, imgShape):
-        WorkingRangeLen = len(WorkingRange)
+    def InclinedShockCheck(self, CheckingRange, H_line, SliceThickness, imgShape):
         Ht = int(SliceThickness/2)
-        Ref = []
-        if (WorkingRangeLen == 1 or  WorkingRangeLen == 4) and ShockType != 'Normal':
+        Ref = []; inclinationCheck = True
+        
+        # generat the points
+        if SliceThickness > 10:              Pnts = np.linspace(0, SliceThickness, 10)
+        elif SliceThickness > 2 and SliceThickness <= 10: Pnts = range(SliceThickness)
+        else: 
+            print('escaping the shock angle checking... \nSlice thickness is not sufficient for check the shock angle')
+            return Ref, 0, False
+        
+        self.LineDraw(self.clone, 'Inc', 3)                
+        HalfSliceWidth = int(CheckingRange/2) 
+        if len(self.Reference) < 4: 
+            print('Reference lines is not sufficient!')
+            sys.exit()
+        
+        # Define the estimated shock line using 2 points P1, P2 --> User defined
+        P1 = (int(self.Reference[3][0][0]), int(self.Reference[3][0][1]))            
+        LineSlope = self.Reference[3][2]
+        
+        # Define the shock domain of tracking ** the line upstream
+        P1Up = (P1[0] - HalfSliceWidth, P1[1])
+        aUp = P1Up[1] - LineSlope*P1Up[0] # y-intercept
+        P1Up,P2Up,m,a = self.InclinedLine(P1Up, slope = LineSlope, imgShape=imgShape)            
+        cv2.line(self.clone, P1Up, P2Up, (0,0,255), 1)
+        
+        # Define the shock domain of tracking ** the line downstream
+        P1Down = (P1[0] + HalfSliceWidth, P1[1])
+        aDown = P1Down[1] - self.Reference[3][2]*P1Down[0] # y-intercept
+        P1Down,P2Down,m,a = self.InclinedLine(P1Down, slope = LineSlope, imgShape=imgShape) 
+        cv2.line(self.clone, P1Down, P2Down, (0,0,255), 1)
+        
+        pointTranslation = H_line-Ht
+        for i in Pnts: 
+            y_i = int(i+pointTranslation)
             
-            # generat the points
-            if SliceThickness > 10:              Pnts = np.linspace(0, SliceThickness, 10)
-            elif SliceThickness > 2 and SliceThickness <= 10: Pnts = range(SliceThickness)
-            else: 
-                print('escaping the shock angle checking... \nSlice thickness is not sufficient for check the shock angle')
-                return Ref
-            
-            self.LineDraw(self.clone, 'Inc', 3)                
-            HalfSliceWidth = int(WorkingRange[0]/2) 
-            if len(self.Reference) < 3: 
-                print('Reference lines is not sufficient!')
-                sys.exit()
-            
-            # Define the estimated shock line using 2 points P1, P2 --> User defined
-            P1 = (int(self.Reference[3][0][0]), int(self.Reference[3][0][1]))            
-            LineSlope = self.Reference[3][2]
-            
-            # Define the shock domain of tracking ** the line upstream
-            P1Up = (P1[0] - HalfSliceWidth, P1[1])
-            aUp = P1Up[1] - LineSlope*P1Up[0] # y-intercept
-            P1Up,P2Up,m,a = self.InclinedLine(P1Up, slope = LineSlope, imgShape=imgShape)            
-            cv2.line(self.clone, P1Up, P2Up, (0,0,255), 1)
-            
-            # Define the shock domain of tracking ** the line downstream
-            P1Down = (P1[0] + HalfSliceWidth, P1[1])
-            aDown = P1Down[1] - self.Reference[3][2]*P1Down[0] # y-intercept
-            P1Down,P2Down,m,a = self.InclinedLine(P1Down, slope = LineSlope, imgShape=imgShape) 
-            cv2.line(self.clone, P1Down, P2Down, (0,0,255), 1)
-            
-            pointTranslation = H_line-Ht
-            for i in Pnts: 
-                y_i = int(i+pointTranslation)
-                
-                if self.Reference[3][2] != 0: x_i1 = int((i+pointTranslation-aUp)/self.Reference[3][2])
-                
-                cv2.circle(self.clone, (x_i1,y_i), radius=3, color=(0, 0, 255), thickness=-1)
-                
+            if self.Reference[3][2] != 0 and self.Reference[3][2] != np.inf: 
+                x_i1 = int((i+pointTranslation-aUp)/self.Reference[3][2])
                 x_i2 = int((i+pointTranslation-aDown)/self.Reference[3][2])
-                cv2.circle(self.clone, (x_i2,y_i), radius=3, color=(0, 0, 255), thickness=-1)                
-                Ref.append([[x_i1,x_i2],y_i])
-        return Ref, len(Pnts)
+            elif self.Reference[3][2] == np.inf: 
+                x_i1 = P1[0] - HalfSliceWidth; x_i2 = P1[0] + HalfSliceWidth
+            elif self.Reference[3][2] == 0: 
+                print('Software is not supporting horizontal shock waves, aborting...')
+                sys.exit()
+                
+            cv2.circle(self.clone, (x_i1,y_i), radius=3, color=(0, 0, 255), thickness=-1)
+            
+            cv2.circle(self.clone, (x_i2,y_i), radius=3, color=(0, 0, 255), thickness=-1)                
+            Ref.append([[x_i1,x_i2],y_i])
+        return Ref, len(Pnts), inclinationCheck 
     
     def InclinedShockTracking(self, imgSet, nSlices, Ref,
                               nReview = 0, CheckSolutionTime = False, OutputDirectory = ''):
@@ -445,8 +452,8 @@ class SOA:
         return AvgAngleGlob/count, AvgSlope/count, AvgMidLoc/count
                            
     def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False,
-                              OutputDirectory = '',comment='', SliceThickness = 0, ShockType = 'Normal', 
-                              nt = -1, Mode = -1, ShockAngleSamples = 30, AngleSamplesReview = 10):
+                              OutputDirectory = '',comment='', SliceThickness = 0, nt = -1, Mode = -1,
+                               ShockAngleSamples = 30, AngleSamplesReview = 10):
         # This function is importing a seuqnce of image to perform single horizontal line shock wave analysis
         # for efficient and optimizied analysis the function extract only one pixel slice from each image
         # defined by the user and append one to another and finally generates a single image where each raw 
@@ -465,7 +472,7 @@ class SOA:
         # .......................... slices list will not be stored  (Default: '')
         # Outputs: openCV image slices list, number of slices, horizontal slice location on the image [pixels]
         img_list=[]
-        n = 0; o = 0
+        n = 0; o = 0; inclinationCheck = False
         # Find all files in the directory with the sequence and sorth them by name
         files = sorted(glob.glob(path))
         n1 = len(files)
@@ -515,8 +522,14 @@ class SOA:
                 cv2.line(self.clone, (0,H_line+Ht), (shp[1],H_line+Ht), (0, 128, 255), 1)
                 cv2.line(self.clone, (0,H_line-Ht), (shp[1],H_line-Ht), (0, 128, 255), 1)
                 
-            print('Shock inclination test')
-            Ref, nSlices = self.InclinedShockCheck(WorkingRange, H_line, ShockType, SliceThickness, shp)    
+            if len(WorkingRange) == 1:
+                print('Shock inclination test')
+                Ref, nSlices, inclinationCheck = self.InclinedShockCheck(WorkingRange[0], H_line, SliceThickness, shp)
+
+            elif len(WorkingRange) == 4:
+                print('Shock inclination test')
+                Ref, nSlices, inclinationCheck = self.InclinedShockCheck(WorkingRange[4], H_line, SliceThickness, shp)
+
                 
             cv2.imshow(self.LineName[2], self.clone)
             cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
@@ -526,86 +539,80 @@ class SOA:
             elif Mode > 0 and nt > 0: n1 = int(nt/Mode)
             elif Mode > 0 and nt < 0: n1 = int(len(files)/Mode)
             else: n1 = nt
-            
-            print('Shock inclination estimate ... ')
-            randomIndx=[]
-            if n1 >= 50: NSamples = 50
-            else:  NSamples = n1
-            
-            k = 0
-            while k < NSamples:
-               r =random.randint(0,n1) # ....................................... generating a random number in the range 1 to 100
-               # checking whether the generated random number is not in the randomList
-               if r not in randomIndx: 
-                   randomIndx.append(r) # ................. appending the random number to the resultant list, if the condition is true
-                   k += 1
-            
-            samplesList = []; k = 0
-            for indx in randomIndx:
-                with open(files[indx]):
-                    Sample = cv2.imread(files[indx])
-                    # check if the image on grayscale or not and convert if not
-                    if len(Sample.shape) > 2: Sample = cv2.cvtColor(Sample, cv2.COLOR_BGR2GRAY)
-                    samplesList.append(Sample)
-                k += 1
-                sys.stdout.write('\r')
-                sys.stdout.write("[%-20s] %d%%" % ('='*int(k/(NSamples/20)), int(5*k/(NSamples/20))))
-                sys.stdout.flush()
-            print('')   
+            if inclinationCheck:
+                print('Shock inclination estimate ... ')
+                randomIndx=[]
+                if n1 < ShockAngleSamples: 
+                    ShockAngleSamples = n1
+                    print('ShockAngleSamples should not be more than number of files, number of files will be only considered')
+
+                k = 0
+                while k < ShockAngleSamples:
+                   r =random.randint(0,n1) # ....................................... generating a random number in the range 1 to 100
+                   # checking whether the generated random number is not in the randomList
+                   if r not in randomIndx: 
+                       randomIndx.append(r) # ................. appending the random number to the resultant list, if the condition is true
+                       k += 1
+                
+                samplesList = []; k = 0
+                for indx in randomIndx:
+                    with open(files[indx]):
+                        Sample = cv2.imread(files[indx])
+                        # check if the image on grayscale or not and convert if not
+                        if len(Sample.shape) > 2: Sample = cv2.cvtColor(Sample, cv2.COLOR_BGR2GRAY)
+                        samplesList.append(Sample)
+                    k += 1
+                    sys.stdout.write('\r')
+                    sys.stdout.write("[%-20s] %d%%" % ('='*int(k/(ShockAngleSamples/20)), int(5*k/(ShockAngleSamples/20))))
+                    sys.stdout.flush()
+                print('')   
             
 
-            if AngleSamplesReview < NSamples: NSamplingReview = AngleSamplesReview
-            else:
-                NSamplingReview = NSamples
-                print('Warning: Numper of samples is larger than requested to review, all samples will be reviewed')
+                if AngleSamplesReview < ShockAngleSamples: NSamplingReview = AngleSamplesReview
+                else:
+                    NSamplingReview = ShockAngleSamples
+                    print('Warning: Number of samples is larger than requested to review, all samples will be reviewed')
             
                 
-            AvgAngleGlob, AvgSlopeGlob, AvgShockLocGlob = self.InclinedShockTracking(samplesList, nSlices, Ref, 
-                                                                                     nReview = NSamplingReview, 
-                                                                                     OutputDirectory = OutputDirectory)
-            print('Average inclination angle {:.2f} deg'.format(AvgAngleGlob))
-            P1Avg, P2Avg, mAvg, aAvg = self.InclinedLine((AvgShockLocGlob, H_line), slope = AvgSlopeGlob, imgShape = shp)
-            cv2.line(self.clone, P1Avg, P2Avg, (255, 0, 255), 1)
-                        
-            newAvgSlope = -(1/AvgSlopeGlob)
-            
-            P1S, P2S, mS, aS = self.InclinedLine((AvgShockLocGlob, H_line), slope = newAvgSlope, imgShape = shp)
-            cv2.line(self.clone, P1S, P2S, (255, 255, 0), 1)
-            
-            M = cv2.getRotationMatrix2D((AvgShockLocGlob, H_line), 90-AvgAngleGlob, 1.0)
-            NewImg = cv2.warpAffine(img, M, (shp[1],shp[0]))
-            
-            cv2.line(NewImg, (0,H_line-Ht), (shp[1],H_line-Ht), (255, 128, 0), 1)
-            cv2.line(NewImg, (0,H_line+Ht), (shp[1],H_line+Ht), (255, 128, 0), 1)
-            cv2.line(NewImg, (0,H_line), (shp[1],H_line), (255, 128, 255), 1)
-            cv2.line(NewImg, (round(AvgShockLocGlob),0), (round(AvgShockLocGlob),shp[0]), (255,255,0), 1)
-            cv2.line(NewImg, (self.Reference[0],0), (self.Reference[0],shp[0]), (0,255,0), 1)
-            cv2.line(NewImg, (self.Reference[1],0), (self.Reference[1],shp[0]), (0,255,0), 1)
-            
-            # NewSTP1 = () # New slice thickness point 1 (upper range)
-            # NewSTP1 += ((AvgShockLocGlob + Ht*np.cos(AvgAngleGlob*np.pi/180)),)
-            # NewSTP1 += ((mAvg*NewSTP1[0]+aAvg),)
-            
-            # print(Ht,int(np.sqrt((NewSTP1[0]-AvgShockLocGlob)**2 + (NewSTP1[1]-H_line)**2)))
-            # cv2.circle(self.clone, NewSTP1, radius=3, color=(0, 255, 255), thickness=-1)
-            
-            
-            cv2.imshow(self.LineName[2], NewImg)
-            cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
+                AvgAngleGlob, AvgSlopeGlob, AvgShockLocGlob = self.InclinedShockTracking(samplesList, nSlices, Ref, 
+                                                                                         nReview = NSamplingReview, 
+                                                                                         OutputDirectory = OutputDirectory)
+                print('Average inclination angle {:.2f} deg'.format(AvgAngleGlob))
+                P1Avg, P2Avg, mAvg, aAvg = self.InclinedLine((AvgShockLocGlob, H_line), slope = AvgSlopeGlob, imgShape = shp)
+                cv2.line(self.clone, P1Avg, P2Avg, (255, 0, 255), 1)
+                            
+                newAvgSlope = -(1/AvgSlopeGlob)
+                
+                P1S, P2S, mS, aS = self.InclinedLine((AvgShockLocGlob, H_line), slope = newAvgSlope, imgShape = shp)
+                cv2.line(self.clone, P1S, P2S, (255, 255, 0), 1)
+                
+                M = cv2.getRotationMatrix2D((AvgShockLocGlob, H_line), 90-AvgAngleGlob, 1.0)
+                NewImg = cv2.warpAffine(img, M, (shp[1],shp[0]))
+                
+                cv2.line(NewImg, (0,H_line-Ht), (shp[1],H_line-Ht), (255, 128, 0), 1)
+                cv2.line(NewImg, (0,H_line+Ht), (shp[1],H_line+Ht), (255, 128, 0), 1)
+                cv2.line(NewImg, (0,H_line), (shp[1],H_line), (255, 128, 255), 1)
+                cv2.line(NewImg, (round(AvgShockLocGlob),0), (round(AvgShockLocGlob),shp[0]), (255,255,0), 1)
+                cv2.line(NewImg, (self.Reference[0],0), (self.Reference[0],shp[0]), (0,255,0), 1)
+                cv2.line(NewImg, (self.Reference[1],0), (self.Reference[1],shp[0]), (0,255,0), 1)
+
+                cv2.imshow(self.LineName[2], NewImg)
+                cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
             
             if len(OutputDirectory) > 0:
                 if len(comment) > 0:
-                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+comment+'.png'
+                    self.outputPath = OutputDirectory+'\\RefDomain-'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+comment+'.png'
                 else:
                     now = datetime.now()
                     now = now.strftime("%d%m%Y%H%M")
                     self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+str(SliceThickness)+'_slice'+now+'.png'
-                cv2.imwrite(self.outputPath, NewImg)
+                if inclinationCheck: cv2.imwrite(self.outputPath, NewImg)
+                else: cv2.imwrite(self.outputPath, self.clone)
             
             if FullImWidth: 
                 WorkingRange = [0,shp[1],H_line]
                 print ('scaling lines:', [self.Reference[0],self.Reference[1],H_line])
-            elif WorkingRangeLen < 1: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
+            elif WorkingRangeLen < 2: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
             print('working range is: ', WorkingRange)
             
             
@@ -614,8 +621,9 @@ class SOA:
                 if o%Mode == 0 and n < n1:
                     with open(name):
                         img = cv2.imread(name)
-                        if AvgAngleGlob != 90: img = cv2.warpAffine(img, M, (shp[1],shp[0]))
                         if SliceThickness > 0:
+                            if inclinationCheck: 
+                                img = cv2.warpAffine(img, M, (shp[1],shp[0]))
                             cropped_image = np.zeros([1,WorkingRange[1]-WorkingRange[0],3])
                             for i in range(SliceThickness): cropped_image += img[WorkingRange[2]-(Ht+1)+i:WorkingRange[2]-Ht+i,WorkingRange[0]:WorkingRange[1]]
                             cropped_image /= SliceThickness
@@ -626,7 +634,6 @@ class SOA:
                     n += 1
                     sys.stdout.write('\r')
                     sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n1/20)), int(5*n/(n1/20))))
-                    sys.stdout.flush()
                 o += 1
             print('')
             ImgList = cv2.vconcat(img_list)
@@ -733,7 +740,6 @@ class SOA:
             count += 1
             sys.stdout.write('\r')
             sys.stdout.write("[%-20s] %d%%" % ('='*int(count/(nShoots/20)), int(5*count/(nShoots/20))))
-            sys.stdout.flush()
         print('')
             
         # for pnt in uncertain:
