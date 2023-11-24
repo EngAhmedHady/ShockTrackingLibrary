@@ -336,6 +336,7 @@ class SOA:
         return minLoc, certainLoc, reason                    
     
     def InclinedShockCheck(self, CheckingRange, H_line, SliceThickness, imgShape):
+        print('Shock inclination test')
         Ht = int(SliceThickness/2)
         Ref = []; inclinationCheck = True
         
@@ -452,8 +453,8 @@ class SOA:
         return AvgAngleGlob/count, AvgSlope/count, AvgMidLoc/count
                            
     def ImportSchlierenImages(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False,
-                              OutputDirectory = '',comment='', SliceThickness = 0, nt = -1, Mode = -1,
-                               ShockAngleSamples = 30, AngleSamplesReview = 10):
+                              SliceThickness = 0, nt = -1, Mode = -1, ShockAngleSamples = 30, AngleSamplesReview = 10,
+                              OutputDirectory = '',comment=''):
         # This function is importing a seuqnce of image to perform single horizontal line shock wave analysis
         # for efficient and optimizied analysis the function extract only one pixel slice from each image
         # defined by the user and append one to another and finally generates a single image where each raw 
@@ -523,16 +524,14 @@ class SOA:
                 cv2.line(self.clone, (0,H_line-Ht), (shp[1],H_line-Ht), (0, 128, 255), 1)
                 
             if len(WorkingRange) == 1:
-                print('Shock inclination test')
                 Ref, nSlices, inclinationCheck = self.InclinedShockCheck(WorkingRange[0], H_line, SliceThickness, shp)
-
             elif len(WorkingRange) == 4:
-                print('Shock inclination test')
                 Ref, nSlices, inclinationCheck = self.InclinedShockCheck(WorkingRange[4], H_line, SliceThickness, shp)
-
                 
-            cv2.imshow(self.LineName[2], self.clone)
-            cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
+
+            if len(WorkingRange) < 3:    
+                cv2.imshow(self.LineName[2], self.clone)
+                cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
                 
                         
             if  nt == -1 and Mode == -1: n1 = len(files)    
@@ -564,7 +563,6 @@ class SOA:
                     k += 1
                     sys.stdout.write('\r')
                     sys.stdout.write("[%-20s] %d%%" % ('='*int(k/(ShockAngleSamples/20)), int(5*k/(ShockAngleSamples/20))))
-                    sys.stdout.flush()
                 print('')   
             
 
@@ -578,13 +576,6 @@ class SOA:
                                                                                          nReview = NSamplingReview, 
                                                                                          OutputDirectory = OutputDirectory)
                 print('Average inclination angle {:.2f} deg'.format(AvgAngleGlob))
-                P1Avg, P2Avg, mAvg, aAvg = self.InclinedLine((AvgShockLocGlob, H_line), slope = AvgSlopeGlob, imgShape = shp)
-                cv2.line(self.clone, P1Avg, P2Avg, (255, 0, 255), 1)
-                            
-                newAvgSlope = -(1/AvgSlopeGlob)
-                
-                P1S, P2S, mS, aS = self.InclinedLine((AvgShockLocGlob, H_line), slope = newAvgSlope, imgShape = shp)
-                cv2.line(self.clone, P1S, P2S, (255, 255, 0), 1)
                 
                 M = cv2.getRotationMatrix2D((AvgShockLocGlob, H_line), 90-AvgAngleGlob, 1.0)
                 NewImg = cv2.warpAffine(img, M, (shp[1],shp[0]))
@@ -594,11 +585,21 @@ class SOA:
                 cv2.line(NewImg, (0,H_line), (shp[1],H_line), (255, 128, 255), 1)
                 cv2.line(NewImg, (round(AvgShockLocGlob),0), (round(AvgShockLocGlob),shp[0]), (255,255,0), 1)
                 cv2.line(NewImg, (self.Reference[0],0), (self.Reference[0],shp[0]), (0,255,0), 1)
-                cv2.line(NewImg, (self.Reference[1],0), (self.Reference[1],shp[0]), (0,255,0), 1)
-
+                cv2.line(NewImg, (self.Reference[1],0), (self.Reference[1],shp[0]), (0,255,0), 1)                
                 cv2.imshow(self.LineName[2], NewImg)
                 cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
-            
+            elif WorkingRangeLen > 4:
+                inclinationCheck = True
+                print('Average inclination angle {:.2f} deg'.format(90-WorkingRange[3]))
+                M = cv2.getRotationMatrix2D(WorkingRange[4], WorkingRange[3], 1.0)
+                NewImg = cv2.warpAffine(img, M, (shp[1],shp[0]))
+                cv2.line(NewImg, (0,H_line-Ht), (shp[1],H_line-Ht), (255, 128, 0), 1)
+                cv2.line(NewImg, (0,H_line+Ht), (shp[1],H_line+Ht), (255, 128, 0), 1)
+                cv2.line(NewImg, (0,H_line), (shp[1],H_line), (255, 128, 255), 1)
+                cv2.line(NewImg, (round(90-WorkingRange[4][0]),0), (round(90-WorkingRange[4][0]),shp[0]), (255,255,0), 1)
+                cv2.line(NewImg, (WorkingRange[0],0), (WorkingRange[0],shp[0]), (0,255,0), 1)
+                cv2.line(NewImg, (WorkingRange[1],0), (WorkingRange[1],shp[0]), (0,255,0), 1)
+                
             if len(OutputDirectory) > 0:
                 if len(comment) > 0:
                     self.outputPath = OutputDirectory+'\\RefDomain-'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+comment+'.png'
@@ -610,11 +611,19 @@ class SOA:
                 else: cv2.imwrite(self.outputPath, self.clone)
             
             if FullImWidth: 
-                WorkingRange = [0,shp[1],H_line]
+                if WorkingRangeLen == 1: 
+                    WorkingRange = [0,shp[1],H_line, 90-AvgAngleGlob, (round(AvgShockLocGlob), H_line)]
+                elif WorkingRangeLen < 4:   
+                    WorkingRange = [0,shp[1],H_line]
+                else:
+                    WorkingRange = [0,shp[1],H_line, WorkingRange[3], WorkingRange[4]]
                 print ('scaling lines:', [self.Reference[0],self.Reference[1],H_line])
-            elif WorkingRangeLen < 2: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
-            print('working range is: ', WorkingRange)
+            elif WorkingRangeLen < 2: 
+                if WorkingRangeLen == 1: 
+                    WorkingRange = [self.Reference[0],self.Reference[1],H_line, 90-AvgAngleGlob, (round(AvgShockLocGlob), H_line)]
+                else: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
             
+            print('working range is: ', WorkingRange)
             
             print('Importing images ... ')
             for name in files:
