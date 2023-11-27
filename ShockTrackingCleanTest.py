@@ -15,13 +15,15 @@ from scipy import signal
 
 f = 15000
 D = 80      # distance in mm
-HLP = 7     # Horizontal line position [slice location to a reference line]
-Scale = 0.12944983818770225
+HLP = 5   # Horizontal line position [slice location to a reference line]
+Scale = 0.12987012987012986
+SliceThickness = 80
 n = 0;
 # imgPath = 'C:\\Users\\Hady-PC\\Desktop\\PhD\\Schlieren\\2kHz_2_20220729\\*.png'
-imgPath = '*.png'
+# imgPath = '*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
-# imgPath = 'D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Half Open\\2022_11_24 - half opend without 3rd plate - NoSuction\\2.5kHz\\*.png'
+# imgPath = 'D:\\TFAST\\TEAMAero experiments\\Reference Case data\\2022_07_29_FastShileren\\5kHz\\*.png'
+imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\15kHz_smooth P1_4.5sec (Test 9)\\*.png'
 # imgPath = 'D:\\TFAST\TEAMAero experiments\\2023_05_10\\Smooth-2kHz-5sec (test 5)\\*.png'
 # CaseName = '17suc-ReflecEff-Leading'
 CaseName = 'Ref'
@@ -34,16 +36,20 @@ NewFileDirectory = os.path.join(FileDirectory, "shock_signal")
 if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
 
 SA = SOA(f,D)
-# ShockwaveRegion ,n ,H_line, Scale = SA.ImportSchlierenImages(imgPath,
-#                                                               HLP = HLP,
-#                                                               FullImWidth = True,
-#                                                               ScalePixels= True,
-#                                                               OutputDirectory = NewFileDirectory,
-#                                                               SliceThickness = 35,
-#                                                               comment = 'ts_35_slice')
+ShockwaveRegion ,n ,H_line, Scale = SA.ImportSchlierenImages(imgPath,
+                                                              HLP = HLP,
+                                                              FullImWidth = False,
+                                                              ScalePixels= True,
+                                                              OutputDirectory = NewFileDirectory,
+                                                              SliceThickness = SliceThickness,
+                                                              WorkingRange = [80],
+                                                              nt = -1,
+                                                              ShockAngleSamples = 1000,
+                                                              AngleSamplesReview = 10,
+                                                              comment = '-')
 
 # ImgList = cv2.imread(NewFileDirectory+'\\2.0kHz_50mm_0.1360544217687075mm-px_ts_10_slice.png')
-File = 'P4_' +str(f/1000)+'kHz_'+str(HLP)+'mm_'+str(Scale)+'mm-px_ts_35_slice.png'
+File = str(f/1000)+'kHz_'+str(HLP)+'mm_'+str(Scale)+'mm-px_ts_'+str(SliceThickness)+'_slice-.png'
 
 print(NewFileDirectory+'\\'+File)
 if os.path.exists(NewFileDirectory+'\\'+File): ImgList = cv2.imread(NewFileDirectory+'\\'+File)
@@ -60,7 +66,7 @@ else:
     
 # or (Spacify x location of 2 vertical lines)
 # NewRef = [262, 520]
-NewRef = [262, 480]
+NewRef = [260, 430]
 
 ShockwaveRegion = ImgList[:,NewRef[0]:NewRef[1]]
 xPixls = (NewRef[1]-NewRef[0])
@@ -95,7 +101,7 @@ ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion,
 #                     [defult is [0,0] which mean notheing to review]
 #                  3- Signalfilter: ['median','Wiener','med-Wiener']
 ShockLocation, Uncer = SA.FindTheShockwaveImproved(ShockwaveRegion, 
-                                                   reviewInterval = [0,3], 
+                                                   reviewInterval = [0,0], 
                                                    Signalfilter = 'med-Wiener')
 # print(Uncer)
 print('uncertainty ratio:', round((len(Uncer)/len(ShockLocation))*100,2),'%')

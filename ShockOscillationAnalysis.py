@@ -738,7 +738,6 @@ class SOA:
             else: Plot = False
             if len(ShockLocation) > 0: LastShockLocation = ShockLocation[-1]
             else :
-                print(count)
                 LastShockLocation = -1
             minLoc, certain, reason = self.ShockTraking(SnapshotSlice, 
                                                 LastShockLoc = LastShockLocation, 
