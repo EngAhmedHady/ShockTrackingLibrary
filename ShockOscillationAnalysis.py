@@ -607,7 +607,9 @@ class SOA:
                     now = datetime.now()
                     now = now.strftime("%d%m%Y%H%M")
                     self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+str(SliceThickness)+'_slice'+now+'.png'
-                if inclinationCheck: cv2.imwrite(self.outputPath, NewImg)
+                if inclinationCheck: 
+                    cv2.imwrite(self.outputPath, NewImg)
+                    cv2.imwrite(self.outputPath, self.clone)
                 else: cv2.imwrite(self.outputPath, self.clone)
             
             if FullImWidth: 
@@ -672,6 +674,7 @@ class SOA:
         return Newimg
         
     def CleanIlluminationEffects(self, img, Spectlocation = [0, 233], D = 10, n=10, ShowIm = False ):
+        if len(img.shape) > 2: img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         dft = cv2.dft(np.float32(img),flags = cv2.DFT_COMPLEX_OUTPUT)
         magnitude_spectrum = np.fft.fftshift(dft)
         imShp = magnitude_spectrum.shape
@@ -681,9 +684,9 @@ class SOA:
             fig, ax = plt.subplots(figsize=(30,20))
             spectrum_im = 20*np.log(np.abs(magnitude_spectrum)+1)
             im = ax.imshow(spectrum_im[:,:,0])
-            ax.set_ylim([int(y/2)-20,int(y/2)+Spectlocation[1]+50])
-            fig.colorbar(im)
-            ax.set_title('Row Image FFT')
+            ax.set_ylim([int(y/2)-20,int(y/2)+Spectlocation[1]+147])
+            # fig.colorbar(im)
+            # ax.set_title('Row Image FFT')
 
         LowpassFilter = np.ones([imShp[0],imShp[1],2])
               
@@ -703,9 +706,9 @@ class SOA:
             fig, ax = plt.subplots(figsize=(30,20))
             CleanFFT_im = 20*np.log(np.abs(CleanFFT)+1)
             im = ax.imshow(CleanFFT_im[:,:,0])
-            ax.set_ylim([int(y/2)-20,int(y/2)+Spectlocation[1]+50])
-            ax.set_title('Cleaned Image FFT')
-            fig.colorbar(im)
+            ax.set_ylim([int(y/2)-20,int(y/2)+Spectlocation[1]+147])
+            # ax.set_title('Cleaned Image FFT')
+            # fig.colorbar(im)
             
         f_ishift = np.fft.ifftshift(CleanFFT)
         img_back = cv2.idft(f_ishift)

@@ -31,9 +31,9 @@ ShockwaveRegion ,n ,H_line, Scale = SA.ImportSchlierenImages(imgPath,
                                                              ScalePixels= True,
                                                              OutputDirectory = NewFileDirectory,
                                                              SliceThickness = 60,
-                                                             WorkingRange = [70],
-                                                             nt = 100,
-                                                             ShockAngleSamples = 200,
+                                                             WorkingRange = [80],
+                                                             nt = 5000,
+                                                             ShockAngleSamples = 1000,
                                                              AngleSamplesReview = 10,
                                                              comment = '-')
 
