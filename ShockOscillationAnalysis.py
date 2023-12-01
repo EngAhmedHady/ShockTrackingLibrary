@@ -3,7 +3,7 @@
 """
 Created on Tue Dec 20 09:32:30 2022
 
-@author: Ahmed Hady
+@author: Ahmed H. Hanfy
 """
 
 import cv2
@@ -16,6 +16,7 @@ import sys
 import time
 import random
 from sklearn.linear_model import LinearRegression
+from __linedrawingfunctions import LineDraw
 px = 1/plt.rcParams['figure.dpi']
 plt.rcParams.update({'font.size': 30})
 plt.rcParams["text.usetex"] =  True
@@ -39,13 +40,7 @@ class SOA:
         self.LineName = ["First Reference Line (left)",
                          "Second Reference Line (right)",
                          "Horizontal Reference Line",
-                         "estimated shock location"] 
-    
-    def XCheck(self,x,Shp,slope,a):
-        if   x >= 0 and x <= Shp[1]:                           p2 = (x, Shp[0])
-        elif x >= 0 and x >  Shp[1]: y2 = int(Shp[1]*slope+a); p2 = (Shp[1],y2)
-        elif x <  0 and x <= Shp[1]: y2 = int(a);              p2 = (0,y2)
-        return p2    
+                         "estimated shock location"]     
     
     def TimeCalculation(self, timeInSec):
         if timeInSec > 60: 
@@ -61,279 +56,8 @@ class SOA:
                 print("Total run time: %s Min, %s Sec" % (Min,round(sec)))
         else: print("Total run time:  %s Sec" % round(timeInSec))
         
-    def InclinedLine(self,P1, P2 = (), slope = None, imgShape = ()):
-        # Generates the inclind line equation from two points or one point,slope 
-        # The image boundary/shape should be given
-        # inputs : P1       => first point tuple (a1,b1)
-        # ........ P2       => second point tuple (a2,b2)
-        # ........ slope    => second point tuple (a2,b2)
-        # ........ imgShape => image size (y-length 'Number of raws', x-length'Number of columns')
-        # outputs: - first boundary point tuple
-        # ........ - second boundary point tuple
-        # ........ - line slope  (equal to zero in case of vertical or horizontal)
-        # ........ - y-intersept (equal to zero in case of vertical or horizontal)
-        if len(imgShape) < 1: 
-            print('Image shape is not provided, program aborting ...')
-            sys.exit()
-            
-        if len(P2) > 0 and slope is None:
-            dx = P1[0]-P2[0];   dy = P1[1]-P2[1]
-            if dx != 0: slope = dy/dx
-        elif len(P2) == 0 and slope is np.inf: dx = 0;
-        else: dx = -1 
-        
-            
-        if slope != 0 and slope is not None and slope is not np.inf:
-            a = P1[1] - slope*P1[0]
-            Xmax = int((imgShape[0]-a)/slope)
-            Xmin = int(-a/slope)
-            if   Xmin >= 0 and Xmin <= imgShape[1]:
-                p1 = (Xmin,0)
-                p2 = self.XCheck(Xmax,imgShape,slope,a)
-            elif Xmin >= 0 and Xmin >  imgShape[1]:
-                y = int(imgShape[1]*slope+a)
-                p1 = (imgShape[1],y)
-                p2 = self.XCheck(Xmax,imgShape,slope,a)
-            else:
-                y1 = int(a);
-                p1 = (0,y1)
-                p2 = self.XCheck(Xmax,imgShape,slope,a)
-            return p1, p2, slope, a
-        elif dx == 0:
-            return (P1[0],0), (P1[0],imgShape[0]), np.Inf, 0 
-        else:
-            return (0,P1[1]), (imgShape[1],P1[1]), 0, 0   
     
-    def extract_coordinates(self, event, x, y, flags, parameters):
-        # Record starting (x,y) coordinates on left mouse button click and draw
-        # line that cross allover the image and store it in a global variable in case
-        # of Horizontal or Vertical lines it takes the average between points
-        # Drawing steps: 1- push the left mouse on the first point
-        # .............. 2- pull the mouse cursor to the second point
-        # .............. 3- the software will draw a thick red line (indecating the mouse locations)
-        # ................. and green line indecating the generated averaged line 
-        # .............. 4- to confrim press left click anywhere on the image, or
-        # ................. to delete the line press right click anywhere on the image
-        # .............. 5- press anykey to proceed
-        
-        if event == cv2.EVENT_LBUTTONDOWN:
-            self.ClickCount += 1
-            if len(self.TempLine) == 2: 
-                self.line_coordinates = self.TempLine;
-            elif len(self.TempLine) == 0: self.TempLine = [(x,y)]
-            
-        # Record ending (x,y) coordintes on left mouse bottom release
-        elif event == cv2.EVENT_LBUTTONUP: 
-            if len(self.TempLine) < 2:
-                self.TempLine.append((x,y))
-                # print('Starting: {}, Ending: {}'.format(self.TempLine[0], self.TempLine[1]))
-                
-                # Draw temprary line
-                cv2.line(self.Temp, self.TempLine[0], self.TempLine[1], (0,0,255), 2)
-                if parameters[2] == 'V':
-                    avg = int((self.TempLine[0][0]+self.TempLine[1][0])/2)
-                    cv2.line(self.Temp, (avg,0), (avg,parameters[1]), (0,255,0), 1)
-                elif parameters[2] == 'H':
-                    avg = int((self.TempLine[0][1]+self.TempLine[1][1])/2)
-                    cv2.line(self.Temp, (0,avg), (parameters[1],avg), (0,255,255), 1)
-                elif parameters[2] == 'Inc':
-                    P1,P2,m,a = self.InclinedLine(self.TempLine[0],self.TempLine[1],imgShape = parameters[1])
-                    cv2.line(self.Temp, P1, P2, (0,255,0), 1)
-                    
-                cv2.imshow(parameters[0], self.Temp)
-            elif self.ClickCount == 2:
-                   
-                self.Temp = self.clone.copy()
-                cv2.imshow(parameters[0], self.clone)
-                # storing the vertical line
-                if parameters[2] == 'V':
-                    avg = int((self.line_coordinates[0][0]+self.line_coordinates[1][0])/2)
-                    cv2.line(self.Temp, (avg,0), (avg,parameters[1]), (0,255,0), 1)
-                
-                # storing the Horizontal line
-                elif parameters[2] == 'H':
-                    avg = int((self.line_coordinates[0][1]+self.line_coordinates[1][1])/2)
-                    cv2.line(self.Temp, (0,avg), (parameters[1],avg), (0,255,255), 1)
-                    
-                elif parameters[2] == 'Inc':
-                    P1,P2,m,a = self.InclinedLine(self.line_coordinates[0],self.line_coordinates[1],imgShape = parameters[1])
-                    cv2.line(self.Temp, P1, P2, (0,255,0), 1)
-                    avg = [P1, P2, m,a]
-                
-                    
-                self.Reference.append(avg)
-                self.clone = self.Temp.copy()
-                cv2.imshow(parameters[0], self.clone)
-                
-        # Delete draw line before storing    
-        elif event == cv2.EVENT_RBUTTONDOWN:
-            self.TempLine = []
-            if self.ClickCount>0: self.ClickCount -= 1
-            self.Temp = self.clone.copy()
-            cv2.imshow(parameters[0], self.Temp)
-               
-    def LineDraw(self, img, lineType, LineNameInd, Intialize = False):
-        # This function drive the extract_coordinates fucntion to draw lines 
-        # Inputs: img         => is a single openCV image
-        # ....... lineType    => 'V'   -> Vertical line 'starts from top to bottom of the image'
-        # ...................... 'H'   -> Horizontal line 'starts from the left to the right'
-        # ...................... 'Inc' -> Inclind line 'not averaging take the exact selected points'
-        # ....... LineNameInd =>  Window title from the list 
-        # ....... Intialize   => to rest the values of Reference and line_coordinates for new line set
-        # ...................... True or False (Default: False)
-        # Outputs: croping limits or (line set) 
-        
-        self.clone = img.copy(); 
-        self.Temp = self.clone.copy();
-        self.TempLine = [];
-        self.ClickCount = 0
-        if Intialize:
-            self.Reference = []
-            self.line_coordinates = []
-        shp = img.shape
-        if   lineType == 'V':
-            prams = [self.LineName[LineNameInd],shp[0],lineType]
-        elif lineType == 'H':
-            prams = [self.LineName[LineNameInd],shp[1],lineType]
-        elif lineType == 'Inc':
-            prams = [self.LineName[LineNameInd],shp,lineType]
-            
-        cv2.imshow(self.LineName[LineNameInd], self.clone)
-        cv2.setMouseCallback(self.LineName[LineNameInd], self.extract_coordinates,prams)
-        # Wait until user press some key
-        cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
-        return self.Reference
-    
-    def ShockTraking(self, SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
-        # Start processing the slice
-        avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice   
-        MinimumPoint = min(SnapshotSlice) # ........... minimum (darkest) point
-        
-        if Plot: # to plot slice illumination values with location and Avg. line
-            fig, ax = plt.subplots(figsize=(10,5))
-            ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
-            ax.plot(SnapshotSlice); 
-            # ax.plot(AvgLocation,AvgIllumination,linestyle = '-.');
-        
-        # Initiating Variables 
-        MinA = 0 # ............................................... Minimum Area
-        Pixels = len(SnapshotSlice) # ............................. Slice width
-        localmin = [] # .............. Local Minimum set of illumination values
-        LocMinI = [] # ......................... Local Minimum set of Locations 
-        AeraSet = [] # ............................... local minimum areas list
-       
-        # Loop through the slice illumination values
-        for pixel in range(Pixels):
-            if SnapshotSlice[pixel] < avg: 
-            # find the local minimum and store illumination values and location
-                localmin.append(SnapshotSlice[pixel]); LocMinI.append(pixel)
-                
-                # find open local minimum at the end of the slice
-                if pixel == Pixels-1 and len(localmin) >1: 
-                    A = abs(np.trapz(avg-localmin))
-                    SetMinPoint = min(localmin)
-                    AeraSet.append(A)
-                    if Plot: ax.fill_between(LocMinI, localmin,avg , alpha=0.5)
-                    if A > MinA and SetMinPoint/MinimumPoint > 0.3: 
-                        MinA = A;   ShockRegion = [LocMinI,localmin]
-                    localmin = []; LocMinI = []
-            
-            # bounded local minimum
-            elif SnapshotSlice[pixel] >= avg and len(localmin) > 1: 
-                A = abs(np.trapz(avg-localmin))
-                SetMinPoint = min(localmin)
-                AeraSet.append(A)
-                if Plot:ax.fill_between(LocMinI, localmin,avg , alpha=0.5)                        
-                if A > MinA and SetMinPoint/MinimumPoint > 0.3:
-                    MinA = A;   ShockRegion = [LocMinI,localmin]
-                localmin = []; LocMinI = []
-                
-            else: localmin = [];  LocMinI = []
-        
-        # check if there is more than one valley in the local minimum
-        LocMinAvg = np.mean(ShockRegion[1])
-        if Plot: ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinAvg,LocMinAvg],'-.r')
-        
-        localmin2 = [] # .............................. sub-local minimum value
-        LocMinI2 = [] # ............................ sub-local minimum location
-        SubLocalMinSets = [] # ........ Sub-local minimum set [Location, Value]
-        n = 0 # ................ number of valleys in the sub-local minimum set
-        # if Plot: print(min(ShockRegion[1])/MinimumPoint)
-        for k in range(len(ShockRegion[1])):
-            # check all pixels lays under the valley average line
-            if ShockRegion[1][k] < LocMinAvg:
-                localmin2.append(ShockRegion[1][k]); LocMinI2.append(ShockRegion[0][k])
-            elif ShockRegion[1][k] >= LocMinAvg and len(localmin2) > 1:
-                SubLocalMinSets.append([LocMinI2,localmin2])
-                n += 1; localmin2 = []; LocMinI2 = []
-            else:
-                localmin2 = []; LocMinI2 = []
-        # uncertainity calculation
-        certainLoc = True
-        reason = ''
-        
-        # if there is more than one valley in the local minimum, 
-        # the closest to the preivous location will be choosen
-        if n > 1 and LastShockLoc > -1:
-            # The minimum distance between the sub-valley and last shock location
-            # initiated with the full lenght 
-            MinDis = Pixels;  
-            AreaSet2 = [] # ......................... Set of sub-local minimums
-            MaxArea2 = 0 # ................. minimum area in sub-local minimums
-            for SubLocalMinSet in SubLocalMinSets:
-                # calculating the area of the sub-valley
-                A2 = abs(np.trapz(LocMinAvg-SubLocalMinSet[1]))
-                AreaSet2.append(A2) # ........................ storing the area
-                if A2 > MaxArea2: MaxArea2 = A2 # ...... Check the minimum area
-                
-                # check the location of the minimum illumination point from last snapshot location and choose the closest
-                minValue = min(SubLocalMinSet[1]) # ........ find minimam illumination in the sub-set
-                minLoc = SubLocalMinSet[1].index(minValue) # find the location of the minimam illumination in the sub-set
-                
-                Distance = abs(LastShockLoc-SubLocalMinSet[0][minLoc])                
-                if Distance < MinDis: 
-                    MinDis = Distance;  ShockRegion = SubLocalMinSet
-                if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
-        elif n > 1 and LastShockLoc == -1: 
-            n = 1; 
-            certainLoc = False
-            reason = 'First pexil slice, No shock location history'
-        
-        
-        # Find the middel of the shock wave as middle point of RMS
-        LocMinRMS = avg-np.sqrt(np.mean(np.array(avg-ShockRegion[1])**2))
-        if Plot: 
-            ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinRMS,LocMinRMS],'-.k') 
-            ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='///') 
-            
-        shockLoc = [];
-        for elment in range(len(ShockRegion[1])):
-            if ShockRegion[1][elment] <= LocMinRMS: shockLoc.append(ShockRegion[0][elment])
-        minLoc = np.mean(shockLoc) 
-        
-        if Plot:
-            ax.axvline(minLoc, linestyle = '--', color = 'b')
-            if count > -1: ax.set_title(count)
-            if LastShockLoc > -1:
-                ax.axvline(LastShockLoc,linestyle = '--',color = 'orange')  
-        
-        for Area in AeraSet:
-            Ra = Area/MinA
-            if Ra > 0.6 and Ra < 1 and certainLoc:
-                certainLoc = False
-                reason = 'Almost equal Valleys'
-        
-        if n > 1 and certainLoc:
-            for Area in AreaSet2:
-                if MaxArea2 > 0: Ra = Area/MaxArea2
-                if Ra > 0.5 and Ra < 1 and certainLoc: certainLoc = False; reason = 'Almost equal sub-Valleys'   
-                if MaxArea2 !=  abs(np.trapz(LocMinAvg-ShockRegion[1])) and certainLoc: 
-                    certainLoc = False; reason = 'different sub-Valleys than smallest'
-        
-        if (not certainLoc) and Plot: 
-            ax.text(Pixels-130,0.55, 'uncertain: '+ reason, color = 'red', fontsize=14)
-            # ax.set_ylim([-1,1])
-        return minLoc, certainLoc, reason                    
+                        
     
     def InclinedShockCheck(self, CheckingRange, H_line, SliceThickness, imgShape):
         print('Shock inclination test')
@@ -347,7 +71,7 @@ class SOA:
             print('escaping the shock angle checking... \nSlice thickness is not sufficient for check the shock angle')
             return Ref, 0, False
         
-        self.LineDraw(self.clone, 'Inc', 3)                
+        LineDraw(self.clone, 'Inc', 3)                
         HalfSliceWidth = int(CheckingRange/2) 
         if len(self.Reference) < 4: 
             print('Reference lines is not sufficient!')
@@ -488,8 +212,8 @@ class SOA:
             # Defining the working range
             if WorkingRangeLen < 2:
                 # Vertical limits and scale 
-                self.LineDraw(img, 'V', 0)
-                self.LineDraw(self.clone, 'V', 1)
+                LineDraw(self, img, 'V', 0)
+                LineDraw(self, self.clone, 'V', 1)
                 if len(self.Reference) < 2: 
                     print('Reference lines is not sufficient!')
                     sys.exit()
@@ -504,7 +228,7 @@ class SOA:
             #----------------------------------------------------------
             # Alocate Horizontal reference
             if WorkingRangeLen < 3:
-                self.LineDraw(self.clone, 'H', 2)
+                LineDraw(self.clone, 'H', 2)
                 if len(self.Reference) < 3: 
                     print('Reference lines is not sufficient!')
                     sys.exit()
