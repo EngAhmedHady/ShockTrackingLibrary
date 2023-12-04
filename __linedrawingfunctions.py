@@ -8,7 +8,7 @@ import sys
 import cv2
 import numpy as np
 
-def XCheck(self,x,Shp,slope,a):
+def XCheck(x,Shp,slope,a):
     """
     Check and calculate the image boundary y-coordinate based on the given x-coordinate and slope.
 
@@ -41,7 +41,7 @@ def XCheck(self,x,Shp,slope,a):
     elif x <  0 and x <= Shp[1]: y2 = int(a);              p2 = (0,y2)
     return p2
 
-def InclinedLine(self,P1, P2 = (), slope = None, imgShape = ()):
+def InclinedLine(P1, P2 = (), slope = None, imgShape = ()):
     """
     Generates the inclined line equation from two points or one point and slope.
 
@@ -90,159 +90,18 @@ def InclinedLine(self,P1, P2 = (), slope = None, imgShape = ()):
         Xmin = int(-a/slope)
         if   Xmin >= 0 and Xmin <= imgShape[1]:
             p1 = (Xmin,0)
-            p2 = self.XCheck(Xmax,imgShape,slope,a)
+            p2 = XCheck(Xmax,imgShape,slope,a)
         elif Xmin >= 0 and Xmin >  imgShape[1]:
             y = int(imgShape[1]*slope+a)
             p1 = (imgShape[1],y)
-            p2 = self.XCheck(Xmax,imgShape,slope,a)
+            p2 = XCheck(Xmax,imgShape,slope,a)
         else:
             y1 = int(a);
             p1 = (0,y1)
-            p2 = self.XCheck(Xmax,imgShape,slope,a)
+            p2 = XCheck(Xmax,imgShape,slope,a)
         return p1, p2, slope, a
     elif dx == 0:
         return (P1[0],0), (P1[0],imgShape[0]), np.Inf, 0 
     else:
         return (0,P1[1]), (imgShape[1],P1[1]), 0, P1[1]  
 
-def extract_coordinates(self, event, x, y, flags, parameters):
-    """
-    Record starting (x, y) coordinates on left mouse button click and draw
-    a line that crosses all over the image, storing it in a global variable.
-    In case of horizontal or vertical lines, it takes the average between points.
-
-    Drawing steps:
-    1. Push the left mouse on the first point.
-    2. Pull the mouse cursor to the second point.
-    3. The software will draw a thick red line (indicating the mouse locations)
-       and a green line indicating the Final line result.
-    4. To confirm, press the left click anywhere on the image, or
-       to delete the line, press the right click anywhere on the image.
-    5. Press any key to proceed.
-
-    Parameters:
-    - event (int): The type of mouse event (e.g., cv2.EVENT_LBUTTONDOWN).
-    - x (int): The x-coordinate of the mouse cursor.
-    - y (int): The y-coordinate of the mouse cursor.
-    - flags (int): Flags associated with the mouse event.
-    - parameters (tuple): A tuple containing:
-        - Name of the window to display the image.
-        - Image shape (tuple of y-length and x-length).
-        - Line type ('V' for vertical, 'H' for horizontal, 'Inc' for inclined).
-
-    Returns:
-    None
-
-    Example:
-    >>> instance = YourClass()
-    >>> cv2.setMouseCallback(window_name, instance.extract_coordinates, parameters)
-
-    Note:
-    - If 'Inc' is provided as the line type, it uses the 'InclinedLine' method
-      to calculate the inclined line and display it on the image.
-
-    """
-    
-    if event == cv2.EVENT_LBUTTONDOWN:
-        self.ClickCount += 1
-        if len(self.TempLine) == 2: 
-            self.line_coordinates = self.TempLine;
-        elif len(self.TempLine) == 0: self.TempLine = [(x,y)]
-        
-    # Record ending (x,y) coordintes on left mouse bottom release
-    elif event == cv2.EVENT_LBUTTONUP: 
-        if len(self.TempLine) < 2:
-            self.TempLine.append((x,y))
-            # print('Starting: {}, Ending: {}'.format(self.TempLine[0], self.TempLine[1]))
-            
-            # Draw temprary line
-            cv2.line(self.Temp, self.TempLine[0], self.TempLine[1], (0,0,255), 2)
-            if parameters[2] == 'V':
-                avg = int((self.TempLine[0][0]+self.TempLine[1][0])/2)
-                cv2.line(self.Temp, (avg,0), (avg,parameters[1]), (0,255,0), 1)
-            elif parameters[2] == 'H':
-                avg = int((self.TempLine[0][1]+self.TempLine[1][1])/2)
-                cv2.line(self.Temp, (0,avg), (parameters[1],avg), (0,255,255), 1)
-            elif parameters[2] == 'Inc':
-                P1,P2,m,a = self.InclinedLine(self.TempLine[0],self.TempLine[1],imgShape = parameters[1])
-                cv2.line(self.Temp, P1, P2, (0,255,0), 1)
-                
-            cv2.imshow(parameters[0], self.Temp)
-        elif self.ClickCount == 2:
-               
-            self.Temp = self.clone.copy()
-            cv2.imshow(parameters[0], self.clone)
-            # storing the vertical line
-            if parameters[2] == 'V':
-                avg = int((self.line_coordinates[0][0]+self.line_coordinates[1][0])/2)
-                cv2.line(self.Temp, (avg,0), (avg,parameters[1]), (0,255,0), 1)
-            
-            # storing the Horizontal line
-            elif parameters[2] == 'H':
-                avg = int((self.line_coordinates[0][1]+self.line_coordinates[1][1])/2)
-                cv2.line(self.Temp, (0,avg), (parameters[1],avg), (0,255,255), 1)
-                
-            elif parameters[2] == 'Inc':
-                P1,P2,m,a = self.InclinedLine(self.line_coordinates[0],self.line_coordinates[1],imgShape = parameters[1])
-                cv2.line(self.Temp, P1, P2, (0,255,0), 1)
-                avg = [P1, P2, m,a]
-            
-                
-            self.Reference.append(avg)
-            self.clone = self.Temp.copy()
-            cv2.imshow(parameters[0], self.clone)
-            
-    # Delete draw line before storing    
-    elif event == cv2.EVENT_RBUTTONDOWN:
-        self.TempLine = []
-        if self.ClickCount>0: self.ClickCount -= 1
-        self.Temp = self.clone.copy()
-        cv2.imshow(parameters[0], self.Temp)
-           
-def LineDraw(self, img, lineType, LineNameInd, Intialize = False):
-    """
-    Drive the extract_coordinates function to draw lines.
-
-    Inputs:
-    - img (numpy.ndarray): A single OpenCV image.
-    - lineType (str): 'V' for Vertical line (starts from top to bottom of the image),
-                     'H' for Horizontal line (starts from the left to the right),
-                     'Inc' for Inclined line (not averaging, takes the exact selected points).
-    - LineNameInd (int): Index of the window title from the list.
-    - Initialize (bool, optional): To reset the values of Reference and line_coordinates for a new line set.
-                                   True or False (Default: False).
-
-    Outputs:
-    list: Cropping limits or (line set).
-
-    Example:
-    >>> instance = YourClass()
-    >>> line_set = instance.LineDraw(image, 'V', 0, Initialize=True)
-    >>> print(line_set)
-
-    Note:
-    - The function uses the `extract_coordinates` method to interactively draw lines on the image.
-    - It waits until the user presses a key to close the drawing window.
-
-    """ 
-    
-    self.clone = img.copy(); 
-    self.Temp = self.clone.copy();
-    self.TempLine = [];
-    self.ClickCount = 0
-    if Intialize:
-        self.Reference = []
-        self.line_coordinates = []
-    shp = img.shape
-    if   lineType == 'V':
-        prams = [self.LineName[LineNameInd],shp[0],lineType]
-    elif lineType == 'H':
-        prams = [self.LineName[LineNameInd],shp[1],lineType]
-    elif lineType == 'Inc':
-        prams = [self.LineName[LineNameInd],shp,lineType]
-        
-    cv2.imshow(self.LineName[LineNameInd], self.clone)
-    cv2.setMouseCallback(self.LineName[LineNameInd], extract_coordinates,prams)
-    # Wait until user press some key
-    cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
-    return self.Reference
