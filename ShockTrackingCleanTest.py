@@ -11,19 +11,22 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from ShockOscillationAnalysis import SOA
+from __importImages import importSchlierenImages as ImpS
+
+
 # from scipy import signal
 plt.rcParams.update({'font.size': 30})
 px = 1/plt.rcParams['figure.dpi']
 
 f = 2000
 D = 80      # distance in mm
-HLP = 5   # Horizontal line position [slice location to a reference line]
+HLP = 10   # Horizontal line position [slice location to a reference line]
 Scale = 0.12987012987012986
 SliceThickness = 50
 n = 0;
-imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
+# imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # imgPath = '*.png'
-# imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
+imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\3kHz_smooth P1 (Test 6)\\*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Reference Case data\\2022_07_29_FastShileren\\5kHz\\*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # imgPath = 'D:\\TFAST\TEAMAero experiments\\2023_05_10\\Smooth-2kHz-5sec (test 5)\\*.png'
@@ -38,17 +41,18 @@ NewFileDirectory = os.path.join(FileDirectory, "shock_signal")
 if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
 
 SA = SOA(f,D)
-ShockwaveRegion ,n ,H_line, Scale = SA.ImportSchlierenImages(imgPath,
-                                                              HLP = HLP,
-                                                              FullImWidth = False,
-                                                              ScalePixels= True,
-                                                              OutputDirectory = NewFileDirectory,
-                                                              SliceThickness = SliceThickness,
-                                                              WorkingRange = [60],
-                                                              nt = -1,
-                                                              ShockAngleSamples = 100,
-                                                              AngleSamplesReview = 10,
-                                                              comment = '-')
+ImpImg = ImpS(f,D)
+# ShockwaveRegion ,n ,H_line, Scale = ImpImg.GenerateSlicesArray(imgPath,
+#                                                               HLP = HLP,
+#                                                               FullImWidth = False,
+#                                                               ScalePixels= True,
+#                                                               OutputDirectory = NewFileDirectory,
+#                                                               SliceThickness = SliceThickness,
+#                                                               WorkingRange = [80],
+#                                                               nt = -1,
+#                                                               ShockAngleSamples = 1000,
+#                                                               AngleSamplesReview = 0,
+#                                                               comment = '-')
 
 # ImgList = cv2.imread(NewFileDirectory+'\\2.0kHz_50mm_0.1360544217687075mm-px_ts_10_slice.png')
 File = str(f/1000)+'kHz_'+str(HLP)+'mm_'+str(Scale)+'mm-px_ts_'+str(SliceThickness)+'_slice-.png'
@@ -89,7 +93,7 @@ print('Cleaning illumination instability ...')
 ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion, 
                                               Spectlocation = [0, 233], 
                                               D = 20, n = 5, 
-                                              ShowIm = True)
+                                              ShowIm = False)
 
 # ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion, 
 #                                               Spectlocation = [0, 180], 
@@ -102,21 +106,21 @@ ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion,
 #                  2- reviewInterval: to plot the image slices in defined interval (to evaluate the tracking if needed)
 #                     [defult is [0,0] which mean notheing to review]
 #                  3- Signalfilter: ['median','Wiener','med-Wiener']
-# ShockLocation, Uncer = SA.FindTheShockwaveImproved(ShockwaveRegion, 
-#                                                    reviewInterval = [0,0], 
-#                                                    Signalfilter = 'med-Wiener')
+ShockLocation, Uncer = SA.FindTheShockwaveImproved(ShockwaveRegion, 
+                                                    reviewInterval = [0,0], 
+                                                    Signalfilter = 'med-Wiener')
 # # print(Uncer)
-# print('uncertainty ratio:', round((len(Uncer)/len(ShockLocation))*100,2),'%')
-# # print(Uncer)
+print('uncertainty ratio:', round((len(Uncer)/len(ShockLocation))*100,2),'%')
+# print(Uncer)
 
-# uncertain = []; Loc = []
-# for i in Uncer:
-#     uncertain.append(i[1]*Scale)
-#     Loc.append(i[0])
+uncertain = []; Loc = []
+for i in Uncer:
+    uncertain.append(i[1]*Scale)
+    Loc.append(i[0])
     
-# A = Scale * np.array(ShockLocation)   
-# avg = np.average(A)
-# ShockLocation = A - avg
+A = Scale * np.array(ShockLocation)   
+avg = np.average(A)
+ShockLocation = A - avg
 
 # if n < 1: n = ShockwaveRegion.shape[0]
 
@@ -208,16 +212,16 @@ ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion,
 # ax2.minorticks_on()
 # ax2.grid(True, which='minor', color='#D8D8D8', linestyle='-', alpha=0.2)
 
-fig1, ax1 = plt.subplots(figsize=(1200*px,1200*px))
+fig1, ax1 = plt.subplots(figsize=(500*px,1200*px))
 ax1.set_yticks(np.arange(0, n+1, 100))
 xPixls = (NewRef[1]-NewRef[0])
 ShockResionScale = xPixls*Scale
 ax1.imshow(ShockwaveRegion, extent=[0, ShockResionScale, n, 0], aspect='0.1', cmap='gray');
 ax1.invert_yaxis()
-# ax1.set_ylabel(r"Shock oscillation domain ($x$) [mm]"); 
-# ax1.set_xlabel("Frequency [Hz]");
-# ax1.plot(A, range(n),'x', lw = 1, color = 'g', ms = 3)
-# ax1.plot(uncertain, Loc,'x', lw = 1, color = 'r', ms = 2)
+ax1.set_ylabel(r"Shock oscillation domain ($x$) [mm]"); 
+ax1.set_xlabel("Frequency [Hz]");
+ax1.plot(A, range(n),'x', lw = 1, color = 'g', ms = 10)
+# ax1.plot(uncertain, Loc,'x', lw = 1, color = 'r', ms = 5)
 ax1.set_ylim([0,400])
 # plt.show()
 

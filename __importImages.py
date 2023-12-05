@@ -218,16 +218,6 @@ class importSchlierenImages(SOA):
             midIndx = nSlices // 2 + 1 if nSlices % 2 != 0 else nSlices // 2
             midLoc = xLoc[midIndx] if nSlices % 2 != 0 else (xLoc[midIndx - 1] + xLoc[midIndx]) / 2
             y = ColumnY[midIndx] if nSlices % 2 != 0 else (ColumnY[midIndx - 1] + ColumnY[midIndx]) / 2
-            
-            # if nSlices%2 != 0:
-            #     midIndx = int(nSlices/2) + 1
-            #     midLoc = xLoc[midIndx]
-            #     y = ColumnY[midIndx]
-            # else: 
-            #     midIndx = int(nSlices/2)
-            #     # The average location between two points
-            #     midLoc = ((xLoc[midIndx-1]+xLoc[midIndx])/2)
-            #     y = (ColumnY[midIndx-1]+ColumnY[midIndx])/2
                 
             ColumnXLoc = np.array(xLoc).reshape((-1, 1))
             ColumnY = np.array(ColumnY).reshape((-1, 1))
@@ -235,12 +225,9 @@ class importSchlierenImages(SOA):
             m = model.coef_[0][0]
             
             
-            if m > 0:   
-                AngReg = 180 - np.arctan(m)*180/np.pi
-            elif m < 0: 
-                AngReg = abs(np.arctan(m)*180/np.pi)
-            else:
-                AngReg = 90
+            if   m > 0:AngReg = 180 - np.arctan(m)*180/np.pi
+            elif m < 0:AngReg = abs(np.arctan(m)*180/np.pi)
+            else:      AngReg = 90
                 
             AvgMidLoc += midLoc
             AvgAngleGlob += AngReg
@@ -357,7 +344,7 @@ class importSchlierenImages(SOA):
 
                 k = 0
                 while k < ShockAngleSamples:
-                   r =random.randint(0,n1) # ....................................... generating a random number in the range 1 to 100
+                   r =random.randint(0,n1-1) # ....................................... generating a random number in the range 1 to 100
                    # checking whether the generated random number is not in the randomList
                    if r not in randomIndx: 
                        randomIndx.append(r) # ................. appending the random number to the resultant list, if the condition is true
