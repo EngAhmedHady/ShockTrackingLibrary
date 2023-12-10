@@ -19,14 +19,16 @@ plt.rcParams.update({'font.size': 30})
 px = 1/plt.rcParams['figure.dpi']
 
 f = 2000
-D = 80      # distance in mm
+D = 80     # Distance in mm
 HLP = 10   # Horizontal line position [slice location to a reference line]
-Scale = 0.12987012987012986
+# Scale = 0.12987012987012986
+# Scale = 0.13008130081300814
+Scale = 0.13008130081300814
 SliceThickness = 50
-n = 0;
-# imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
+n = 10001;
+imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # imgPath = '*.png'
-imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\3kHz_smooth P1 (Test 6)\\*.png'
+# imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Reference Case data\\2022_07_29_FastShileren\\5kHz\\*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # imgPath = 'D:\\TFAST\TEAMAero experiments\\2023_05_10\\Smooth-2kHz-5sec (test 5)\\*.png'
@@ -48,7 +50,7 @@ ImpImg = ImpS(f,D)
 #                                                               ScalePixels= True,
 #                                                               OutputDirectory = NewFileDirectory,
 #                                                               SliceThickness = SliceThickness,
-#                                                               WorkingRange = [80],
+#                                                               WorkingRange = [],
 #                                                               nt = -1,
 #                                                               ShockAngleSamples = 1000,
 #                                                               AngleSamplesReview = 0,
@@ -82,18 +84,23 @@ print('Shock Regions:',NewRef,'\t Represents:' ,xPixls, 'px \t Shock Regions in 
 
 # Image cleaning [subtracting the average, subtracting ambiant light frequency]
 
-ShockwaveRegion = SA.Average(ShockwaveRegion)
+# ShockwaveRegion = SA.Average(ShockwaveRegion)
+print('Cleaning illumination instability ...')
+ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
+                                    'Average', 'FFT', 'Brightness and Contrast',
+                                    filterCenter = [0, 233], D = 20, n = 5,
+                                    Brightness = 2, Contrast = 1.5, Sharpness = 1.2,
+                                    ShowIm = False)
 
 # CleanIlluminationEffects
 # function inputs: 1- the image needed to be cleaned
 #                   2- location/center of the light frequency peak in FFT domain (Spectlocation)
 #                   3- butterworth function parameter (D = circle diameter, n = function power)
 #                   4- see the FFT domain before and after filtering (True/False)
-print('Cleaning illumination instability ...')
-ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion, 
-                                              Spectlocation = [0, 233], 
-                                              D = 20, n = 5, 
-                                              ShowIm = False)
+# ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion, 
+#                                               Spectlocation = [0, 233], 
+#                                               D = 20, n = 5, 
+#                                               ShowIm = False)
 
 # ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion, 
 #                                               Spectlocation = [0, 180], 
@@ -107,7 +114,7 @@ ShockwaveRegion = SA.CleanIlluminationEffects(ShockwaveRegion,
 #                     [defult is [0,0] which mean notheing to review]
 #                  3- Signalfilter: ['median','Wiener','med-Wiener']
 ShockLocation, Uncer = SA.FindTheShockwaveImproved(ShockwaveRegion, 
-                                                    reviewInterval = [0,0], 
+                                                    reviewInterval = [190,200], 
                                                     Signalfilter = 'med-Wiener')
 # # print(Uncer)
 print('uncertainty ratio:', round((len(Uncer)/len(ShockLocation))*100,2),'%')
@@ -217,11 +224,14 @@ ax1.set_yticks(np.arange(0, n+1, 100))
 xPixls = (NewRef[1]-NewRef[0])
 ShockResionScale = xPixls*Scale
 ax1.imshow(ShockwaveRegion, extent=[0, ShockResionScale, n, 0], aspect='0.1', cmap='gray');
+ax1.plot([0,ShockResionScale],[25,25],'r--')
+# ax1.plot([0,ShockResionScale],[122,122],'r--')
+# ax1.plot([0,ShockResionScale],[133,133],'r--')
 ax1.invert_yaxis()
 ax1.set_ylabel(r"Shock oscillation domain ($x$) [mm]"); 
 ax1.set_xlabel("Frequency [Hz]");
 ax1.plot(A, range(n),'x', lw = 1, color = 'g', ms = 10)
-# ax1.plot(uncertain, Loc,'x', lw = 1, color = 'r', ms = 5)
+ax1.plot(uncertain, Loc,'x', lw = 1, color = 'r', ms = 5)
 ax1.set_ylim([0,400])
 # plt.show()
 

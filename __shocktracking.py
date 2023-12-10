@@ -6,7 +6,7 @@ Created on Fri Dec  1 15:27:54 2023
 """
 import numpy as np
 import matplotlib.pyplot as plt
-
+# from scipy import signal
 
         
 def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
@@ -38,7 +38,8 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
     """
     
     # Start processing the slice
-    avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice   
+    avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice  
+    
     MinimumPoint = min(SnapshotSlice) # ........... minimum (darkest) point
     
     if Plot: # to plot slice illumination values with location and Avg. line
@@ -55,13 +56,13 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
     AeraSet = [] # ............................... local minimum areas list
    
     # Loop through the slice illumination values
-    for pixel in range(Pixels):
+    for pixel in range(Pixels-1,-1,-1):
         if SnapshotSlice[pixel] < avg: 
         # find the local minimum and store illumination values and location
             localmin.append(SnapshotSlice[pixel]); LocMinI.append(pixel)
             
             # find open local minimum at the end of the slice
-            if pixel == Pixels-1 and len(localmin) >1: 
+            if pixel == 0 and len(localmin) >1: 
                 A = abs(np.trapz(avg-localmin))
                 SetMinPoint = min(localmin)
                 AeraSet.append(A)

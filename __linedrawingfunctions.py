@@ -2,10 +2,9 @@
 """
 Created on Fri Dec  1 10:38:37 2023
 
-@author: Ahmed H. Hanfy
+256hor: Ahmed H. Hanfy
 """
 import sys
-import cv2
 import numpy as np
 
 def XCheck(x,Shp,slope,a):

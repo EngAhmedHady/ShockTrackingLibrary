@@ -8,16 +8,12 @@ Created on Tue Dec 20 09:32:30 2022
 
 import cv2
 import matplotlib.pyplot as plt
-import numpy as np
 from scipy import signal
 import sys
 import time
-# import glob
-# import random
-# from datetime import datetime
-# from sklearn.linear_model import LinearRegression
 from __linedrawingfunctions import InclinedLine
 from __shocktracking import ShockTraking
+from __Imagecleaningfunctions import Average, CleanIlluminationEffects, BrightnessAndContrast
  
 px = 1/plt.rcParams['figure.dpi']
 plt.rcParams.update({'font.size': 30})
@@ -216,59 +212,72 @@ class SOA:
         cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
         return self.Reference
     
-    def Average(self,img):
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        width = len(img[0])
-        Avg = np.zeros(width)
-        for i in img: Avg += i
-        Avg /= img.shape[0]
-        Newimg = np.zeros(img.shape)
-        for i in range(img.shape[0]):  Newimg[i] = img[i] - Avg
-        return Newimg
+    def CleanSnapshots(self, img,*args,**kwargs):
+        """
+        Clean and enhance snapshots based on specified corrections.
+    
+        Parameters:
+        - img (numpy.ndarray): Original image snapshot.
+        - *args (str): Variable-length argument list specifying the corrections to apply. 
+                       Supported corrections: 'Brightness and Contrast', 'Average', 'FFT'.
+        - **kwargs: Additional keyword arguments for correction functions.
+    
+        Returns:
+        - numpy.ndarray: Corrected image snapshot.
+    
+        Example:
+        >>> cleaned_image = CleanSnapshots(original_image, 'Brightness and Contrast', 'FFT', Brightness=1.5, D=20)
+    
+        This method takes an original image snapshot 'img' and applies specified corrections based on the provided *args.
+        Supported corrections include 'Brightness and Contrast', 'Average', and 'FFT'.
+    
+        If 'Brightness and Contrast' is in *args, the image undergoes brightness and contrast adjustments.
+        If 'Average' is in *args, the average illumination effect is removed.
+        If 'FFT' is in *args, the illumination effects are corrected using FFT-based filtering.
+    
+        Additional keyword arguments (**kwargs) can be provided for fine-tuning the correction parameters.
+    
+        Returns the corrected image snapshot.
+    
+        .. note::
+           Ensure that the correction functions 'BrightnessAndContrast', 'Average', and 'CleanIlluminationEffects'
+           are defined and accessible in the class containing this method.
+    
+        """
+        CorrectedImg = img.copy()
+        if 'Brightness and Contrast' in args: CorrectedImg = BrightnessAndContrast(img, **kwargs)
+        if 'Average' in args: CorrectedImg = Average(CorrectedImg)
+        if 'FFT' in args: CorrectedImg = CleanIlluminationEffects(CorrectedImg, **kwargs)
+        return CorrectedImg
         
-    def CleanIlluminationEffects(self, img, Spectlocation = [0, 233], D = 10, n=10, ShowIm = False ):
-        if len(img.shape) > 2: img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        dft = cv2.dft(np.float32(img),flags = cv2.DFT_COMPLEX_OUTPUT)
-        magnitude_spectrum = np.fft.fftshift(dft)
-        imShp = magnitude_spectrum.shape
-        x = imShp[1];   y = imShp[0]
-        
-        if ShowIm:
-            fig, ax = plt.subplots(figsize=(30,20))
-            spectrum_im = 20*np.log(np.abs(magnitude_spectrum)+1)
-            im = ax.imshow(spectrum_im[:,:,0])
-            ax.set_ylim([int(y/2)-20,int(y/2)+Spectlocation[1]+147])
-            # fig.colorbar(im)
-            # ax.set_title('Row Image FFT')
-
-        LowpassFilter = np.ones([imShp[0],imShp[1],2])
-              
-        for i in range(y):
-            for j in range(x):
-                if i > y/2:
-                    y_shift = int(y/2)+Spectlocation[1]
-                    x_shift = int(x/2)+Spectlocation[0]
-                    denominator = np.sqrt((i-y_shift)**2+(j-x_shift)**2)
-                    if denominator <= 0: LowpassFilter[i][j] = 0
-                    else: LowpassFilter[i][j]= 1/(1+(D/denominator)**(n*2))
-                else: LowpassFilter[i][j]= 0
-        
-        CleanFFT = magnitude_spectrum*LowpassFilter
-        
-        if ShowIm:
-            fig, ax = plt.subplots(figsize=(30,20))
-            CleanFFT_im = 20*np.log(np.abs(CleanFFT)+1)
-            im = ax.imshow(CleanFFT_im[:,:,0])
-            ax.set_ylim([int(y/2)-20,int(y/2)+Spectlocation[1]+147])
-            # ax.set_title('Cleaned Image FFT')
-            # fig.colorbar(im)
-            
-        f_ishift = np.fft.ifftshift(CleanFFT)
-        img_back = cv2.idft(f_ishift)
-        CleanedImage = img_back[:,:,0]/np.amax(img_back[:,:,0])
-        return CleanedImage
     
     def FindTheShockwaveImproved(self, img, reviewInterval = [0,0], Signalfilter=None, CheckSolutionTime = True):
+        """
+        Find the shockwave locations in a series of snapshots with optional signal processing filters.
+    
+        Parameters:
+        - self: The instance of the class containing this method.
+        - img (numpy.ndarray): Input array of shape (num_snapshots, height, width) representing a series of snapshots.
+        - reviewInterval (list, optional): List specifying the review interval for plotting. Default is [0, 0].
+        - Signalfilter (str, optional): Type of signal filter to apply ('median', 'Wiener', 'med-Wiener'). Default is None.
+        - CheckSolutionTime (bool, optional): Flag to measure and display the time taken for shock tracking. Default is True.
+    
+        Returns:
+        - ShockLocation (list): List of shock locations for each snapshot.
+        - uncertain (list): List of uncertain shock locations with additional information.
+    
+        Examples:
+        ::
+            # Create an instance of the class
+            instance = SOA(f,D)
+    
+            # Load a series of snapshots (assuming 'snapshots' is a NumPy array)
+            shock_locations, uncertain_locations = instance.FindTheShockwaveImproved(snapshots)
+    
+        Note:
+        - Ensure that 'ShockTrackingModule' is properly defined and imported.
+    
+        """
         if CheckSolutionTime: start_time = time.time()
         # Initiating Variables
         ShockLocation = [] # ........................... set of shock locations
@@ -276,25 +285,26 @@ class SOA:
         count = 0 # ................................ Processed snapshot counter
         
         # check ploting conditions
-        reviewInterval.sort(); start = reviewInterval[0]; end = reviewInterval[1]
+        reviewInterval.sort(); start, end = reviewInterval
         plotingInterval = abs(end-start)
-        if plotingInterval > 0: ploting = True
-        else: ploting= False
+        ploting = plotingInterval > 0
         
         # check if the image on grayscale or not and convert if not
-        if len(img.shape) > 2: img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
         
         nShoots = img.shape[0] # .................... total number of snapshots
-        print('Processing the shock location')
-        # check ploting conditions
+        print('Processing the shock location ...')
         
-        
+        if ploting: 
+            fig, ax = plt.subplots(figsize=(30,300))
+            ax.imshow(img, cmap='gray');
+            # check ploting conditions
+         
         for SnapshotSlice in img:
-            if ploting and count >= start and count<end: Plot = True
-            else: Plot = False
-            if len(ShockLocation) > 0: LastShockLocation = ShockLocation[-1]
-            else :
-                LastShockLocation = -1
+            Plot = ploting and start <= count < end
+            
+            LastShockLocation = ShockLocation[-1] if ShockLocation else -1
+            
             minLoc, certain, reason = ShockTraking(SnapshotSlice, 
                                                    LastShockLoc = LastShockLocation, 
                                                    Plot = Plot,
@@ -304,20 +314,19 @@ class SOA:
             count += 1
             sys.stdout.write('\r')
             sys.stdout.write("[%-20s] %d%%" % ('='*int(count/(nShoots/20)), int(5*count/(nShoots/20))))
+            sys.stdout.flush()
         print('')
             
-        # for pnt in uncertain:
-        #     if ShockLocation[pnt[0]] == pnt[1]: print('Uncorrected point at',pnt[0])
         if Signalfilter == 'median':
             print('Appling median filter...')
             ShockLocation = signal.medfilt(ShockLocation)
         elif Signalfilter == 'Wiener':
             print('Appling Wiener filter...')
-            ShockLocation = signal.wiener(ShockLocation)
+            ShockLocation = signal.wiener(ShockLocation.astype('float64'))
         elif Signalfilter == 'med-Wiener':
             print('Appling med-Wiener filter...')
             ShockLocation = signal.medfilt(ShockLocation)
-            ShockLocation = signal.wiener(ShockLocation)
+            ShockLocation = signal.wiener(ShockLocation.astype('float64'))
         
         # Shock tracking time
         if CheckSolutionTime:
@@ -326,3 +335,6 @@ class SOA:
             
         return ShockLocation, uncertain
     
+   
+            
+            
