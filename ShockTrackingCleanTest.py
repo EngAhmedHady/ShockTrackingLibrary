@@ -11,22 +11,23 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from ShockOscillationAnalysis import SOA
-from __importImages import importSchlierenImages as ImpS
+from ShockOscillationAnalysis import importSchlierenImages as ImpS
 
 
 # from scipy import signal
 plt.rcParams.update({'font.size': 30})
 px = 1/plt.rcParams['figure.dpi']
 
-f = 2000
-D = 80     # Distance in mm
-HLP = 10   # Horizontal line position [slice location to a reference line]
+f = 1500
+D = 60     # Distance in mm
+HLP = 7   # Horizontal line position [slice location to a reference line]
 # Scale = 0.12987012987012986
 # Scale = 0.13008130081300814
 Scale = 0.13008130081300814
-SliceThickness = 50
+SliceThickness = 35
 n = 10001;
-imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
+# imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
+imgPath = 'D:\\PhD\\TEAMAero\\2023_03_29 - Fully Open with suction\\Oil-sch test 8 - Final full covered 25fps - 5%\\0_20230329_164729\\*.png'
 # imgPath = '*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Reference Case data\\2022_07_29_FastShileren\\5kHz\\*.png'
@@ -44,17 +45,17 @@ if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
 
 SA = SOA(f,D)
 ImpImg = ImpS(f,D)
-# ShockwaveRegion ,n ,H_line, Scale = ImpImg.GenerateSlicesArray(imgPath,
-#                                                               HLP = HLP,
-#                                                               FullImWidth = False,
-#                                                               ScalePixels= True,
-#                                                               OutputDirectory = NewFileDirectory,
-#                                                               SliceThickness = SliceThickness,
-#                                                               WorkingRange = [],
-#                                                               nt = -1,
-#                                                               ShockAngleSamples = 1000,
-#                                                               AngleSamplesReview = 0,
-#                                                               comment = '-')
+ShockwaveRegion ,n ,H_line, Scale = ImpImg.GenerateSlicesArray(imgPath,
+                                                              HLP = HLP,
+                                                              FullImWidth = False,
+                                                              ScalePixels= True,
+                                                              OutputDirectory = NewFileDirectory,
+                                                              SliceThickness = SliceThickness,
+                                                              WorkingRange = [80],
+                                                              nt = -1,
+                                                              ShockAngleSamples = 1000,
+                                                              AngleSamplesReview = 0,
+                                                              comment = '-')
 
 # ImgList = cv2.imread(NewFileDirectory+'\\2.0kHz_50mm_0.1360544217687075mm-px_ts_10_slice.png')
 File = str(f/1000)+'kHz_'+str(HLP)+'mm_'+str(Scale)+'mm-px_ts_'+str(SliceThickness)+'_slice-.png'
@@ -67,14 +68,14 @@ else:
 
 # spacify the shock region
 # (Draw 2 vertical lines)
-# NewRef = SA.LineDraw(ImgList, 'V', 0, 1)
-# NewRef = SA.LineDraw(SA.clone, 'V', 1)
-# NewRef.sort()
+NewRef = SA.LineDraw(ImgList, 'V', 0, 1)
+NewRef = SA.LineDraw(SA.clone, 'V', 1)
+NewRef.sort()
     
     
 # or (Spacify x location of 2 vertical lines)
 # NewRef = [262, 520]
-NewRef = [269, 430]
+# NewRef = [269, 430]
 
 ShockwaveRegion = ImgList[:,NewRef[0]:NewRef[1]]
 xPixls = (NewRef[1]-NewRef[0])
@@ -89,7 +90,7 @@ print('Cleaning illumination instability ...')
 ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
                                     'Average', 'FFT', 'Brightness and Contrast',
                                     filterCenter = [0, 233], D = 20, n = 5,
-                                    Brightness = 2, Contrast = 1.5, Sharpness = 1.2,
+                                    Brightness = 2, Contrast = 1.7, Sharpness = 2,
                                     ShowIm = False)
 
 # CleanIlluminationEffects
@@ -113,9 +114,9 @@ ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
 #                  2- reviewInterval: to plot the image slices in defined interval (to evaluate the tracking if needed)
 #                     [defult is [0,0] which mean notheing to review]
 #                  3- Signalfilter: ['median','Wiener','med-Wiener']
-ShockLocation, Uncer = SA.FindTheShockwaveImproved(ShockwaveRegion, 
-                                                    reviewInterval = [190,200], 
-                                                    Signalfilter = 'med-Wiener')
+ShockLocation, Uncer = SA.ShockTrakingAutomation(ShockwaveRegion, 
+                                                 reviewInterval = [190,200], 
+                                                 Signalfilter = 'med-Wiener')
 # # print(Uncer)
 print('uncertainty ratio:', round((len(Uncer)/len(ShockLocation))*100,2),'%')
 # print(Uncer)

@@ -4,4 +4,6 @@ ShockTrackingLibrary
 .. toctree::
    :maxdepth: 4
 
-   ShockTrackingLibrary
+   ShockOscillationAnalysis
+   ShockPointsTracking
+   ShockTrackingCleanTest
