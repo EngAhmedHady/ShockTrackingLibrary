@@ -57,6 +57,14 @@ class importSchlierenImages(SOA):
         P1new,P2new,m,a = InclinedLine(P1new, slope = LineSlope, imgShape=imgShape)            
         cv2.line(self.clone, P1new, P2new, (0,0,255), 1)
         return anew
+    
+    def genratingRandomNonRepeativeNumber(self, ShockAngleSamples, n1):
+        if n1 < ShockAngleSamples:
+            ShockAngleSamples = n1
+            print('ShockAngleSamples should not be more than the number of files; the number of files will be the only considered.')
+
+        randomIndx = random.sample(range(n1), min(ShockAngleSamples, n1))
+        return randomIndx
 
     def InclinedShockDomainSetup(self, CheckingWidth, CheckingHieght, imgShape, 
                                  VMidPnt = 0, nPnts = 0, inclinationEst = []):
@@ -252,8 +260,7 @@ class importSchlierenImages(SOA):
             timeInSec =  time.time() - start_time  
             TimeCalculation(timeInSec)
         return AvgAngleGlob/count, AvgSlope/count, AvgMidLoc/count  
-    
-    
+      
     def GenerateSlicesArray(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False,
                               SliceThickness = 0, nt = -1, Mode = -1, ShockAngleSamples = 30, AngleSamplesReview = 10,
                               OutputDirectory = '',comment='', inclinationEst = []):
@@ -342,9 +349,9 @@ class importSchlierenImages(SOA):
                 
 
             if len(WorkingRange) < 3:
-                cv2.namedWindow(self.LineName[2], cv2.WINDOW_NORMAL)
-                cv2.moveWindow(self.LineName[2], win_x, win_y)
-                cv2.imshow(self.LineName[2], self.clone)
+                # cv2.namedWindow('investigation domain before rotating', cv2.WINDOW_NORMAL)
+                # cv2.moveWindow('investigation domain before rotating', win_x, win_y)
+                cv2.imshow('investigation domain before rotating', self.clone)
                 cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
                 
                         
@@ -354,19 +361,9 @@ class importSchlierenImages(SOA):
             else: n1 = nt
             if inclinationCheck:
                 print('Shock inclination estimate ... ')
-                randomIndx=[]
-                if n1 < ShockAngleSamples: 
-                    ShockAngleSamples = n1
-                    print('ShockAngleSamples should not be more than number of files, number of files will be only considered')
-
-                k = 0
-                while k < ShockAngleSamples:
-                   r =random.randint(0,n1-1) # ....................................... generating a random number in the range 1 to 100
-                   # checking whether the generated random number is not in the randomList
-                   if r not in randomIndx: 
-                       randomIndx.append(r) # ................. appending the random number to the resultant list, if the condition is true
-                       k += 1
                 
+                randomIndx = self.genratingRandomNonRepeativeNumber(ShockAngleSamples, n1)
+
                 samplesList = []; k = 0
                 for indx in randomIndx:
                     with open(files[indx]):
@@ -377,8 +374,7 @@ class importSchlierenImages(SOA):
                     k += 1
                     sys.stdout.write('\r')
                     sys.stdout.write("[%-20s] %d%%" % ('='*int(k/(ShockAngleSamples/20)), int(5*k/(ShockAngleSamples/20))))
-                print('')   
-            
+                print('')            
 
                 if AngleSamplesReview < ShockAngleSamples: NSamplingReview = AngleSamplesReview
                 else:
@@ -402,9 +398,9 @@ class importSchlierenImages(SOA):
                 cv2.line(NewImg, (self.Reference[1],0), (self.Reference[1],shp[0]), (0,255,0), 1)
                 
                 if len(inclinationEst) == 0:
-                    cv2.namedWindow(self.LineName[2], cv2.WINDOW_NORMAL)
-                    cv2.moveWindow(self.LineName[2], win_x, win_y)  
-                    cv2.imshow(self.LineName[2], NewImg)
+                    # cv2.namedWindow('Final investigation domain', cv2.WINDOW_NORMAL)
+                    # cv2.moveWindow('Final investigation domain', win_x, win_y)  
+                    cv2.imshow('Final investigation domain', NewImg)
                     cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
                     
             elif WorkingRangeLen > 3:
@@ -429,241 +425,24 @@ class importSchlierenImages(SOA):
                     now = dt.now()
                     now = now.strftime("%d%m%Y%H%M")
                     self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+str(SliceThickness)+'_slice'+now
-                if inclinationCheck: 
-                    cv2.imwrite(self.outputPath+'-Final.png', NewImg)
-                    cv2.imwrite(self.outputPath+'.png', self.clone)
-                else: cv2.imwrite(self.outputPath+'.png', self.clone)
+                if inclinationCheck:
+                    print('RotatedImage:', "stored" if cv2.imwrite(self.outputPath+'-Final.png', NewImg) else "Failed")
+                    print('DomainImage:' , "stored" if cv2.imwrite(self.outputPath+'.png', self.clone)   else "Failed")
+                else: print('DomainImage:',"stored" if cv2.imwrite(self.outputPath+'.png', self.clone)   else "Failed") 
+                    
             
             if FullImWidth: 
-                if WorkingRangeLen == 1  or len(inclinationEst) > 2: 
+                if (WorkingRangeLen == 1  or len(inclinationEst) > 2) and inclinationCheck: 
                     WorkingRange = [0,shp[1],H_line, 90-AvgAngleGlob, (round(AvgShockLocGlob), H_line)]
-                elif WorkingRangeLen < 4 and len(inclinationEst) < 2:   
-                    WorkingRange = [0,shp[1],H_line]
-                else:
+                elif WorkingRangeLen > 4:   
                     WorkingRange = [0,shp[1],H_line, WorkingRange[3], WorkingRange[4]]
+                else: 
+                    WorkingRange = [0,shp[1],H_line]
+                    
                 print ('scaling lines:', [self.Reference[0],self.Reference[1],H_line])
                 
             elif WorkingRangeLen < 2: 
                 if WorkingRangeLen == 1 or len(inclinationEst) > 2: 
-                    WorkingRange = [self.Reference[0],self.Reference[1],H_line, 90-AvgAngleGlob, (round(AvgShockLocGlob), H_line)]
-                else: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
-            
-            if len(inclinationEst) > 2 and len(WorkingRange) == 3: 
-                WorkingRange += [90-AvgAngleGlob, (round(AvgShockLocGlob), H_line)]
-            
-            print('working range is: ', WorkingRange)
-            
-            print('Importing images ... ')
-            for name in files:
-                if o%Mode == 0 and n < n1:
-                    with open(name):
-                        img = cv2.imread(name)
-                        if SliceThickness > 0:
-                            if inclinationCheck: 
-                                img = cv2.warpAffine(img, M, (shp[1],shp[0]))
-                            cropped_image = np.zeros([1,WorkingRange[1]-WorkingRange[0],3])
-                            for i in range(SliceThickness): cropped_image += img[WorkingRange[2]-(Ht+1)+i:WorkingRange[2]-Ht+i,WorkingRange[0]:WorkingRange[1]]
-                            cropped_image /= SliceThickness
-                        else:
-                            cropped_image = img[WorkingRange[2]-1:WorkingRange[2],
-                                                WorkingRange[0]  :WorkingRange[1]]
-                        img_list.append(cropped_image.astype('float32'))
-                    n += 1
-                    sys.stdout.write('\r')
-                    sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n1/20)), int(5*n/(n1/20))))
-                o += 1
-            print('')
-            ImgList = cv2.vconcat(img_list)
-            if len(OutputDirectory) > 0:
-                if len(comment) > 0:
-                    self.outputPath = OutputDirectory+'\\'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+comment+'.png'
-                else:
-                    now = dt.now()
-                    now = now.strftime("%d%m%Y%H%M")
-                    self.outputPath = OutputDirectory+'\\'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+now+'.png'
-                cv2.imwrite(self.outputPath, ImgList)
-                print('File was stored:', self.outputPath)
-        else:
-            # In case no file found end the progress and eleminate the program
-            print('No files found!')
-            sys.exit()
-        return ImgList,n,WorkingRange,self.pixelScale
-    
-    
-    def GenerateSlicesArray(self, path, ScalePixels = True, HLP = 0, WorkingRange = [] , FullImWidth = False,
-                              SliceThickness = 0, nt = -1, Mode = -1, ShockAngleSamples = 30, AngleSamplesReview = 10,
-                              OutputDirectory = '',comment='', inclinationEst = []):
-
-        img_list=[]
-        n = 0; o = 0; inclinationCheck = False
-        # Find all files in the directory with the sequence and sorth them by name
-        files = sorted(glob.glob(path))
-        n1 = len(files)
-        WorkingRangeLen = len(WorkingRange)
-        
-        
-        if n1 > 1:
-            img = cv2.imread(files[0])
-            # Open first file and set the limits and scale
-            shp = img.shape
-            print('Img Shape is:', shp)
-            win_x, win_y = self.screenMidLoc(shp)
-            # Defining the working range
-            if WorkingRangeLen < 2:
-                # Vertical limits and scale 
-                self.LineDraw(img, 'V', 0,  Intialize = True)
-                self.LineDraw(self.clone, 'V', 1)
-                if len(self.Reference) < 2: 
-                    print('Reference lines is not sufficient!')
-                    sys.exit()
-            elif WorkingRangeLen > 1:
-                self.clone = img.copy(); 
-                cv2.line(self.clone, (WorkingRange[0],0), (WorkingRange[0],shp[0]), (0,255,0), 1)
-                cv2.line(self.clone, (WorkingRange[1],0), (WorkingRange[1],shp[0]), (0,255,0), 1)
-                self.Reference = WorkingRange[0:2].copy()
-                
-            self.Reference.sort() # to make sure that the limits are properly assigned
-            if ScalePixels:  self.pixelScale = self.D / abs(self.Reference[1]-self.Reference[0])
-            print(f'Image scale: {self.pixelScale}')
-            #----------------------------------------------------------
-            # Alocate Horizontal reference
-            if WorkingRangeLen < 3:
-                self.LineDraw(self.clone, 'H', 2)
-                if len(self.Reference) < 3: 
-                    print('Reference lines is not sufficient!')
-                    sys.exit()
-                H_line = self.Reference[2]-round(HLP/self.pixelScale)
-            else:
-                self.Reference.append(WorkingRange[2])
-                H_line = WorkingRange[2]
-                cv2.line(self.clone, (0     ,H_line+round(HLP/self.pixelScale)), 
-                                     (shp[1],H_line+round(HLP/self.pixelScale)), 
-                                     (0,255,255), 1)
-            
-            print(f'Slice is located at: {H_line}')
-            cv2.line(self.clone, (0,H_line), (shp[1],H_line), (0,0,255), 1)
-            if SliceThickness > 0:
-                Ht = int(SliceThickness/2)  # Half Thickness
-                cv2.line(self.clone, (0,H_line+Ht), (shp[1],H_line+Ht), (0, 128, 255), 1)
-                cv2.line(self.clone, (0,H_line-Ht), (shp[1],H_line-Ht), (0, 128, 255), 1)
-                
-            if WorkingRangeLen == 1:
-                Ref, nSlices, inclinationCheck = self.InclinedShockDomainSetup(WorkingRange[0], SliceThickness, shp, H_line)
-            elif len(inclinationEst) > 2:
-                Ref, nSlices, inclinationCheck = self.InclinedShockDomainSetup(inclinationEst[0], SliceThickness, shp, H_line, 
-                                                                               inclinationEst = inclinationEst)
-            elif WorkingRangeLen == 4:
-                self.LineDraw(self.clone, 'Inc', 3)
-                AvgShockLocGlob = self.IntersectionPoint([0, self.Reference[3][2]], 
-                                                         [H_line, self.Reference[3][3]], 
-                                                         [(0,H_line),self.Reference[3][0]])
-                WorkingRange.append(AvgShockLocGlob)
-                
-
-            if len(WorkingRange) < 3:
-                # cv2.namedWindow('Final arrangement before rotation', cv2.WINDOW_NORMAL)
-                # cv2.moveWindow('Final arrangement before rotation', win_x, win_y)
-                cv2.imshow('Final arrangement before rotation', self.clone)
-                cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
-                
-                        
-            if  nt == -1 and Mode == -1: n1 = len(files)    
-            elif Mode > 0 and nt > 0: n1 = int(nt/Mode)
-            elif Mode > 0 and nt < 0: n1 = int(len(files)/Mode)
-            else: n1 = nt
-            if inclinationCheck:
-                print('Shock inclination estimate ... ')
-                randomIndx=[]
-                if n1 < ShockAngleSamples: 
-                    ShockAngleSamples = n1
-                    print('ShockAngleSamples should not be more than number of files, number of files will be only considered')
-
-                k = 0
-                while k < ShockAngleSamples:
-                   r =random.randint(0,n1-1) # ....................................... generating a random number in the range 1 to 100
-                   # checking whether the generated random number is not in the randomList
-                   if r not in randomIndx: 
-                       randomIndx.append(r) # ................. appending the random number to the resultant list, if the condition is true
-                       k += 1
-                
-                samplesList = []; k = 0
-                for indx in randomIndx:
-                    with open(files[indx]):
-                        Sample = cv2.imread(files[indx])
-                        # check if the image on grayscale or not and convert if not
-                        if len(Sample.shape) > 2: Sample = cv2.cvtColor(Sample, cv2.COLOR_BGR2GRAY)
-                        samplesList.append(Sample)
-                    k += 1
-                    sys.stdout.write('\r')
-                    sys.stdout.write("[%-20s] %d%%" % ('='*int(k/(ShockAngleSamples/20)), int(5*k/(ShockAngleSamples/20))))
-                print('')   
-            
-
-                if AngleSamplesReview < ShockAngleSamples: NSamplingReview = AngleSamplesReview
-                else:
-                    NSamplingReview = ShockAngleSamples
-                    print('Warning: Number of samples is larger than requested to review, all samples will be reviewed')
-            
-                
-                AvgAngleGlob, AvgSlopeGlob, AvgShockLocGlob = self.InclinedShockTracking(samplesList, nSlices, Ref, 
-                                                                                         nReview = NSamplingReview, 
-                                                                                         OutputDirectory = OutputDirectory)
-                print('Average inclination angle {:.2f} deg'.format(AvgAngleGlob))
-                
-                M = cv2.getRotationMatrix2D((AvgShockLocGlob, H_line), 90-AvgAngleGlob, 1.0)
-                NewImg = cv2.warpAffine(img, M, (shp[1],shp[0]))
-                
-                cv2.line(NewImg, (0,H_line-Ht), (shp[1],H_line-Ht), (255, 128, 0), 1)
-                cv2.line(NewImg, (0,H_line+Ht), (shp[1],H_line+Ht), (255, 128, 0), 1)
-                cv2.line(NewImg, (0,H_line), (shp[1],H_line), (255, 128, 255), 1)
-                cv2.line(NewImg, (round(AvgShockLocGlob),0), (round(AvgShockLocGlob),shp[0]), (255,255,0), 1)
-                cv2.line(NewImg, (self.Reference[0],0), (self.Reference[0],shp[0]), (0,255,0), 1)
-                cv2.line(NewImg, (self.Reference[1],0), (self.Reference[1],shp[0]), (0,255,0), 1)
-                
-                if len(inclinationEst) == 0:
-                    # cv2.namedWindow('Final arrangement after rotation', cv2.WINDOW_NORMAL)
-                    # cv2.moveWindow('Final arrangement after rotation', win_x, win_y)  
-                    cv2.imshow('Final arrangement after rotation', NewImg)
-                    cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
-                    
-            elif WorkingRangeLen > 3:
-            
-                inclinationCheck = True
-                print('Average inclination angle {:.2f} deg'.format(90-WorkingRange[3]))
-                M = cv2.getRotationMatrix2D(WorkingRange[4], WorkingRange[3], 1.0)
-                NewImg = cv2.warpAffine(img, M, (shp[1],shp[0]))
-                if SliceThickness > 0:
-                    cv2.line(NewImg, (0,H_line-Ht), (shp[1],H_line-Ht), (255, 128, 0), 1)
-                    cv2.line(NewImg, (0,H_line+Ht), (shp[1],H_line+Ht), (255, 128, 0), 1)
-                cv2.line(NewImg, (0,H_line), (shp[1],H_line), (255, 128, 255), 1)
-                cv2.line(NewImg, (round(90-WorkingRange[4][0]),0), (round(90-WorkingRange[4][0]),shp[0]), (255,255,0), 1)
-                cv2.line(NewImg, (WorkingRange[0],0), (WorkingRange[0],shp[0]), (0,255,0), 1)
-                cv2.line(NewImg, (WorkingRange[1],0), (WorkingRange[1],shp[0]), (0,255,0), 1)
-                cv2.circle(NewImg,WorkingRange[4], 5, (0,255,0), (2))
-                
-            if len(OutputDirectory) > 0:
-                if len(comment) > 0:
-                    self.outputPath = OutputDirectory+'\\RefDomain-'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+comment
-                else:
-                    now = dt.now()
-                    now = now.strftime("%d%m%Y%H%M")
-                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+str(SliceThickness)+'_slice'+now
-                if inclinationCheck: 
-                    cv2.imwrite(self.outputPath+'-Final.png', NewImg)
-                    cv2.imwrite(self.outputPath+'.png', self.clone)
-                else: cv2.imwrite(self.outputPath+'.png', self.clone)
-            
-            if FullImWidth: 
-                if WorkingRangeLen == 1  or len(inclinationEst) > 2: 
-                    WorkingRange = [0,shp[1],H_line, 90-AvgAngleGlob, (round(AvgShockLocGlob), H_line)]
-                elif WorkingRangeLen < 4 and len(inclinationEst) < 2:   
-                    WorkingRange = [0,shp[1],H_line]
-                else:
-                    WorkingRange = [0,shp[1],H_line, WorkingRange[3], WorkingRange[4]]
-                print ('scaling lines:', [self.Reference[0],self.Reference[1],H_line])
-                
-            elif WorkingRangeLen < 2: 
-                if WorkingRangeLen == 1 or len(inclinationEst) > 2 and inclinationCheck: 
                     WorkingRange = [self.Reference[0],self.Reference[1],H_line, 90-AvgAngleGlob, (round(AvgShockLocGlob), H_line)]
                 else: WorkingRange = [self.Reference[0],self.Reference[1],H_line]
             
@@ -680,12 +459,14 @@ class importSchlierenImages(SOA):
                         if SliceThickness > 0:
                             if inclinationCheck: 
                                 img = cv2.warpAffine(img, M, (shp[1],shp[0]))
+                                
                             cropped_image = np.zeros([1,WorkingRange[1]-WorkingRange[0],3])
                             for i in range(SliceThickness): cropped_image += img[WorkingRange[2]-(Ht+1)+i:WorkingRange[2]-Ht+i,WorkingRange[0]:WorkingRange[1]]
                             cropped_image /= SliceThickness
                         else:
                             cropped_image = img[WorkingRange[2]-1:WorkingRange[2],
                                                 WorkingRange[0]  :WorkingRange[1]]
+                        
                         img_list.append(cropped_image.astype('float32'))
                     n += 1
                     sys.stdout.write('\r')
@@ -693,15 +474,16 @@ class importSchlierenImages(SOA):
                 o += 1
             print('')
             ImgList = cv2.vconcat(img_list)
+
             if len(OutputDirectory) > 0:
                 if len(comment) > 0:
-                    self.outputPath = OutputDirectory+'\\'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+comment+'.png'
+                    self.outputPath = f'{OutputDirectory}\\{self.f/1000}kHz_{HLP}mm_{self.pixelScale}mm-px_ts_{SliceThickness}_slice_{comment}.png'
                 else:
                     now = dt.now()
                     now = now.strftime("%d%m%Y%H%M")
-                    self.outputPath = OutputDirectory+'\\'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+now+'.png'
-                cv2.imwrite(self.outputPath, ImgList)
-                print('File was stored:', self.outputPath)
+                    self.outputPath =f'{OutputDirectory}\\{self.f/1000}kHz_{HLP}mm_{self.pixelScale}mm-px_ts_{SliceThickness}_slice_{now}.png'
+                print('ImageList write:', f"File was stored:{self.outputPath}" if cv2.imwrite(self.outputPath, ImgList) else "Failed")
+                
         else:
             # In case no file found end the progress and eleminate the program
             print('No files found!')

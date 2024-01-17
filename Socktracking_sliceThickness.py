@@ -14,28 +14,32 @@ import matplotlib.pyplot as plt
 from ShockOscillationAnalysis import SOA
 from ShockOscillationAnalysis import importSchlierenImages as ImpS
 
-f = 15000
-D = 80
+f = 1500
+D = 59
 # D = 97.741
 HLP = 7
-Scale = 0.12965964343598055
+Scale = 0.13245033112582782
 # WorkingRange = [56, 673, 470] #Ref-3000
 # WorkingRange = [241, 687, 260] #Fully Open with suction-1500
 n = 0
 
-# SliceThicknesses = [0,1,2,4,8,10,16,20,25,32,35,40,50,60,64,70,75,80,90,100,110,128]
-SliceThicknesses = [60]
+SliceThicknesses = [0,2,4,8,10,16,20,25,32,35,40,50,60,64,70,75,80,90,100,110]
+# SliceThicknesses = [0,1,2,4,8,10,16,20,25,32,35,40,50,60]
+# SliceThicknesses = [4,20,80,128]
+# SliceThicknesses = [60]
 
 # SliceThicknesses = [10]
 
 # imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\10kHz_smooth P1 (Test 8)\\*.png'
-imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\15kHz_smooth P1_4.5sec (Test 9)\\*.png'
-CaseName = 'P1-withRotation'
+# imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\10kHz_smooth P1 (Test 8)\\*.png'
+# imgPath = 'D:\\PhD\\TEAMAero\\2023_03_29 - Fully Open with suction\\Oil-sch test 8 - Final full covered 25fps - 5%\\0_20230329_164729\\*.png'
+imgPath = 'D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Fully Open\\2023-03-29_Sync_Oil_sch-fully open\\Oil-sch test 8 - Final full covered\\Schlieren\\*.png'
+CaseName = 'Passage-shock_Rotated'
 
 Folders = imgPath.split("\\")
 FileDirectory = ''
 for i in range(len(Folders)-1): FileDirectory += (Folders[i]+'\\')
-NewFileDirectory = os.path.join(FileDirectory, "shock_sliceThickness-Final")
+NewFileDirectory = os.path.join(FileDirectory, f"shock_signal")
 if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
 
 uncertainityRatios = []
@@ -52,56 +56,45 @@ for thickness in SliceThicknesses:
     ShockwaveRegion ,n ,WR, Scale = ImpImg.GenerateSlicesArray(imgPath,
                                                                   HLP = HLP,
                                                                   FullImWidth = False,
+                                                                  nt = -1,
+                                                                  WorkingRange = [240, 693, 260], #MidRe-Test 8-leading edge
                                                                   # WorkingRange =[109, 726, 565], #P1-2kHz
                                                                   # WorkingRange =[109, 726, 276], #P1-3kHz
                                                                   # WorkingRange =[111, 725, 75],  #P1-6kHz
                                                                   # WorkingRange =[111, 725, 67],  #P1-10kHz
-                                                                  WorkingRange =[90],  #P1-10kHz
+                                                                  # WorkingRange =[109, 727, 31],  #P1-15kHz
                                                                   ScalePixels= True,
-                                                                  ShockAngleSamples = 20250,
+                                                                  ShockAngleSamples = 4500,
                                                                   AngleSamplesReview = 5,
-                                                                  SliceThickness = thickness,
-                                                                  OutputDirectory = NewFileDirectory,
+                                                                  SliceThickness = thickness, 
                                                                   # inclinationEst = [90,(479, 99),(478, 46)], #P1-6kHz
-#                                                                   inclinationEst = [90,(470, 129),(459, 5)], #P1-10kHz
-                                                                  comment = '--')
-    # ShockwaveRegion ,n ,H_line, Scale = SA.ImportSchlierenImages(imgPath,
-    #                                                              HLP = HLP,
-    #                                                              FullImWidth = False,
-    #                                                              ScalePixels= True,
-    #                                                              OutputDirectory = NewFileDirectory,
-    #                                                              SliceThickness = thickness,
-    #                                                              WorkingRange = [112, 729, 72],
-    #                                                              nt = -1,
-    #                                                              ShockAngleSamples = 1000,
-    #                                                              AngleSamplesReview = 10,
-    #                                                              comment = '--')
+                                                                  # inclinationEst = [90,(470, 129),(459, 5)], #P1-10kHz
+                                                                  # inclinationEst = [120,(462, 86),(457, 18)], #P1-15kHz
+                                                                  # inclinationEst = [70,(87, 296),(124, 210)], #MidRe-Test 8-leading edge
+                                                                  inclinationEst = [150,(423, 292),(416, 217)], #MidRe-Test 8
+                                                                  OutputDirectory = NewFileDirectory,
+                                                                  comment = f'{CaseName}')    
     
-    
-    File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_ts_{thickness}_slice--.png"
+    # File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_ts_{thickness}_slice_{CaseName}.png"
+    File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_ts_{thickness}_slice_{CaseName}.png"
     if os.path.exists(NewFileDirectory+'\\'+File): ImgList = cv2.imread(NewFileDirectory+'\\'+File)
-    else: 
-        print('File is not exist!!')
-        sys.exit()
+    else: print('File is not exist!!'); sys.exit();
     
     # spacify the shock region
     # (Draw 2 vertical lines)
-    NewRef = SA.LineDraw(ImgList, 'V', 0, 1)
-    NewRef = SA.LineDraw(SA.clone, 'V', 1)
-    NewRef.sort()
-           
-        
+    # NewRef = SA.LineDraw(ImgList, 'V', 0, 1)
+    # NewRef = SA.LineDraw(SA.clone, 'V', 1)
+    # NewRef.sort()
+   
     # or (Spacify x location of 2 vertical lines)
-    # NewRef = [292, 446] #Ref-3000
-    # NewRef = [113, 249] #Fully Open with suction-1500
-    # NewRef = [277, 449]
+    # NewRef = [292, 446] # Ref-3000
+    NewRef = [103, 250] # Fully Open with suction-1500
     # NewRef = [383, 552] # 2kHz P1
-    # NewRef = [269, 445]
-    # NewRef = [237, 448]
-    # NewRef = [282, 435]
     # NewRef = [288, 431] # 3kHz P1
     # NewRef = [286, 433] # 6kHz P1
     # NewRef = [283, 440] # 10kHz P1
+    # NewRef = [291, 426] # 15kHz P1
+    # NewRef = [47, 140] # MidRe-Test 8-leading edge
     
     ShockwaveRegion = ImgList[:,NewRef[0]:NewRef[1]]
     xPixls = (NewRef[1]-NewRef[0])
@@ -117,10 +110,13 @@ for thickness in SliceThicknesses:
     #                   4- see the FFT domain before and after filtering (True/False)
     print('Cleaning illumination instability ...')
     ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
-                                        'Average', 'FFT', 'Brightness and Contrast',
-                                        filterCenter = [0, 233], D = 20, n = 5,
-                                        Brightness = 1.2, Contrast = 1.1, Sharpness = 0.7,
+                                        'Brightness and Contrast',
+                                        'Average', 'FFT', 
+                                        # filterCenter = [(0, 233)], D = 20, n = 5,
+                                        filterCenter = [(0, 465), (-10, 465), (10, 465), (0, 490)], D = 10, n = 5,
+                                        Brightness = 1.5, Contrast = 2, Sharpness = 1.5,
                                         ShowIm = False)
+    
     # fig1, ax1 = plt.subplots(figsize=(20,200))
     # ShockResionScale = xPixls*Scale
     # ax1.imshow(ShockwaveRegion, extent=[0, ShockResionScale, n, 0], aspect='0.1', cmap='gray');
@@ -130,13 +126,14 @@ for thickness in SliceThicknesses:
     #                     [defult is [0,0] which mean notheing to review]
     #                  3- Signalfilter: ['median','Wiener','med-Wiener']
     ShockLocation, Uncer = SA.ShockTrakingAutomation(ShockwaveRegion, 
-                                                       reviewInterval = [0,0],
-                                                       # Signalfilter = 'None')
-                                                        Signalfilter = 'med-Wiener')
+                                                     reviewInterval = [0,0],
+                                                     # Signalfilter = 'None')
+                                                     Signalfilter = 'Wiener')
+    
     uncertainityRatio = (len(Uncer)/len(ShockLocation))*100
     uncertainityRatios.append(uncertainityRatio)
     print('uncertainty ratio:', round(uncertainityRatio,2),'%')
-    
+    print('Uncertainty set:',len(uncertainityRatios))
     
     uncertain = []; Loc = []
     for i in Uncer:
@@ -168,26 +165,26 @@ for thickness in SliceThicknesses:
         shockXLoc.append(467);
     
     ShockLocationfile = np.transpose([range(n),ShockLocation])
-    np.savetxt(NewFileDirectory + '\\ShockLocation-' + CaseName +'-'+str(NewRef)+'.txt', 
-               ShockLocationfile,  delimiter = ",")
+    # np.savetxt(NewFileDirectory + '\\ShockLocation-' + CaseName +'-'+str(NewRef)+'.txt', 
+    #             ShockLocationfile,  delimiter = ",")
     
     print("Shock oscillation domain",max(ShockLocation)-min(ShockLocation))
     print("Average Shock oscillation domain",avgDomain)
     
     # Apply welch method for PSD
-    # Freq, psd = signal.welch(x = ShockLocation, fs = f, window='barthann',
-    #                       nperseg = 512*f/2000, noverlap=0, nfft=None, detrend='constant',
-    #                       return_onesided=True, scaling='density')
+    Freq, psd = signal.welch(x = ShockLocation, fs = f, window='barthann',
+                          nperseg = 512*f/2000, noverlap=0, nfft=None, detrend='constant',
+                          return_onesided=True, scaling='density')
       
     # choose which is more convenient (log on both axes or only on x)
-    # ax.loglog(Freq, psd, lw = '2', label = 'ts_'+str(thickness)+'_slice')
-    # ax.semilogx(Freq, psd, lw = '2')   
-    # ax.set_ylabel(r"PSD [mm$^2$/Hz]"); 
-    # ax.set_xlabel("Frequency [Hz]");
-    # ax.set_title('Shock displacement PSD')
-    # ax.grid(True, which='major', color='#D8D8D8', linestyle='-', alpha=0.3, lw = 1.5)
-    # ax.minorticks_on()
-    # ax.grid(True, which='minor', color='#D8D8D8', linestyle='-', alpha=0.2)
+    ax.loglog(Freq, psd, lw = '2', label = 'ts_'+str(thickness)+'_slice')
+    ax.semilogx(Freq, psd, lw = '2')   
+    ax.set_ylabel(r"PSD [mm$^2$/Hz]"); 
+    ax.set_xlabel("Frequency [Hz]");
+    ax.set_title('Shock displacement PSD')
+    ax.grid(True, which='major', color='#D8D8D8', linestyle='-', alpha=0.3, lw = 1.5)
+    ax.minorticks_on()
+    ax.grid(True, which='minor', color='#D8D8D8', linestyle='-', alpha=0.2)
     
     # To define the peakes on PSD signal with horizontal line
     # ax.axvline(x = 19.5,ls='--',color='k',alpha=0.4)
@@ -198,19 +195,8 @@ for thickness in SliceThicknesses:
     # (centeral difference in general and forward/backward at boundaries)
     T = n/f
     print("Total measuring time: ", T, "sec")
-    
-    dx_dt = []; dt = T/n; t = np.linspace(0,T,n);
-    for xi in range(n):
-        if xi > 0 and xi < n-1:
-            dx_dt.append((ShockLocation[xi+1]-ShockLocation[xi-1])/(2*dt*1000))
-        elif xi == 0: 
-            dx_dt.append((ShockLocation[xi+1]-ShockLocation[xi])/(dt*1000))
-        elif xi == n-1:
-            dx_dt.append((ShockLocation[xi]-ShockLocation[xi-1])/(dt*1000))
-    
-    
-    V_avg = np.mean(dx_dt) 
-    V = dx_dt - V_avg
+    V = SA.VelocitySignal(ShockLocation, T)
+
     
     Freq2, psd2 = signal.welch(x = V, fs = f, window='barthann',
                           nperseg = 512*f/2000, noverlap=0, nfft=None, detrend='constant',
@@ -222,23 +208,25 @@ for thickness in SliceThicknesses:
     print('max peak at:', domFreq, 'Hz')
     
     
-    # ax2.semilogx(Freq2, psd2 , lw = '2', label = 'ts_'+str(thickness)+'_slice')
+    ax2.semilogx(Freq2, psd2 , lw = '2', label = 'ts_'+str(thickness)+'_slice')
     # ax2.axvline(x =Freq2[psd2.argmax(axis=0)],ls='--',color='k',alpha=0.4)
-    # ax2.set_ylabel(r"PSD $[m^2.s^{-2}.Hz^{-1}]$"); 
-    # ax2.set_xlabel("Frequency [Hz]");
-    # # ax2.set_title('PSD for '+ CaseName +' above LE')
+    ax2.set_ylabel(r"PSD $[m^2.s^{-2}.Hz^{-1}]$"); 
+    ax2.set_xlabel("Frequency [Hz]");
+    # ax2.set_title('PSD for '+ CaseName +' above LE')
     # ax2.set_title('Shock velocity PSD')
-    # ax2.grid(True, which='major', color='#D8D8D8', linestyle='-', alpha=0.3, lw = 1.5)
-    # ax2.minorticks_on()
-    # ax2.grid(True, which='minor', color='#D8D8D8', linestyle='-', alpha=0.2)
+    ax2.grid(True, which='major', color='#D8D8D8', linestyle='-', alpha=0.3, lw = 1.5)
+    ax2.minorticks_on()
+    ax2.grid(True, which='minor', color='#D8D8D8', linestyle='-', alpha=0.2)
     
-    fig1, ax1 = plt.subplots(figsize=(50,500))
+    fig1, ax1 = plt.subplots(figsize=(60,700))
+    # fig1, ax1 = plt.subplots(figsize=(5,10))
     ax1.set_yticks(np.arange(0, n+1, 100))
+    # ax1.set_ylim([32900,32700])
     ShockResionScale = xPixls*Scale
     ax1.imshow(ShockwaveRegion, extent=[0, ShockResionScale, n, 0], aspect='0.1', cmap='gray');
-    ax1.plot(A, range(n),'x', lw = 1, color = 'g', ms = 3)
-    ax1.plot(uncertain, Loc,'x', lw = 1, color = 'r', ms = 2)
-    fig1.savefig(NewFileDirectory +'\\ShockOsc-WithThickness_'+ str(thickness) +'.png')
+    ax1.plot(A, range(n),'x', lw = 1, color = 'g', ms = 5)
+    ax1.plot(uncertain, Loc,'x', lw = 1, color = 'r', ms = 3)
+    fig1.savefig(f'{NewFileDirectory}\\ShockOsc-WithThickness_{thickness}_{CaseName}.png')
 
 ax.legend(fontsize="14")
 ax2.legend(fontsize="14")

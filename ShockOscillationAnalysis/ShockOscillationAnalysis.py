@@ -7,6 +7,7 @@ Created on Tue Dec 20 09:32:30 2022
 
 import cv2
 import screeninfo
+import numpy as np
 import matplotlib.pyplot as plt
 from .__Imagecleaningfunctions import Average, CleanIlluminationEffects, BrightnessAndContrast
 from .__linedrawingfunctions import InclinedLine
@@ -235,12 +236,26 @@ class SOA:
     
         """
         CorrectedImg = img.copy()
-        if 'Brightness and Contrast' in args: CorrectedImg = BrightnessAndContrast(img, **kwargs)
-        if 'Average' in args: CorrectedImg = Average(CorrectedImg)
-        if 'FFT' in args: CorrectedImg = CleanIlluminationEffects(CorrectedImg, **kwargs)
+        for arg in args:
+            if arg == 'Average': CorrectedImg = Average(CorrectedImg)
+            if arg == 'FFT': CorrectedImg = CleanIlluminationEffects(CorrectedImg, **kwargs)
+            if arg =='Brightness and Contrast': CorrectedImg = BrightnessAndContrast(CorrectedImg, **kwargs)
         return CorrectedImg
     
+    def ShockTrakingAutomation(self, img, method = 'integral', reviewInterval = [0,0], Signalfilter=None, CheckSolutionTime = True, **kwargs):
+        return GenerateShockSignal(img, method, Signalfilter, reviewInterval, CheckSolutionTime, **kwargs)
     
-    def ShockTrakingAutomation(self, img, reviewInterval = [0,0], Signalfilter=None, CheckSolutionTime = True):
-        return GenerateShockSignal(img, reviewInterval, Signalfilter, CheckSolutionTime)
+    def VelocitySignal(self, Signal, TotalTime):
+        n = len(Signal);  dx_dt = np.zeros(n) 
+        dt = TotalTime/n;
+        
+        dx_dt[0] = (Signal[1] - Signal[0]) / dt             #forward difference for first point
+        dx_dt[n - 1] = (Signal[n - 1] - Signal[n - 2]) / dt #backward difference for last point
+        
+        for x in range(1, n - 1):
+            dx_dt[x] = (Signal[x + 1] - Signal[x - 1]) / (2000 * dt)
+
+        V_avg = np.mean(dx_dt) 
+        V = dx_dt - V_avg
+        return V
         

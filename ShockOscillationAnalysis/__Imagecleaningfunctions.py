@@ -37,10 +37,14 @@ def plotting(FFT,y,Spectlocation):
        where the last dimension represents the real and imaginary parts of the Fourier-transformed image.
 
     """
+    MaxY = 0;
+    for yloc in Spectlocation:
+        if yloc[1] > MaxY: MaxY = yloc[1]
+    
     fig, ax = plt.subplots(figsize=(30,20))
     FFT_im = 20*np.log(np.abs(FFT)+1)
     ax.imshow(FFT_im[:,:,0])
-    ax.set_ylim([int(y/2)-20,int(y/2)+Spectlocation[1]+147])
+    ax.set_ylim([int(y/2)-20,int(y/2)+MaxY+147])
 
 
 def Average(img):
@@ -122,30 +126,29 @@ def CleanIlluminationEffects(img, filterCenter = [0, 233], D = 10, n=10, ShowIm 
     # Convert image to grayscale if it is in color
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
     
-    
     dft = cv2.dft(np.float32(img),flags = cv2.DFT_COMPLEX_OUTPUT)
     magnitude_spectrum = np.fft.fftshift(dft)
     y, x = magnitude_spectrum.shape[:2]
 
-    
     if ShowIm: plotting(magnitude_spectrum,y,filterCenter)
     
-    
     # Create a low-pass filter in the frequency domain
-    LowpassFilter = np.ones((y, x, 2), dtype=np.float32) 
-          
-    for i in range(y):
-        for j in range(x):
-            if i > y/2:
-                y_shift = int(y/2)+filterCenter[1]
-                x_shift = int(x/2)+filterCenter[0]
-                denominator = np.sqrt((i-y_shift)**2+(j-x_shift)**2)
-                if denominator <= 0: LowpassFilter[i][j] = 0
-                else: LowpassFilter[i][j]= 1/(1+(D/denominator)**(n*2))
-            else: LowpassFilter[i][j]= 0
+    LowpassFilter = np.ones((y, x, 2), dtype=np.float32)
+    Filter = np.ones((y, x, 2), dtype=np.float32)
+    for Center in filterCenter:       
+        for i in range(y):
+            for j in range(x):
+                if i > y/2:
+                        y_shift = int(y/2)+Center[1]
+                        x_shift = int(x/2)+Center[0]
+                        denominator = np.sqrt((i-y_shift)**2+(j-x_shift)**2)
+                        if denominator <= 0: LowpassFilter[i][j] = 0
+                        else: LowpassFilter[i][j]= 1/(1+(D/denominator)**(n*2))
+                else: LowpassFilter[i][j]= 0
+        Filter *= LowpassFilter
     
-    # Apply the low-pass filter to the magnitude spectrum
-    CleanFFT = magnitude_spectrum*LowpassFilter
+        # Apply the low-pass filter to the magnitude spectrum
+    CleanFFT = magnitude_spectrum*Filter
     
     # Display the cleaned spectrum if required
     if ShowIm: plotting(CleanFFT,y,filterCenter)
@@ -153,10 +156,13 @@ def CleanIlluminationEffects(img, filterCenter = [0, 233], D = 10, n=10, ShowIm 
     # Compute the Inverse Discrete Fourier Transform (IDFT)
     f_ishift = np.fft.ifftshift(CleanFFT)
     img_back = cv2.idft(f_ishift)
-    CleanedImage = img_back[:,:,0]/np.amax(img_back[:,:,0])
+    maxValue = np.amax(img_back[:,:,0]); minValue = np.amin(img_back[:,:,0])
+
+    CleanedImage = np.around(((img_back[:,:,0]-minValue)/(maxValue-minValue))*255).astype(np.uint8)
+    
     return CleanedImage
 
-def BrightnessAndContrast(img, Brightness = 1, Contrast = 1, Sharpness = 1, **kwargs):
+def BrightnessAndContrast(img, Brightness = 1, Contrast = 1, Sharpness = 1, ShowIm =False, **kwargs):
     """
     Adjusts the brightness, contrast, and sharpness of an image.
 
@@ -199,6 +205,7 @@ def BrightnessAndContrast(img, Brightness = 1, Contrast = 1, Sharpness = 1, **kw
     Brightness = kwargs.get('Brightness', Brightness)
     Contrast = kwargs.get('Contrast', Contrast)
     Sharpness = kwargs.get('Sharpness', Sharpness)
+    ShowIm = kwargs.get('ShowIm', ShowIm)
 
     # Validate parameter values
     Brightness = max(0, min(2, Brightness))
@@ -208,7 +215,8 @@ def BrightnessAndContrast(img, Brightness = 1, Contrast = 1, Sharpness = 1, **kw
     # Convert image to grayscale if it is in color
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
     
-    img = Image.fromarray(img, mode='L')
+    img = Image.fromarray(img, mode='L')    
+    
     CorrectedImage = img.copy()
     if Brightness != 1:
         enhancer = ImageEnhance.Brightness(img)

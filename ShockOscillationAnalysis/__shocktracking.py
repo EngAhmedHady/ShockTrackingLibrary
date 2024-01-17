@@ -6,9 +6,8 @@ Created on Fri Dec  1 15:27:54 2023
 """
 import numpy as np
 import matplotlib.pyplot as plt
-# from scipy import signal
-
-        
+          
+            
 def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
     """
     Process a given slice to track shock waves and determine the shock location.
@@ -38,14 +37,11 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
     """
     
     # Start processing the slice
-    avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice  
-    
+    avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice    
     MinimumPoint = min(SnapshotSlice) # ........... minimum (darkest) point
-    
     if Plot: # to plot slice illumination values with location and Avg. line
         fig, ax = plt.subplots(figsize=(10,5))
         ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
-        ax.plot(SnapshotSlice); 
         # ax.plot(AvgLocation,AvgIllumination,linestyle = '-.');
     
     # Initiating Variables 
@@ -67,7 +63,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
                 SetMinPoint = min(localmin)
                 AeraSet.append(A)
                 if Plot: ax.fill_between(LocMinI, localmin,avg , alpha=0.5)
-                if A > MinA and SetMinPoint/MinimumPoint > 0.3: 
+                if A > MinA and (avg - SetMinPoint)/(avg-MinimumPoint) > 0.3: 
                     MinA = A;   ShockRegion = [LocMinI,localmin]
                 localmin = []; LocMinI = []
         
@@ -77,15 +73,27 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
             SetMinPoint = min(localmin)
             AeraSet.append(A)
             if Plot:ax.fill_between(LocMinI, localmin,avg , alpha=0.5)                        
-            if A > MinA and SetMinPoint/MinimumPoint > 0.3:
+            if A > MinA and (avg - SetMinPoint)/(avg-MinimumPoint) > 0.3:
                 MinA = A;   ShockRegion = [LocMinI,localmin]
             localmin = []; LocMinI = []
             
         else: localmin = [];  LocMinI = []
     
     # check if there is more than one valley in the local minimum
-    LocMinAvg = np.mean(ShockRegion[1])
-    if Plot: ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinAvg,LocMinAvg],'-.r')
+    # print(ShockRegion[1])
+    
+    try:
+        LocMinAvg = np.mean(ShockRegion[1])
+    except Exception as e:
+        # By this way we can know about the type of error occurring
+        fig, ax = plt.subplots(figsize=(10,5))
+        ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
+        ax.text(0.99, 0.99, f'Error: {e}',
+                ha = 'right', va ='top', transform = ax.transAxes,
+                color = 'red', fontsize=14)
+        print("The error is: ",e)
+    
+    if Plot: ax.plot([ShockRegion[0][0]+5,ShockRegion[0][-1]-5],[LocMinAvg,LocMinAvg],'-.r')
     
     localmin2 = [] # .............................. sub-local minimum value
     LocMinI2 = [] # ............................ sub-local minimum location
@@ -117,7 +125,8 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
             # calculating the area of the sub-valley
             A2 = abs(np.trapz(LocMinAvg-SubLocalMinSet[1]))
             AreaSet2.append(A2) # ........................ storing the area
-            if A2 > MaxArea2: MaxArea2 = A2 # ...... Check the minimum area
+            if A2 > MaxArea2: MaxArea2 = A2 # ...... Check the maximum area
+            
             
             # check the location of the minimum illumination point from last snapshot location and choose the closest
             minValue = min(SubLocalMinSet[1]) # ........ find minimam illumination in the sub-set
@@ -136,7 +145,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
     # Find the middel of the shock wave as middle point of RMS
     LocMinRMS = avg-np.sqrt(np.mean(np.array(avg-ShockRegion[1])**2))
     if Plot: 
-        ax.plot([ShockRegion[0][0]-5,ShockRegion[0][-1]+5],[LocMinRMS,LocMinRMS],'-.k') 
+        ax.plot([ShockRegion[0][0]+5,ShockRegion[0][-1]-5],[LocMinRMS,LocMinRMS],'-.k') 
         ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='///') 
         
     shockLoc = [];
@@ -167,5 +176,8 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
         ax.text(0.99, 0.99, 'uncertain: '+ reason,
                 ha = 'right', va ='top', transform = ax.transAxes,
                 color = 'red', fontsize=14)
-        # ax.set_ylim([-1,1])
     return minLoc, certainLoc, reason
+
+
+# def ShockOld(SnapshotSlice, Plot = False, count = -1):
+    

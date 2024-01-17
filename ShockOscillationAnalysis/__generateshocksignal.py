@@ -7,6 +7,7 @@ Created on Sun Dec 10 02:41:58 2023
 import cv2
 import sys
 import time
+import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
 from .__shocktracking import ShockTraking
@@ -41,8 +42,42 @@ def TimeCalculation(timeInSec):
         print("Total run time: %s Min, %s Sec" % (timeInMin, round(sec)))
     else:
         print("Total run time: %s Sec" % round(timeInSec))
+        
+def GradientGenerator(img, KernalDim = 3):
+    ddepth = cv2.CV_16S
 
-def GenerateShockSignal(img, reviewInterval = [0,0], Signalfilter=None, CheckSolutionTime = True):
+    grad_x = cv2.Sobel(img, ddepth, 1, 0, ksize=KernalDim, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+    grad_y = cv2.Sobel(img, ddepth, 0, 1, ksize=KernalDim, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
+
+    abs_grad_x = cv2.convertScaleAbs(grad_x)
+    abs_grad_y = cv2.convertScaleAbs(grad_y)
+
+    grad = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
+    return grad
+
+def IntegralShocktracking(SnapshotSlice,Plot,count,ShockLocation, uncertain):
+
+    LastShockLocation = ShockLocation[-1] if ShockLocation else -1
+    
+    minLoc, certain, reason = ShockTraking(SnapshotSlice, 
+                                           LastShockLoc = LastShockLocation, 
+                                           Plot = Plot,
+                                           count = count)
+    ShockLocation.append(minLoc)
+    if not certain: uncertain.append([count,minLoc,reason])
+    return ShockLocation, uncertain
+    
+def GradShocktracking(GradSlice,Plot,count,ShockLocation, uncertain):
+    ShockLocation.append(np.argmax(GradSlice))
+    return ShockLocation, uncertain
+
+def DarkestSpotShocktracking(SnapshotSlice,Plot,count,ShockLocation, uncertain):
+    ShockLocation.append(np.argmin(SnapshotSlice))
+    return ShockLocation, uncertain
+
+def GenerateShockSignal(img, method = 'integral', 
+                        signalfilter=None, reviewInterval = [0,0],
+                        CheckSolutionTime = True, **kwargs):
     """
     Find the shockwave locations in a series of snapshots with optional signal processing filters.
 
@@ -81,43 +116,42 @@ def GenerateShockSignal(img, reviewInterval = [0,0], Signalfilter=None, CheckSol
     ploting = plotingInterval > 0
     
     # check if the image on grayscale or not and convert if not
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
+    ShockRegion = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
     
+    if method == 'integral':
+        TrakingMethod = IntegralShocktracking
+    elif method == 'darkest_spot':
+        TrakingMethod = DarkestSpotShocktracking
+    elif method == 'maxGrad':
+        ksize = kwargs.get('ksize', 3)
+        ShockRegion = GradientGenerator(ShockRegion, KernalDim = ksize)
+        TrakingMethod = GradShocktracking
+        
+        
     nShoots = img.shape[0] # .................... total number of snapshots
     print('Processing the shock location ...')
     
     if ploting: 
         fig, ax = plt.subplots(figsize=(30,300))
         ax.imshow(img, cmap='gray');
-        # check ploting conditions
-     
-    for SnapshotSlice in img:
+        # check ploting conditions        
+    for SnapshotSlice in ShockRegion:
         Plot = ploting and start <= count < end
-        
-        LastShockLocation = ShockLocation[-1] if ShockLocation else -1
-        
-        minLoc, certain, reason = ShockTraking(SnapshotSlice, 
-                                               LastShockLoc = LastShockLocation, 
-                                               Plot = Plot,
-                                               count = count)
-        ShockLocation.append(minLoc)
-        if not certain: uncertain.append([count,minLoc,reason])
+        ShockLocation, uncertain = TrakingMethod(SnapshotSlice,Plot,count,ShockLocation,uncertain)
         count += 1
         sys.stdout.write('\r')
         sys.stdout.write("[%-20s] %d%%" % ('='*int(count/(nShoots/20)), int(5*count/(nShoots/20))))
-        sys.stdout.flush()
+        # sys.stdout.flush()
     print('')
-        
-    if Signalfilter == 'median':
-        print('Appling median filter...')
+    
+    print(f'Appling {signalfilter} filter...')
+    if signalfilter == 'median':
         ShockLocation = signal.medfilt(ShockLocation)
-    elif Signalfilter == 'Wiener':
-        print('Appling Wiener filter...')
-        ShockLocation = signal.wiener(ShockLocation.astype('float64')+ 1e-10)
-    elif Signalfilter == 'med-Wiener':
-        print('Appling med-Wiener filter...')
+    elif signalfilter == 'Wiener':
+        ShockLocation = signal.wiener(np.array(ShockLocation).astype('float64'))
+    elif signalfilter == 'med-Wiener':
         ShockLocation = signal.medfilt(ShockLocation)
-        ShockLocation = signal.wiener(ShockLocation.astype('float64')+ 1e-10)
+        ShockLocation = signal.wiener(ShockLocation.astype('float64'))
     
     # Shock tracking time
     if CheckSolutionTime:
