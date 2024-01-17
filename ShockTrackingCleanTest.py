@@ -20,38 +20,39 @@ plt.rcParams.update({'font.size': 30})
 
 f = 1500
 D = 59     # Distance in mm
-HLP = 7   # Horizontal line position [slice location to a reference line]
+HLP = 15   # Horizontal line position [slice location to a reference line]
 # Scale = 0.12987012987012986
 # Scale = 0.13008130081300814
-Scale = 0.13024282560706402
-SliceThickness = 50
+Scale = 0.13082039911308205
+SliceThickness = 60
 WR = [0, 1024, 260, 22.804736509281568, (101, 260)]
 n = -1;
 # imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
-imgPath = 'D:\\PhD\\TEAMAero\\2023_03_29 - Fully Open with suction\\Oil-sch test 8 - Final full covered 25fps - 5%\\0_20230329_164729\\*.png'
+# imgPath = 'D:\\PhD\\TEAMAero\\2023_03_29 - Fully Open with suction\\Oil-sch test 8 - Final full covered 25fps - 5%\\0_20230329_164729\\*.png'
 # imgPath = '*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\10kHz_smooth P1 (Test 8)\\*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Reference Case data\\2022_07_29_FastShileren\\5kHz\\*.png'
-# imgPath = 'D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Fully Open\\2023-03-29_Sync_Oil_sch-fully open\\Oil-sch test 8 - Final full covered\\Schlieren\\*.png'
+imgPath = 'D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Fully Open\\2023-03-29_Sync_Oil_sch-fully open\\Oil-sch test 8 - Final full covered\\Schlieren\\*.png'
 # imgPath = 'D:\\TFAST\TEAMAero experiments\\2023_05_10\\Smooth-2kHz-5sec (test 5)\\*.png'
 # CaseName = '17suc-ReflecEff-Leading'
-CaseName = 'Passage_Rotated'
+# CaseName = f'Passage_Rotated-{HLP}mm'
+CaseName = 'Passage-shock_NotRotated'
 # CaseName = '17suc-fullsuc-ReflecEff-passage'
 
 Folders = imgPath.split("\\")
 FileDirectory = ''
 for i in range(len(Folders)-1): FileDirectory += (f'{Folders[i]}\\')
-NewFileDirectory = os.path.join(FileDirectory, "shock_signal2")
+NewFileDirectory = os.path.join(FileDirectory, "shock_signal2_15mm")
 if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
 
 SA = SOA(f,D)
-# ImpImg = ImpS(f,D)
+ImpImg = ImpS(f,D)
 # ShockwaveRegion ,n ,WR, Scale = ImpImg.GenerateSlicesArray(imgPath,
 #                                                               HLP = HLP,
 #                                                               FullImWidth = False,
-#                                                               # WorkingRange = [150], #MidRe-Test 8-passage edge (7mm)
-#                                                               # WorkingRange = [239, 690, 194], #MidRe-Test 8-leading edge (15mm)
-#                                                               WorkingRange = [240, 693, 260], #MidRe-Test 8-leading edge (7mm)
+#                                                               # WorkingRange = [150], #MidRe-Test 8-passage edge (15mm)
+#                                                               WorkingRange = [239, 690, 194], #MidRe-Test 8-leading edge (15mm)
+#                                                               # WorkingRange = [240, 693, 260], #MidRe-Test 8-leading edge (7mm)
 #                                                               # WorkingRange = [237, 691, 259], #MidRe-Test 8
 #                                                               # WorkingRange = [109, 726, 565], #P1_2kHz
 #                                                               # WorkingRange = [109, 726, 276], #P1_3kHz
@@ -64,6 +65,7 @@ SA = SOA(f,D)
 #                                                               OutputDirectory = NewFileDirectory,
 #                                                               # inclinationEst = [70,(87, 296),(124, 210)], #MidRe-Test 8-leading edge
 #                                                               inclinationEst = [120,(423, 292),(416, 217)], #MidRe-Test 8
+#                                                               # inclinationEst = [120,(423, 292),(416, 217)], #MidRe-Test 8
 #                                                               # inclinationEst = [100,(83, 293),(143, 187)], #MidRe-Test 8
 #                                                               # inclinationEst = [80,(473,591),(466,514)], #P1_2kHz
 #                                                               # inclinationEst = [80,(473,591),(466,514)], #P1_2kHz
@@ -74,7 +76,7 @@ SA = SOA(f,D)
 
 # ImgList = cv2.imread(NewFileDirectory+'\\2.0kHz_50mm_0.1360544217687075mm-px_ts_10_slice.png')
 # File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_ts_{SliceThickness}_slice_{CaseName}.png"
-File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_ts_{SliceThickness}_slice_{CaseName}.png"
+File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_tk_{SliceThickness}px_{CaseName}.png"
 
 # print(NewFileDirectory+'\\'+File)
 if os.path.exists(f"{NewFileDirectory}\\{File}"): ImgList = cv2.imread(f"{NewFileDirectory}\\{File}")
@@ -94,7 +96,7 @@ else:
 # NewRef = [315, 477]
 # NewRef = [383, 552] # 2kHz P1
 # NewRef = [288, 431] # 3kHz P1
-NewRef = [103, 250] # MidRe-Test8-P3
+NewRef = [103, 250] # MidRe-Test8-P3 (7,15mm)
 # NewRef = [55, 141] # MidRe-Test8-P3
 # NewRef = [283, 440] # 10kHz P1
 # NewRef = [47, 140] #MidRe-Test 8-leading edge (7mm)
@@ -109,7 +111,6 @@ print('Shock Regions:',NewRef,'\t Represents:' ,xPixls, 'px \t Shock Regions in 
 # Image cleaning [subtracting the average, subtracting ambiant light frequency]
 
 # ShockwaveRegion = SA.Average(ShockwaveRegion)
-print('Cleaning illumination instability ...')
 # ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
 #                                     'Average', 'FFT', #'Brightness and Contrast',
 #                                     filterCenter = [(0, 233)], D = 20, n = 5,
@@ -118,12 +119,12 @@ print('Cleaning illumination instability ...')
 
 ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
                                     'FFT',
+                                    'Average',
                                     'Brightness and Contrast',
-                                    # 'Average',
                                     # filterCenter = [(0, 233)], D = 20, n = 5,
                                     filterCenter = [(0, 465), (-10, 465), (10, 465), (0, 495)], D = 25, n = 5,
                                     # Brightness = 0.5, Contrast = 2, Sharpness = 1.5,
-                                    Brightness = 0.9, Contrast = 2, Sharpness = 3,
+                                    Brightness = 0.8, Contrast = 1.9, Sharpness = 2,
                                     ShowIm = False)
 
 # Find shock location
@@ -138,7 +139,7 @@ ShockLocation, Uncer = SA.ShockTrakingAutomation(ShockwaveRegion,
                                                   # method = 'maxGrad',
                                                   method = 'integral',
                                                  # reviewInterval = [10,15],
-                                                 reviewInterval = [0,0], 
+                                                 reviewInterval = [5670,5690], 
                                                  Signalfilter = 'Wiener')
 
 print('uncertainty ratio:', round((len(Uncer)/len(ShockLocation))*100,2),'%')
@@ -260,18 +261,20 @@ ShockResionScale = xPixls*Scale
 #                                     ShowIm = False)
 
 ax1.imshow(ShockwaveRegion, extent=[0, ShockResionScale, n, 0], aspect='0.1', cmap='gray');
+# plt.close(fig1)
 # ax1.plot([0,ShockResionScale],[25,25],'r--')
 # ax1.plot([0,ShockResionScale],[122,122],'r--')
 # ax1.plot([0,ShockResionScale],[133,133],'r--')
 ax1.invert_yaxis()
 ax1.set_ylabel(r"snapshots (n)"); 
 ax1.set_xlabel(r"Shock oscillation domain ($x$) [mm]");
-ax1.plot(A, range(n),'x', lw = 1, color = 'g', ms = 10)
+ax1.plot(A, range(n),'x', lw = 1, color = 'g', ms = 7)
 ax1.plot(uncertain, Loc,'x', lw = 1, color = 'r', ms = 5)
 if len(WR) > 3:
     fig1.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{HLP}mm_tk_{SliceThickness}_{CaseName}_{round(WR[3])}deg_TrackedPoints.png")
 else:
     fig1.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{HLP}mm_tk_{SliceThickness}_{CaseName}_TrackedPoints.png")
+
 # ax1.set_ylim([0,400])
 # plt.show()
 

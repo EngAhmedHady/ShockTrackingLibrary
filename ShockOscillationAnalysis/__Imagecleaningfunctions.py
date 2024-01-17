@@ -74,13 +74,16 @@ def Average(img):
     """    
     # Convert image to grayscale if it is in color
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
-    
+    print('\t - subtracting Averaging ...', end=" ")
     width = len(img[0])
     Avg = np.zeros(width)
     for i in img: Avg += i
     Avg /= img.shape[0]
     Newimg = np.zeros(img.shape)
     for i in range(img.shape[0]):  Newimg[i] = img[i] - Avg
+    maxValue = np.amax(Newimg); minValue = np.amin(Newimg)
+    Newimg = np.around(((Newimg-minValue)/(maxValue-minValue))*255).astype(np.uint8)
+    print(u'\u2713')
     return Newimg
     
 
@@ -126,6 +129,8 @@ def CleanIlluminationEffects(img, filterCenter = [0, 233], D = 10, n=10, ShowIm 
     # Convert image to grayscale if it is in color
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
     
+    print('\t - Removing illumination instability', end=" ")
+    
     dft = cv2.dft(np.float32(img),flags = cv2.DFT_COMPLEX_OUTPUT)
     magnitude_spectrum = np.fft.fftshift(dft)
     y, x = magnitude_spectrum.shape[:2]
@@ -146,6 +151,7 @@ def CleanIlluminationEffects(img, filterCenter = [0, 233], D = 10, n=10, ShowIm 
                         else: LowpassFilter[i][j]= 1/(1+(D/denominator)**(n*2))
                 else: LowpassFilter[i][j]= 0
         Filter *= LowpassFilter
+        print('.', end="")
     
         # Apply the low-pass filter to the magnitude spectrum
     CleanFFT = magnitude_spectrum*Filter
@@ -159,7 +165,7 @@ def CleanIlluminationEffects(img, filterCenter = [0, 233], D = 10, n=10, ShowIm 
     maxValue = np.amax(img_back[:,:,0]); minValue = np.amin(img_back[:,:,0])
 
     CleanedImage = np.around(((img_back[:,:,0]-minValue)/(maxValue-minValue))*255).astype(np.uint8)
-    
+    print(u' \u2713')
     return CleanedImage
 
 def BrightnessAndContrast(img, Brightness = 1, Contrast = 1, Sharpness = 1, ShowIm =False, **kwargs):
@@ -217,6 +223,8 @@ def BrightnessAndContrast(img, Brightness = 1, Contrast = 1, Sharpness = 1, Show
     
     img = Image.fromarray(img, mode='L')    
     
+    print('\t - Enhancing Image visability ...', end=" ")
+    
     CorrectedImage = img.copy()
     if Brightness != 1:
         enhancer = ImageEnhance.Brightness(img)
@@ -229,7 +237,7 @@ def BrightnessAndContrast(img, Brightness = 1, Contrast = 1, Sharpness = 1, Show
     if Sharpness != 1:
         enhancer = ImageEnhance.Sharpness(CorrectedImage)
         CorrectedImage = enhancer.enhance(Sharpness)
-        
+    print(u'\u2713')
     return np.array(CorrectedImage)
         
         

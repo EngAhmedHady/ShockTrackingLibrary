@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
           
             
-def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
+def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alpha = 0.3):
     """
     Process a given slice to track shock waves and determine the shock location.
     
@@ -42,6 +42,8 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
     if Plot: # to plot slice illumination values with location and Avg. line
         fig, ax = plt.subplots(figsize=(10,5))
         ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
+        ax.set_ylim([-20,260]);  ax.set_yticks(np.arange(0, 260, 51))
+        ax.axhline(0,linestyle = ':', color = 'b', alpha = 0.3); ax.axhline(255,linestyle = ':', color = 'b', alpha = 0.3);
         # ax.plot(AvgLocation,AvgIllumination,linestyle = '-.');
     
     # Initiating Variables 
@@ -63,7 +65,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
                 SetMinPoint = min(localmin)
                 AeraSet.append(A)
                 if Plot: ax.fill_between(LocMinI, localmin,avg , alpha=0.5)
-                if A > MinA and (avg - SetMinPoint)/(avg-MinimumPoint) > 0.3: 
+                if A > MinA and (avg - SetMinPoint)/(avg-MinimumPoint) > Alpha: 
                     MinA = A;   ShockRegion = [LocMinI,localmin]
                 localmin = []; LocMinI = []
         
@@ -73,7 +75,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
             SetMinPoint = min(localmin)
             AeraSet.append(A)
             if Plot:ax.fill_between(LocMinI, localmin,avg , alpha=0.5)                        
-            if A > MinA and (avg - SetMinPoint)/(avg-MinimumPoint) > 0.3:
+            if A > MinA and (avg - SetMinPoint)/(avg-MinimumPoint) > Alpha:
                 MinA = A;   ShockRegion = [LocMinI,localmin]
             localmin = []; LocMinI = []
             
@@ -91,7 +93,8 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
         ax.text(0.99, 0.99, f'Error: {e}',
                 ha = 'right', va ='top', transform = ax.transAxes,
                 color = 'red', fontsize=14)
-        print("The error is: ",e)
+        if count > -1: ax.set_title(count)
+        print("\n The error is: ",e)
     
     if Plot: ax.plot([ShockRegion[0][0]+5,ShockRegion[0][-1]-5],[LocMinAvg,LocMinAvg],'-.r')
     
@@ -127,7 +130,6 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
             AreaSet2.append(A2) # ........................ storing the area
             if A2 > MaxArea2: MaxArea2 = A2 # ...... Check the maximum area
             
-            
             # check the location of the minimum illumination point from last snapshot location and choose the closest
             minValue = min(SubLocalMinSet[1]) # ........ find minimam illumination in the sub-set
             minLoc = SubLocalMinSet[1].index(minValue) # find the location of the minimam illumination in the sub-set
@@ -144,6 +146,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
     
     # Find the middel of the shock wave as middle point of RMS
     LocMinRMS = avg-np.sqrt(np.mean(np.array(avg-ShockRegion[1])**2))
+    if LocMinRMS < min(ShockRegion[1]): LocMinRMS = min(ShockRegion[1])
     if Plot: 
         ax.plot([ShockRegion[0][0]+5,ShockRegion[0][-1]-5],[LocMinRMS,LocMinRMS],'-.k') 
         ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='///') 
@@ -157,8 +160,19 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
         ax.axvline(minLoc, linestyle = '--', color = 'b')
         if count > -1: ax.set_title(count)
         if LastShockLoc > -1:
-            ax.axvline(LastShockLoc,linestyle = '--',color = 'orange')  
-    
+            ax.axvline(LastShockLoc,linestyle = '--',color = 'orange')
+            if abs(LastShockLoc - minLoc) > 15:
+                arrow_props = dict(arrowstyle='<|-|>', fc='k', ec='k')
+                ax.annotate('', xy=(LastShockLoc, -13.5) , xytext=(minLoc, -13.5), arrowprops=arrow_props)
+            else:
+                arrow_props = dict(arrowstyle='-|>', fc='k', ec='k')
+                if LastShockLoc > minLoc:
+                    ax.annotate('', xy=(LastShockLoc, -13.5) , xytext=(LastShockLoc + 10, -13.5), arrowprops=arrow_props)
+                    ax.annotate('', xy=(minLoc, -13.5) , xytext=(minLoc - 10, -13.5), arrowprops=arrow_props)
+                else:
+                    ax.annotate('', xy=(LastShockLoc, -13.5) , xytext=(LastShockLoc-10, -13.5), arrowprops=arrow_props)
+                    ax.annotate('', xy=(minLoc, -13.5) , xytext=(minLoc + 10, -13.5), arrowprops=arrow_props)
+            ax.text((LastShockLoc+minLoc)/2, -10, f'{abs(LastShockLoc-minLoc):0.1f}', ha='center', fontsize=14)
     for Area in AeraSet:
         Ra = Area/MinA
         if Ra > 0.6 and Ra < 1 and certainLoc:
@@ -176,6 +190,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1):
         ax.text(0.99, 0.99, 'uncertain: '+ reason,
                 ha = 'right', va ='top', transform = ax.transAxes,
                 color = 'red', fontsize=14)
+        
     return minLoc, certainLoc, reason
 
 

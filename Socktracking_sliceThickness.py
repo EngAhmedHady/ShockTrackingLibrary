@@ -17,7 +17,7 @@ from ShockOscillationAnalysis import importSchlierenImages as ImpS
 f = 1500
 D = 59
 # D = 97.741
-HLP = 7
+HLP = 15
 Scale = 0.13245033112582782
 # WorkingRange = [56, 673, 470] #Ref-3000
 # WorkingRange = [241, 687, 260] #Fully Open with suction-1500
@@ -39,7 +39,7 @@ CaseName = 'Passage-shock_Rotated'
 Folders = imgPath.split("\\")
 FileDirectory = ''
 for i in range(len(Folders)-1): FileDirectory += (Folders[i]+'\\')
-NewFileDirectory = os.path.join(FileDirectory, f"shock_signal")
+NewFileDirectory = os.path.join(FileDirectory, f"shock_signal_{HLP}mm")
 if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
 
 uncertainityRatios = []
@@ -57,7 +57,8 @@ for thickness in SliceThicknesses:
                                                                   HLP = HLP,
                                                                   FullImWidth = False,
                                                                   nt = -1,
-                                                                  WorkingRange = [240, 693, 260], #MidRe-Test 8-leading edge
+                                                                  WorkingRange = [239, 690, 194], #MidRe-Test 8-leading edge (15mm)
+                                                                  # WorkingRange = [240, 693, 260], #MidRe-Test 8-leading edge (7mm)
                                                                   # WorkingRange =[109, 726, 565], #P1-2kHz
                                                                   # WorkingRange =[109, 726, 276], #P1-3kHz
                                                                   # WorkingRange =[111, 725, 75],  #P1-6kHz
@@ -71,12 +72,12 @@ for thickness in SliceThicknesses:
                                                                   # inclinationEst = [90,(470, 129),(459, 5)], #P1-10kHz
                                                                   # inclinationEst = [120,(462, 86),(457, 18)], #P1-15kHz
                                                                   # inclinationEst = [70,(87, 296),(124, 210)], #MidRe-Test 8-leading edge
-                                                                  inclinationEst = [150,(423, 292),(416, 217)], #MidRe-Test 8
+                                                                  inclinationEst = [120,(423, 292),(416, 217)], #MidRe-Test 8
                                                                   OutputDirectory = NewFileDirectory,
                                                                   comment = f'{CaseName}')    
     
     # File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_ts_{thickness}_slice_{CaseName}.png"
-    File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_ts_{thickness}_slice_{CaseName}.png"
+    File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_tk_{thickness}px_{CaseName}.png"
     if os.path.exists(NewFileDirectory+'\\'+File): ImgList = cv2.imread(NewFileDirectory+'\\'+File)
     else: print('File is not exist!!'); sys.exit();
     
@@ -110,11 +111,12 @@ for thickness in SliceThicknesses:
     #                   4- see the FFT domain before and after filtering (True/False)
     print('Cleaning illumination instability ...')
     ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
-                                        'Brightness and Contrast',
-                                        'Average', 'FFT', 
+                                        'FFT', 
+                                        'Average',
+                                        'Brightness and Contrast',                                        
                                         # filterCenter = [(0, 233)], D = 20, n = 5,
                                         filterCenter = [(0, 465), (-10, 465), (10, 465), (0, 490)], D = 10, n = 5,
-                                        Brightness = 1.5, Contrast = 2, Sharpness = 1.5,
+                                        Brightness = 1.1, Contrast = 2, Sharpness = 1,
                                         ShowIm = False)
     
     # fig1, ax1 = plt.subplots(figsize=(20,200))

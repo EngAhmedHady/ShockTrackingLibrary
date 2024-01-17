@@ -100,7 +100,7 @@ class importSchlierenImages(SOA):
        - It returns a list of Slices location and range, the number of slices, and the inclination applicability.
     
         """
-        print('Shock inclination test ...')
+        print('Shock inclination test and setup ...', end=" ")
         Ht = int(CheckingHieght/2)
         SlicesInfo = []; inclinationCheck = True
         
@@ -113,8 +113,9 @@ class importSchlierenImages(SOA):
             DatumY = VMidPnt-Ht
             if CheckingHieght > 10:             Pnts = np.linspace(0, CheckingHieght, 10); nPnts = 10
             elif CheckingHieght > 2 and CheckingHieght <= 10: Pnts = range(CheckingHieght); nPnts = CheckingHieght
-            else: 
-                print('escaping the shock angle checking... \nSlice thickness is not sufficient for check the shock angle')
+            else:
+                print(u'\u2717')
+                print('Escaping the shock angle checking... \nSlice thickness is not sufficient for check the shock angle')
                 return SlicesInfo, 0, False
         
         
@@ -151,6 +152,7 @@ class importSchlierenImages(SOA):
             cv2.circle(self.clone, (x_i1,y_i), radius=3, color=(0, 0, 255), thickness=-1)
             cv2.circle(self.clone, (x_i2,y_i), radius=3, color=(0, 0, 255), thickness=-1)                
             SlicesInfo.append([[x_i1,x_i2],y_i])
+        print(u'\u2713')
         return SlicesInfo, nPnts, inclinationCheck 
     
     def IntersectionPoint(self, M , A, Ref):
@@ -253,7 +255,7 @@ class importSchlierenImages(SOA):
                 self.plot_review(ax, img, xLoc, ColumnY, uncertain, uncertainY, midLoc, y)
                 
                 if len(OutputDirectory)> 0:
-                    fig.savefig(OutputDirectory +f'\\ShockAngleReview_{count:04d}_Ang{AngReg}.png')
+                    fig.savefig(OutputDirectory +f'\\ShockAngleReview_{count:04d}_Ang{AngReg:.2f}.png')
             count += 1
         # Shock tracking time
         if CheckSolutionTime:
@@ -360,7 +362,7 @@ class importSchlierenImages(SOA):
             elif Mode > 0 and nt < 0: n1 = int(len(files)/Mode)
             else: n1 = nt
             if inclinationCheck:
-                print('Shock inclination estimate ... ')
+                print('Shock inclination estimation ... ')
                 
                 randomIndx = self.genratingRandomNonRepeativeNumber(ShockAngleSamples, n1)
 
@@ -379,7 +381,7 @@ class importSchlierenImages(SOA):
                 if AngleSamplesReview < ShockAngleSamples: NSamplingReview = AngleSamplesReview
                 else:
                     NSamplingReview = ShockAngleSamples
-                    print('Warning: Number of samples is larger than requested to review, all samples will be reviewed')
+                    print('Warning: Number of samples is larger than requested to review!, all samples will be reviewed')
             
                 
                 AvgAngleGlob, AvgSlopeGlob, AvgShockLocGlob = self.InclinedShockTracking(samplesList, nSlices, Ref, 
@@ -420,15 +422,15 @@ class importSchlierenImages(SOA):
                 
             if len(OutputDirectory) > 0:
                 if len(comment) > 0:
-                    self.outputPath = OutputDirectory+'\\RefDomain-'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+ str(SliceThickness) +'_slice'+comment
+                    self.outputPath = f'{OutputDirectory}\\{self.f/1000:.1f}kHz_{HLP}mm_{self.pixelScale:.2f}mm-px_tk_{SliceThickness}px_{comment}'
                 else:
                     now = dt.now()
                     now = now.strftime("%d%m%Y%H%M")
-                    self.outputPath = OutputDirectory+'\\RefDomain'+str(self.f/1000)+'kHz_'+str(HLP)+'mm_'+str(self.pixelScale)+'mm-px_ts_'+str(SliceThickness)+'_slice'+now
+                    self.outputPath =f'{OutputDirectory}\\{self.f/1000:.1f}kHz_{HLP}mm_{self.pixelScale:.2f}mm-px_tk_{SliceThickness}px_{now}'
                 if inclinationCheck:
-                    print('RotatedImage:', "stored" if cv2.imwrite(self.outputPath+'-Final.png', NewImg) else "Failed")
-                    print('DomainImage:' , "stored" if cv2.imwrite(self.outputPath+'.png', self.clone)   else "Failed")
-                else: print('DomainImage:',"stored" if cv2.imwrite(self.outputPath+'.png', self.clone)   else "Failed") 
+                    print('RotatedImage:', "stored" if cv2.imwrite(self.outputPath+f'-RefD{round(AvgAngleGlob,2)}deg.png', NewImg) else "Failed")
+                    print('DomainImage:' , "stored" if cv2.imwrite(self.outputPath+'-RefD.png', self.clone)   else "Failed")
+                else: print('DomainImage:',"stored" if cv2.imwrite(self.outputPath+'-RefD.png', self.clone)   else "Failed") 
                     
             
             if FullImWidth: 
@@ -477,11 +479,11 @@ class importSchlierenImages(SOA):
 
             if len(OutputDirectory) > 0:
                 if len(comment) > 0:
-                    self.outputPath = f'{OutputDirectory}\\{self.f/1000}kHz_{HLP}mm_{self.pixelScale}mm-px_ts_{SliceThickness}_slice_{comment}.png'
+                    self.outputPath = f'{OutputDirectory}\\{self.f/1000}kHz_{HLP}mm_{self.pixelScale}mm-px_tk_{SliceThickness}px_{comment}.png'
                 else:
                     now = dt.now()
                     now = now.strftime("%d%m%Y%H%M")
-                    self.outputPath =f'{OutputDirectory}\\{self.f/1000}kHz_{HLP}mm_{self.pixelScale}mm-px_ts_{SliceThickness}_slice_{now}.png'
+                    self.outputPath =f'{OutputDirectory}\\{self.f/1000}kHz_{HLP}mm_{self.pixelScale}mm-px_tk_{SliceThickness}px_{now}.png'
                 print('ImageList write:', f"File was stored:{self.outputPath}" if cv2.imwrite(self.outputPath, ImgList) else "Failed")
                 
         else:

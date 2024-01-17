@@ -35,13 +35,13 @@ def TimeCalculation(timeInSec):
         timeInHr = timeInSec // 3600
         timeInMin = (timeInSec % 3600) // 60
         sec = (timeInSec % 3600) % 60
-        print("Total run time: %s Hr, %s Min, %s Sec" % (timeInHr, timeInMin, round(sec)))
+        print("Processing time: %s Hr, %s Min, %s Sec" % (timeInHr, timeInMin, round(sec)))
     elif timeInSec > 60:
         timeInMin = timeInSec // 60
         sec = timeInSec % 60
-        print("Total run time: %s Min, %s Sec" % (timeInMin, round(sec)))
+        print("Processing time: %s Min, %s Sec" % (timeInMin, round(sec)))
     else:
-        print("Total run time: %s Sec" % round(timeInSec))
+        print("Processing time: %s Sec" % round(timeInSec))
         
 def GradientGenerator(img, KernalDim = 3):
     ddepth = cv2.CV_16S

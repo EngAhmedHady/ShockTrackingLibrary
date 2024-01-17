@@ -236,6 +236,9 @@ class SOA:
     
         """
         CorrectedImg = img.copy()
+        
+        print('Improving image quality ...')
+        
         for arg in args:
             if arg == 'Average': CorrectedImg = Average(CorrectedImg)
             if arg == 'FFT': CorrectedImg = CleanIlluminationEffects(CorrectedImg, **kwargs)
