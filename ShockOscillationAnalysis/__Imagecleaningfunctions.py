@@ -87,7 +87,7 @@ def Average(img):
     return Newimg
     
 
-def CleanIlluminationEffects(img, filterCenter = [0, 233], D = 10, n=10, ShowIm = False ,**kwargs):
+def CleanIlluminationEffects(img, filterCenter = [(0, 233)], D = 10, n=10, ShowIm = False ,**kwargs):
     
     """
     Clean illumination effects from an image using a frequency domain approach.

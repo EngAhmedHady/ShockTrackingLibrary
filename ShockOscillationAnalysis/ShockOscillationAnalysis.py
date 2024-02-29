@@ -6,6 +6,7 @@ Created on Tue Dec 20 09:32:30 2022
 """
 
 import cv2
+import sys
 import screeninfo
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,7 +17,7 @@ from .__generateshocksignal import GenerateShockSignal
 
  
 px = 1/plt.rcParams['figure.dpi']
-plt.rcParams.update({'font.size': 30})
+plt.rcParams.update({'font.size': 25})
 plt.rcParams["text.usetex"] =  True
 plt.rcParams["font.family"] = "Times New Roman"
 
@@ -42,8 +43,7 @@ class SOA:
         x_pos = (screen_width - shp[1]) // 2
         y_pos = (screen_height - shp[0]) // 2
         return x_pos, y_pos
-    
-    
+
     def extract_coordinates(self, event, x, y, flags, parameters):
         """
         Record starting (x, y) coordinates on left mouse button click and draw
@@ -81,7 +81,6 @@ class SOA:
           to calculate the inclined line and display it on the image.
 
         """
-        # win_x, win_y = self.screenMidLoc(parameters[1])
         if event == cv2.EVENT_LBUTTONDOWN:
             self.ClickCount += 1
             if len(self.TempLine) == 2: 
@@ -106,14 +105,10 @@ class SOA:
                     P1,P2,m,a = InclinedLine(self.TempLine[0],self.TempLine[1],imgShape = parameters[1])
                     cv2.line(self.Temp, P1, P2, (0,255,0), 1)
                     
-                # cv2.namedWindow(parameters[0], cv2.WINDOW_NORMAL)
-                # cv2.moveWindow(parameters[0], win_x, win_y)    
                 cv2.imshow(parameters[0], self.Temp)
             elif self.ClickCount == 2:
                    
                 self.Temp = self.clone.copy()
-                # cv2.namedWindow(parameters[0], cv2.WINDOW_NORMAL)
-                # cv2.moveWindow(parameters[0], win_x, win_y)
                 cv2.imshow(parameters[0], self.clone)
                 # storing the vertical line
                 if parameters[2] == 'V':
@@ -130,11 +125,8 @@ class SOA:
                     cv2.line(self.Temp, P1, P2, (0,255,0), 1)
                     avg = [P1, P2, m,a]
                 
-                    
                 self.Reference.append(avg)
                 self.clone = self.Temp.copy()
-                # cv2.namedWindow(parameters[0], cv2.WINDOW_NORMAL)
-                # cv2.moveWindow(parameters[0], win_x, win_y)
                 cv2.imshow(parameters[0], self.clone)
                 
         # Delete draw line before storing    
@@ -142,8 +134,6 @@ class SOA:
             self.TempLine = []
             if self.ClickCount>0: self.ClickCount -= 1
             self.Temp = self.clone.copy()
-            # cv2.namedWindow(parameters[0], cv2.WINDOW_NORMAL)
-            # cv2.moveWindow(parameters[0], win_x, win_y)
             cv2.imshow(parameters[0], self.Temp)
                
     def LineDraw(self, img, lineType, LineNameInd, Intialize = False):
@@ -203,6 +193,45 @@ class SOA:
         cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
         return self.Reference
     
+    def DefineReferences(self, img, shp, Ref_x0, scale_pixels, Ref_y0 = -1, Ref_y1 = -1, slice_loc = 0):
+        Ref_x0.sort(); start, end = Ref_x0
+        x0_diff = abs(end-start);  draw_x0 = x0_diff == 0       
+        
+        if draw_x0:
+            # Vertical limits and scale 
+            Ref_x0[0] = self.LineDraw(img, 'V', 0,  Intialize = True)[0]
+            Ref_x0[1] = self.LineDraw(self.clone, 'V', 1)[1]
+            if len(self.Reference) < 2: print('Reference lines are not sufficient!'); sys.exit()
+            
+        else:
+            self.clone = img.copy(); 
+            cv2.line(self.clone, (Ref_x0[0],0), (Ref_x0[0],shp[0]), (0,255,0), 1)
+            cv2.line(self.clone, (Ref_x0[1],0), (Ref_x0[1],shp[0]), (0,255,0), 1)
+            self.Reference = Ref_x0[0:2].copy()
+
+        self.Reference.sort() # to make sure that the limits are properly assigned
+        
+        if scale_pixels:  self.pixelScale = self.D / abs(self.Reference[1]-self.Reference[0])
+        print(f'Image scale: {self.pixelScale}')
+        
+        #----------------------------------------------------------
+        
+        # Alocate Horizontal reference
+        if Ref_y0 == -1 and Ref_y1 == -1:
+            self.LineDraw(self.clone, 'H', 2)  # to draw the reference line
+            if len(self.Reference) < 3: print('Reference lines are not sufficient!'); sys.exit()
+            Ref_y1 = self.Reference[2]-round(slice_loc/self.pixelScale)
+        else:
+            if   Ref_y0 != -1: Ref_y1 = Ref_y0-round(slice_loc/self.pixelScale)
+            elif Ref_y1 != -1: Ref_y0 = Ref_y1+round(slice_loc/self.pixelScale)
+            self.Reference.append(Ref_y0)
+            cv2.line(self.clone, (0,Ref_y0),(shp[1],Ref_y0),(0,255,255), 1)
+        
+        print(f'Slice is located at: {Ref_y1}px')
+        cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), (0,0,255), 1)
+        
+        return Ref_x0, Ref_y0, Ref_y1, draw_x0
+    
     def CleanSnapshots(self, img,*args,**kwargs):
         """
         Clean and enhance snapshots based on specified corrections.
@@ -252,8 +281,8 @@ class SOA:
         n = len(Signal);  dx_dt = np.zeros(n) 
         dt = TotalTime/n;
         
-        dx_dt[0] = (Signal[1] - Signal[0]) / dt             #forward difference for first point
-        dx_dt[n - 1] = (Signal[n - 1] - Signal[n - 2]) / dt #backward difference for last point
+        dx_dt[0] = (Signal[1] - Signal[0]) / 1000*dt            #forward difference for first point
+        dx_dt[-1] = (Signal[-1] - Signal[-2]) / 1000*dt         #backward difference for last point
         
         for x in range(1, n - 1):
             dx_dt[x] = (Signal[x + 1] - Signal[x - 1]) / (2000 * dt)

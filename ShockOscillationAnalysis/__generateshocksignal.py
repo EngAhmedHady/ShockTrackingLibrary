@@ -35,11 +35,11 @@ def TimeCalculation(timeInSec):
         timeInHr = timeInSec // 3600
         timeInMin = (timeInSec % 3600) // 60
         sec = (timeInSec % 3600) % 60
-        print("Processing time: %s Hr, %s Min, %s Sec" % (timeInHr, timeInMin, round(sec)))
+        print("Processing time: %s Hr, %s Min, %s Sec" % (round(timeInHr), round(timeInMin), round(sec)))
     elif timeInSec > 60:
         timeInMin = timeInSec // 60
         sec = timeInSec % 60
-        print("Processing time: %s Min, %s Sec" % (timeInMin, round(sec)))
+        print("Processing time: %s Min, %s Sec" % (round(timeInMin), round(sec)))
     else:
         print("Processing time: %s Sec" % round(timeInSec))
         

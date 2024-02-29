@@ -316,12 +316,13 @@ def ShockLoc(ImgSlice, plot = False):
 # Input Parameters ================================================================
 # Snapshots -----------------------------------------------------------------------
 # imgPath ='D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Fully Open\\2023-03-29_Sync_Oil_sch-fully open\\Oil-sch test 7 - half covered 25fps - 5%\\Oil-Sch test7\\*.png'
-imgPath ='D:\\TFAST\\TEAMAero experiments\\Philipp Cases, tripping\\2023_04_11\Fast Schlieren\\Test 7 - 180deg from the ref\\*.png'
+# imgPath ='D:\\TFAST\\TEAMAero experiments\\Philipp Cases, tripping\\2023_04_11\Fast Schlieren\\Test 7 - 180deg from the ref\\*.png'
+imgPath ='D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # BGPath ='D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Half Open\\2023_01_19\\Test 4-5\\Avg\\Avg4.JPG'
 # imgPath ='D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\2022_11_30\\*.jpg'
 # imgPath ='C:\\Users\\Hady-PC\\Desktop\\PhD\\TFAST\\TEAMAero Experiments\\2023_04_24\\Rough-2kHz-4sec (test 5)\\*.png'
 NSnapshots = 2000  # ---------------------- SnapShopts to import (-1 to import all)
-ResizeImg = (1620,1080)  # ------------- In case of need to change image resolution  
+# ResizeImg = (1620,1080)  # ------------- In case of need to change image resolution  
 useOrgImg = False # ----------- Use Original image in case of subtracting Avg image
 # Traking points ------------------------------------------------------------------
 N_Slices = 4 # --------------------------------------------------- Number of points
