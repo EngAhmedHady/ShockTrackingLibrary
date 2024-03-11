@@ -10,20 +10,31 @@ import sys
 import screeninfo
 import numpy as np
 import matplotlib.pyplot as plt
-from .__Imagecleaningfunctions import Average, CleanIlluminationEffects, BrightnessAndContrast
+from .__imgcleaningfunctions import SliceListAverage, CleanIlluminationEffects, BrightnessAndContrast
 from .__linedrawingfunctions import InclinedLine
 from .__generateshocksignal import GenerateShockSignal
-
-
  
 px = 1/plt.rcParams['figure.dpi']
 plt.rcParams.update({'font.size': 25})
 plt.rcParams["text.usetex"] =  True
 plt.rcParams["font.family"] = "Times New Roman"
 
+class CVColor:
+    # Define class variables for commonly used colors
+    BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)
+    RED = (0, 0, 255)
+    GREEN = (0, 255, 0)
+    BLUE = (255, 0, 0)
+    GREENBLUE = (255, 128, 0)
+    YELLOW = (0, 255, 255)
+    CYAN = (255, 255, 0)
+    MAGENTA = (255, 0, 255)
+    FUCHSIPINK = (255, 128, 255)
+    GRAY = (128, 128, 128)
 
 class SOA:
-    def __init__(self, f, D = 1, pixelScale = 1, Type = 'single pixel raw'):
+    def __init__(self, f = 1, D = 1, pixelScale = 1, Type = 'single pixel raw'):
         self.f = f # ----------------------- sampling rate (fps)
         self.D = D # ----------------------- refrence distance (mm)
         self.pixelScale = pixelScale # ----- initialize scale of the pixels
@@ -91,19 +102,18 @@ class SOA:
         elif event == cv2.EVENT_LBUTTONUP: 
             if len(self.TempLine) < 2:
                 self.TempLine.append((x,y))
-                print('Starting: {}, Ending: {}'.format(self.TempLine[0], self.TempLine[1]))
                 
                 # Draw temprary line
                 cv2.line(self.Temp, self.TempLine[0], self.TempLine[1], (0,0,255), 2)
                 if parameters[2] == 'V':
                     avg = int((self.TempLine[0][0]+self.TempLine[1][0])/2)
-                    cv2.line(self.Temp, (avg,0), (avg,parameters[1][0]), (0,255,0), 1)
+                    cv2.line(self.Temp, (avg,0), (avg,parameters[1][0]), CVColor.GREEN, 1)
                 elif parameters[2] == 'H':
                     avg = int((self.TempLine[0][1]+self.TempLine[1][1])/2)
-                    cv2.line(self.Temp, (0,avg), (parameters[1][1],avg), (0,255,255), 1)
+                    cv2.line(self.Temp, (0,avg), (parameters[1][1],avg), CVColor.YELLOW, 1)
                 elif parameters[2] == 'Inc':
                     P1,P2,m,a = InclinedLine(self.TempLine[0],self.TempLine[1],imgShape = parameters[1])
-                    cv2.line(self.Temp, P1, P2, (0,255,0), 1)
+                    cv2.line(self.Temp, P1, P2, CVColor.BLUE, 1)
                     
                 cv2.imshow(parameters[0], self.Temp)
             elif self.ClickCount == 2:
@@ -113,21 +123,22 @@ class SOA:
                 # storing the vertical line
                 if parameters[2] == 'V':
                     avg = int((self.line_coordinates[0][0]+self.line_coordinates[1][0])/2)
-                    cv2.line(self.Temp, (avg,0), (avg,parameters[1][0]), (0,255,0), 1)
+                    cv2.line(self.Temp, (avg,0), (avg,parameters[1][0]), CVColor.GREEN, 1)
                 
                 # storing the Horizontal line
                 elif parameters[2] == 'H':
                     avg = int((self.line_coordinates[0][1]+self.line_coordinates[1][1])/2)
-                    cv2.line(self.Temp, (0,avg), (parameters[1][1],avg), (0,255,255), 1)
+                    cv2.line(self.Temp, (0,avg), (parameters[1][1],avg), CVColor.YELLOW, 1)
                     
                 elif parameters[2] == 'Inc':
                     P1,P2,m,a = InclinedLine(self.line_coordinates[0],self.line_coordinates[1],imgShape = parameters[1])
-                    cv2.line(self.Temp, P1, P2, (0,255,0), 1)
+                    cv2.line(self.Temp, P1, P2, CVColor.BLUE, 1)
                     avg = [P1, P2, m,a]
                 
                 self.Reference.append(avg)
                 self.clone = self.Temp.copy()
                 cv2.imshow(parameters[0], self.clone)
+                print('Stored line: {}'.format(avg))
                 
         # Delete draw line before storing    
         elif event == cv2.EVENT_RBUTTONDOWN:
@@ -185,8 +196,6 @@ class SOA:
         elif lineType == 'Inc':
             prams = [WindowHeader[LineNameInd],shp,lineType]
             
-        # cv2.namedWindow(self.LineName[LineNameInd], cv2.WINDOW_NORMAL)
-        # cv2.moveWindow(self.LineName[LineNameInd], win_x, win_y)
         cv2.imshow(WindowHeader[LineNameInd], self.clone)
         cv2.setMouseCallback(WindowHeader[LineNameInd], self.extract_coordinates,prams)
         # Wait until user press some key
@@ -199,19 +208,20 @@ class SOA:
         
         if draw_x0:
             # Vertical limits and scale 
-            Ref_x0[0] = self.LineDraw(img, 'V', 0,  Intialize = True)[0]
-            Ref_x0[1] = self.LineDraw(self.clone, 'V', 1)[1]
-            if len(self.Reference) < 2: print('Reference lines are not sufficient!'); sys.exit()
+            self.LineDraw(img, 'V', 0,  Intialize = True)
+            self.LineDraw(self.clone, 'V', 1)
+            Ref_x0 = self.Reference
+            if len(Ref_x0) < 2: print('Reference lines are not sufficient!'); sys.exit()
             
         else:
             self.clone = img.copy(); 
-            cv2.line(self.clone, (Ref_x0[0],0), (Ref_x0[0],shp[0]), (0,255,0), 1)
-            cv2.line(self.clone, (Ref_x0[1],0), (Ref_x0[1],shp[0]), (0,255,0), 1)
+            cv2.line(self.clone, (Ref_x0[0],0), (Ref_x0[0],shp[0]), CVColor.GREEN, 1)
+            cv2.line(self.clone, (Ref_x0[1],0), (Ref_x0[1],shp[0]), CVColor.GREEN, 1)
             self.Reference = Ref_x0[0:2].copy()
 
-        self.Reference.sort() # to make sure that the limits are properly assigned
+        Ref_x0.sort() # to make sure that the limits are properly assigned
         
-        if scale_pixels:  self.pixelScale = self.D / abs(self.Reference[1]-self.Reference[0])
+        if scale_pixels:  self.pixelScale = self.D / abs(Ref_x0[1]-Ref_x0[0])
         print(f'Image scale: {self.pixelScale}')
         
         #----------------------------------------------------------
@@ -220,17 +230,14 @@ class SOA:
         if Ref_y0 == -1 and Ref_y1 == -1:
             self.LineDraw(self.clone, 'H', 2)  # to draw the reference line
             if len(self.Reference) < 3: print('Reference lines are not sufficient!'); sys.exit()
-            Ref_y1 = self.Reference[2]-round(slice_loc/self.pixelScale)
+            Ref_y0 = self.Reference[-1]
+            Ref_y1 = self.Reference[-1]-round(slice_loc/self.pixelScale)
         else:
             if   Ref_y0 != -1: Ref_y1 = Ref_y0-round(slice_loc/self.pixelScale)
             elif Ref_y1 != -1: Ref_y0 = Ref_y1+round(slice_loc/self.pixelScale)
             self.Reference.append(Ref_y0)
-            cv2.line(self.clone, (0,Ref_y0),(shp[1],Ref_y0),(0,255,255), 1)
-        
-        print(f'Slice is located at: {Ref_y1}px')
-        cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), (0,0,255), 1)
-        
-        return Ref_x0, Ref_y0, Ref_y1, draw_x0
+            cv2.line(self.clone, (0,Ref_y0),(shp[1],Ref_y0), CVColor.YELLOW, 1)
+        return Ref_x0, Ref_y0, Ref_y1
     
     def CleanSnapshots(self, img,*args,**kwargs):
         """
@@ -269,9 +276,9 @@ class SOA:
         print('Improving image quality ...')
         
         for arg in args:
-            if arg == 'Average': CorrectedImg = Average(CorrectedImg)
-            if arg == 'FFT': CorrectedImg = CleanIlluminationEffects(CorrectedImg, **kwargs)
-            if arg =='Brightness and Contrast': CorrectedImg = BrightnessAndContrast(CorrectedImg, **kwargs)
+            if arg == 'SL_Average': CorrectedImg = SliceListAverage(CorrectedImg)
+            if arg == 'SL_FFT': CorrectedImg = CleanIlluminationEffects(CorrectedImg, **kwargs)
+            if arg == 'SL_Brightness/Contrast': CorrectedImg = BrightnessAndContrast(CorrectedImg, **kwargs)
         return CorrectedImg
     
     def ShockTrakingAutomation(self, img, method = 'integral', reviewInterval = [0,0], Signalfilter=None, CheckSolutionTime = True, **kwargs):

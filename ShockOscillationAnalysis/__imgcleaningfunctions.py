@@ -47,7 +47,7 @@ def plotting(FFT,y,Spectlocation):
     ax.set_ylim([int(y/2)-20,int(y/2)+MaxY+147])
 
 
-def Average(img):
+def SliceListAverage(img):
     """
     Compute the average intensity profile across the width of an image and subtract it from each row.
 
@@ -85,6 +85,17 @@ def Average(img):
     Newimg = np.around(((Newimg-minValue)/(maxValue-minValue))*255).astype(np.uint8)
     print(u'\u2713')
     return Newimg
+
+def ImgListAverage(imgList):
+    NewImg = []; n = len(imgList)
+    shp = imgList[0].shape
+    AvgImg = np.zeros(shp)
+    for i in imgList:  
+        GrayImg = cv2.cvtColor(i, cv2.COLOR_BGR2GRAY)
+        AvgImg += GrayImg
+    AvgImg /= n
+    for i in imgList: NewImg.append(i - AvgImg)
+    return NewImg
     
 
 def CleanIlluminationEffects(img, filterCenter = [(0, 233)], D = 10, n=10, ShowIm = False ,**kwargs):

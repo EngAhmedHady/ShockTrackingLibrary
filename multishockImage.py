@@ -78,10 +78,10 @@ Dir = 'tests\\'
 #          '25mm-trip_6.0kHz_7mm_0.1383219954648526mm-px_ts_35_slice.png']
 
 Paths = ['2.0kHz_7mm_0.12965964343598055mm-px_ts_60_slice-Rotated-.png',
-         '3.0kHz_7mm_0.12965964343598055mm-px_ts_60_slice-Rotated-.png',
-         '6.0kHz_7mm_0.13029315960912052mm-px_ts_60_slice-Rotated-.png',
-         '10.0kHz_7mm_0.13029315960912052mm-px_ts_60_slice-Rotated-.png',
-         '15.0kHz_7mm_0.12944983818770225mm-px_ts_60_slice-Rotated-.png']
+          '3.0kHz_7mm_0.12965964343598055mm-px_ts_60_slice-Rotated-.png',
+          '6.0kHz_7mm_0.13029315960912052mm-px_ts_60_slice-Rotated-.png',
+          '10.0kHz_7mm_0.13029315960912052mm-px_ts_60_slice-Rotated-.png',
+          '15.0kHz_7mm_0.12944983818770225mm-px_ts_60_slice-Rotated-.png']
 
 
 

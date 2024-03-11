@@ -20,6 +20,7 @@ from .__list_generation_tools import genratingRandomNumberList, GenerateIndicesL
 class sliceListGenerator(SOA):
     def __init__(self, f, D=1, pixelScale = 1, Type='single pixel raw'):
         super().__init__(f, D, pixelScale, Type)
+        self.inc_trac = inclinedShockTracking(f,D)
     
     def IntersectionPoint(self, M , A, Ref):
         """
@@ -125,10 +126,12 @@ class sliceListGenerator(SOA):
         Ref_x0 = kwargs.get('Ref_x0', [0,0])
         Ref_y0 = kwargs.get('Ref_y0', -1);    Ref_y1 = kwargs.get('Ref_y1', -1)
         
-        Ref_x0, Ref_y0, Ref_y1, draw_x0 = self.DefineReferences(img, shp, 
+        Ref_x0, Ref_y0, Ref_y1 = self.DefineReferences(img, shp, 
                                                                 Ref_x0, scale_pixels, 
                                                                 Ref_y0, Ref_y1, slice_loc)
-        
+        print(f'Slice is located at: {Ref_y1}px')
+        if Ref_y1 > 0 and Ref_y1 != Ref_y0: cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), (0,0,255), 1)
+
         if slice_thickness > 0: Ht = int(slice_thickness/2)  # Half Thickness
         else: Ht = 1; 
         
@@ -139,23 +142,22 @@ class sliceListGenerator(SOA):
             
         avg_shock_angle = kwargs.get('avg_shock_angle', 90)
         avg_shock_loc = kwargs.get('avg_shock_loc', 0)
-        self.inc_trac = inclinedShockTracking(self.f,self.D)
         if not hasattr(inclination_est_info, "__len__"):
             self.LineDraw(self.clone, 'Inc', 3)
             if len(self.Reference) < 4: print('Reference lines are not sufficient!'); sys.exit()
             P1,P2,m,a = self.Reference[3]
             Ref, nSlices, inclinationCheck = self.inc_trac.InclinedShockDomainSetup(inclination_est_info,
-                                                                           slice_thickness, shp, Ref_y1,
-                                                                           inclined_ref_line = [P1,P2,m,a],
-                                                                           preview_img = self.clone)
+                                                                                    slice_thickness, [P1,P2,m,a], 
+                                                                                    shp, VMidPnt = Ref_y1, 
+                                                                                    preview_img = self.clone)
         elif len(inclination_est_info) > 2:
             P1,P2,m,a = InclinedLine(inclination_est_info[1],inclination_est_info[2],imgShape = shp)
             cv2.line(self.clone, P1, P2, (0,255,0), 1)
             self.Reference.append([P1, P2, m,a])
-            Ref, nSlices, inclinationCheck = self.inc_trac.InclinedShockDomainSetup(inclination_est_info[0], 
-                                                                           slice_thickness, shp, Ref_y1, 
-                                                                           inclined_ref_line = [P1,P2,m,a],
-                                                                           preview_img = self.clone)
+            Ref, nSlices, inclinationCheck = self.inc_trac.InclinedShockDomainSetup(inclination_est_info[0],
+                                                                                    slice_thickness, [P1,P2,m,a], 
+                                                                                    shp, VMidPnt = Ref_y1, 
+                                                                                    preview_img = self.clone)
         elif avg_shock_angle != 90 and avg_shock_loc == 0: # in case the rotation angle only is provieded in working _range
             print('Please, provide the rotation center...')
             self.LineDraw(self.clone, 'Inc', 3)
@@ -195,9 +197,9 @@ class sliceListGenerator(SOA):
                 NSamplingReview = shock_angle_samples
                 print('Warning: Number of samples is larger than requested to review!, all samples will be reviewed')
          
-            avg_shock_angle, avg_slope, avg_shock_loc = self.inc_trac.InclinedShockTracking(samplesList, nSlices, Ref, 
-                                                                                     nReview = NSamplingReview, 
-                                                                                     OutputDirectory = OutputDirectory)
+            avg_shock_angle, avg_slope, avg_shock_loc = self.inc_trac.InclinedShockTracking(samplesList, nSlices, Ref,
+                                                                                            nReview = NSamplingReview, 
+                                                                                            OutputDirectory = OutputDirectory)
         print('Average inclination angle {:.2f} deg'.format(avg_shock_angle))
             
         M = cv2.getRotationMatrix2D((avg_shock_angle, Ref_y1), 90-avg_shock_angle, 1.0)
@@ -235,7 +237,7 @@ class sliceListGenerator(SOA):
                             'avg_shock_angle': avg_shock_angle, 'avg_shock_loc': avg_shock_loc}
             
         print ('working range is: ', working_range)
-        print(f'Importing {n_images} images ... ')
+        print(f'Importing {n_images} images ...')
         img_list, n = self.ImportingFiles(files, indices_list, n_images, shp, x_range, [upper_bounds,lower_bounds], M)
 
         if len(OutputDirectory) > 0:

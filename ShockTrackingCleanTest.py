@@ -11,26 +11,27 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from ShockOscillationAnalysis import SOA
-from ShockOscillationAnalysis import importSchlierenImages as ImpS
+from ShockOscillationAnalysis import sliceListGenerator as ImpS
 
 
 from scipy import signal
 plt.rcParams.update({'font.size': 25})
 # px = 1/plt.rcParams['figure.dpi']
 
-f = 5000
-D = 80     # Distance in mm
-HLP = 7   # Horizontal line position [slice location to a reference line]
+f = 1500
+D = 60     # Distance in mm
+slice_loc = 7   # Horizontal line position in mm[slice location to a reference line]
 # Scale = 0.12987012987012986
 # Scale = 0.13008130081300814
 # Scale = 0.13082039911308205 #PS
 # Scale = 0.13024282560706402
-Scale = 0.12987012987012986
-SliceThickness = 80
-WR = [111, 725, 67, -6.3, (471, 276)]
+Scale = 0.13245033112582782
+SliceThickness = 60
+WR = {'Ref_x0': [0, 1024], 'Ref_y1': 198, 
+      'avg_shock_angle': 59.240724672559004, 'avg_shock_loc': 132.00132465155573}
 
 n = -1;
-imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
+# imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\10kHz_smooth P1 (Test 8)\\*.png'
 # imgPath = 'D:\\PhD\\TEAMAero\\2023_03_29 - Fully Open with suction\\Oil-sch test 8 - Final full covered 25fps - 5%\\0_20230329_164729\\*.png'
 # imgPath = '*.png'
 # imgPath = 'tests\\LowRe\\Leadingedge\\*.png'
@@ -38,7 +39,7 @@ imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # imgPath = 'tests\\LowRe\\Passage\\Rotated\\*.png'
 # imgPath = '..\\Shock wave pixels\\RoughnessComp\\Ref-P3\\*.png'
 # imgPath = 'D:\\PhD\\TEAMAero\\Reference case\\2kHz\\*.png'
-# imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\10kHz_smooth P1 (Test 8)\\*.png'
+imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Reference Case data\\2022_07_29_FastShileren\\5kHz\\*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Fully Open\\2023-03-29_Sync_Oil_sch-fully open\\Oil-sch test 8 - Final full covered\\Schlieren\\*.png'
 # imgPath = 'D:\\TFAST\TEAMAero experiments\\2023_05_10\\Smooth-2kHz-5sec (test 5)\\*.png'
@@ -46,8 +47,8 @@ imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # CaseName = f'Passage_Rotated-{HLP}mm'
 # CaseName = 'LE-R'
 # CaseName = 'MidRe-5deg'
-CaseName = 'Ref_5kHz'
-# CaseName = 'LE-XR'
+# CaseName = 'LE-Ref_2kHz'
+CaseName = 'LE-High-Re'
 # CaseName = '17suc-fullsuc-ReflecEff-passage'
 
 Folders = imgPath.split("\\")
@@ -57,42 +58,74 @@ for i in range(len(Folders)-1): FileDirectory += (f'{Folders[i]}\\')
 # NewFileDirectory = os.path.join(FileDirectory, "7mm-NotRotated-tk60")
 # NewFileDirectory = os.path.join(FileDirectory, "7mm")
 # NewFileDirectory = FileDirectory
-NewFileDirectory = os.path.join(FileDirectory, "5kHz-Rotated")
+NewFileDirectory = os.path.join(FileDirectory, "LE-High-Re")
 if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
 
 SA = SOA(f,D)
 ImpImg = ImpS(f,D)
+# ShockwaveRegion ,n ,WR, Scale = ImpImg.GenerateSlicesArray(imgPath,
+#                                                             HLP = slice_loc,
+#                                                             FullImWidth = False,
+#                                                             # WorkingRange = [150], #MidRe-Test 8-passage edge (15mm)
+#                                                             # WorkingRange = [240, 693, 199], #MidRe-Test 8-leading edge (15mm)
+#                                                             # WorkingRange = [240, 693, 260], #MidRe-Test 8-leading edge (7mm)
+#                                                             # WorkingRange = [237, 691, 259], #MidRe-Test 8
+#                                                             WorkingRange = [109, 726, 565, 0, (0,0)], #P1_2kHz
+#                                                             # WorkingRange = [109, 726, 276], #P1_3kHz
+#                                                             # WorkingRange = [111, 725, 75 ], #P1-6kHz
+#                                                             # WorkingRange = [111, 725, 67 ], #P1-10kHz
+#                                                             # WorkingRange = [100], #P3-5kHz
+#                                                             ScalePixels= True,
+#                                                             ShockAngleSamples = 7500,
+#                                                             AngleSamplesReview = 20,
+#                                                             SliceThickness = SliceThickness,
+#                                                             OutputDirectory = NewFileDirectory,
+#                                                             # inclinationEst = [93,(87, 296),(124, 210)], #MidRe-Test 8-leading edge
+#                                                             # inclinationEst = [147,(423, 292),(416, 217)], #MidRe-Test 8
+#                                                             # inclinationEst = [120,(423, 292),(416, 217)], #MidRe-Test 8
+#                                                             # inclinationEst = [100,(83, 293),(143, 187)], #MidRe-Test 8
+#                                                             # inclinationEst = [80,(473,591),(466,514)], #P1_2kHz
+#                                                             # inclinationEst = [80,(473,591),(466,514)], #P1_2kHz
+#                                                             # inclinationEst = [90,(491,302),(488,264)], #P1_3kHz
+#                                                             # inclinationEst = [90,(479,99 ),(478, 46)], #P1-6kHz  
+#                                                             # inclinationEst = [90,(470, 129),(459, 5)], #P1-10kHz  
+#                                                             comment = f'{CaseName}')
+
 ShockwaveRegion ,n ,WR, Scale = ImpImg.GenerateSlicesArray(imgPath,
-                                                            HLP = HLP,
-                                                            FullImWidth = False,
-                                                            # WorkingRange = [150], #MidRe-Test 8-passage edge (15mm)
-                                                            # WorkingRange = [240, 693, 199], #MidRe-Test 8-leading edge (15mm)
-                                                            # WorkingRange = [240, 693, 260], #MidRe-Test 8-leading edge (7mm)
-                                                            # WorkingRange = [237, 691, 259], #MidRe-Test 8
-                                                            WorkingRange = [109, 726, 565, 0, (0,0)], #P1_2kHz
-                                                            # WorkingRange = [109, 726, 276], #P1_3kHz
-                                                            # WorkingRange = [111, 725, 75 ], #P1-6kHz
-                                                            # WorkingRange = [111, 725, 67 ], #P1-10kHz
-                                                            # WorkingRange = [100], #P3-5kHz
-                                                            ScalePixels= True,
-                                                            ShockAngleSamples = 7500,
-                                                            AngleSamplesReview = 20,
-                                                            SliceThickness = SliceThickness,
+                                                            # n_files = 500,
+                                                            # within_range = [100,300],
+                                                            # every_n_files = 10,
+                                                            scale_pixels = True,
+                                                            slice_loc = slice_loc, #mm
+                                                            full_img_width = True,
+                                                            Ref_x0 = [109, 726], Ref_y0 = 618, #Ref_y1 = 565,  #P1_2kHz
+                                                            # Ref_x0 = [240, 693], Ref_y0 = 311,#Ref_y1 = 199, #MidRe-Test 8-leading edge (15mm)
+                                                            #                      Ref_y1 = 260, #MidRe-Test 8-leading edge (7mm)
+                                                            # Ref_x0 = [109, 726], Ref_y1 = 276, #P1_3kHz
+                                                            # Ref_x0 = [111, 725], Ref_y1 = 75,  #P1-6kHz
+                                                            # Ref_x0 = [111, 725], Ref_y1 = 67,  #P1-10kHz
+                                                            slice_thickness = SliceThickness, 
+                                                            shock_angle_samples  = 4500, 
+                                                            angle_samples_review = 20,
+                                                            inclination_est_info = 110,
+                                                            # inclination_est_info =  [110, (474, 591),(463, 482)],
+                                                            # inclination_est_info = [93,(87, 296),(124, 210)], #MidRe-Test 8-leading edge
+                                                            # inclination_est_info = [147,(423, 292),(416, 217)], #MidRe-Test 8
+                                                            # inclination_est_info = [120,(423, 292),(416, 217)], #MidRe-Test 8
+                                                            # inclination_est_info = [100,(83, 293),(143, 187)], #MidRe-Test 8
+                                                            # inclination_est_info = [80,(473,591),(466,514)], #P1_2kHz
+                                                            # inclination_est_info = [80,(473,591),(466,514)], #P1_2kHz
+                                                            # inclination_est_info = [90,(491,302),(488,264)], #P1_3kHz
+                                                            # inclination_est_info = [90,(479,99 ),(478, 46)], #P1-6kHz  
+                                                            # inclination_est_info = [90,(470, 129),(459, 5)], #P1-10kHz
+                                                            # avg_shock_angle = 88, avg_shock_loc = 467,
                                                             OutputDirectory = NewFileDirectory,
-                                                            # inclinationEst = [93,(87, 296),(124, 210)], #MidRe-Test 8-leading edge
-                                                            # inclinationEst = [147,(423, 292),(416, 217)], #MidRe-Test 8
-                                                            # inclinationEst = [120,(423, 292),(416, 217)], #MidRe-Test 8
-                                                            # inclinationEst = [100,(83, 293),(143, 187)], #MidRe-Test 8
-                                                            # inclinationEst = [80,(473,591),(466,514)], #P1_2kHz
-                                                            # inclinationEst = [80,(473,591),(466,514)], #P1_2kHz
-                                                            # inclinationEst = [90,(491,302),(488,264)], #P1_3kHz
-                                                            # inclinationEst = [90,(479,99 ),(478, 46)], #P1-6kHz  
-                                                            # inclinationEst = [90,(470, 129),(459, 5)], #P1-10kHz  
-                                                            comment = f'{CaseName}')
+                                                            comment= f'{CaseName}',
+                                                            preview =  True)
 
 # ImgList = cv2.imread(NewFileDirectory+'\\2.0kHz_50mm_0.1360544217687075mm-px_ts_10_slice.png')
 # File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_ts_{SliceThickness}_slice_{CaseName}.png"
-File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_tk_{SliceThickness}px_{CaseName}.png"
+File = f"{f/1000}kHz_{slice_loc}mm_{Scale}mm-px_tk_{SliceThickness}px_{CaseName}.png"
 
 print(NewFileDirectory+'\\'+File)
 if os.path.exists(f"{NewFileDirectory}\\{File}"): ImgList = cv2.imread(f"{NewFileDirectory}\\{File}")
@@ -111,6 +144,7 @@ NewRef.sort()
 # NewRef = [263, 430] # 5kHz-P3
 # NewRef = [269, 430]
 # NewRef = [315, 477]
+# NewRef = [67, 171] # LE-2kHz P1
 # NewRef = [383, 552] # 2kHz P1
 # NewRef = [280, 443] # 2kHz P1
 # NewRef = [288, 431] # 3kHz P1
@@ -118,7 +152,7 @@ NewRef.sort()
 # NewRef = [55, 141] # MidRe-Test8-P3
 # NewRef = [283, 440] # 10kHz P1
 # NewRef = [47, 140] #MidRe-Test 8-leading edge (7mm)
-# NewRef = [90, 183] #MidRe-Test 8-leading edge (15mm)
+# NewRef = [90, 166] #MidRe-Test 8-leading edge (15mm)
 
 ShockwaveRegion = ImgList[:,NewRef[0]:NewRef[1]]
 xPixls = (NewRef[1]-NewRef[0])
@@ -136,14 +170,14 @@ print('Shock Regions:',NewRef,'\t Represents:' ,xPixls, 'px \t Shock Regions in 
 #                                     ShowIm = False)
 
 ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
-                                    'Average',
-                                    'FFT',
-                                    # 'Brightness and Contrast',
+                                    # 'SL_Average',
+                                    # 'SL_FFT',
+                                    'SL_Brightness/Contrast',
                                     # 'FFT',
-                                    filterCenter = [(0, 233)], D = 20, n = 5,
-                                    # filterCenter = [(0, 465), (-10, 465), (10, 465), (0, 495)], D = 25, n = 5,
-                                    # Brightness = 0.5, Contrast = 2, Sharpness = 1.5,
-                                    Brightness = 1.15, Contrast = 2, Sharpness = 1,
+                                    # filterCenter = [(0, 233)], D = 20, n = 5,
+                                    filterCenter = [(0, 465), (-10, 465), (10, 465), (0, 495)], D = 25, n = 5,
+                                    Brightness = 0.5, Contrast = 2, Sharpness = 1.5,
+                                    # Brightness = 1.15, Contrast = 2, Sharpness = 1,
                                     ShowIm = False)
 
 # Find shock location
@@ -158,7 +192,7 @@ ShockLocation, Uncer = SA.ShockTrakingAutomation(ShockwaveRegion,
                                                   # method = 'maxGrad',
                                                   method = 'integral',
                                                   # reviewInterval = [10,15],
-                                                  reviewInterval = [23319,23320], 
+                                                  reviewInterval = [1780,1790], 
                                                   # Signalfilter = 'med-Wiener')
                                                   Signalfilter = 'Wiener')
                                                   # Signalfilter = 'median')
@@ -199,11 +233,11 @@ for i in range(n):
 # ShockLocationfile = np.transpose(ShockLocationfile)
 
 if len(WR) > 3:
-    np.savetxt(f'{NewFileDirectory}\\ShockLocation_{HLP}mm_{CaseName}{WR[3]:.0f}deg.txt', 
+    np.savetxt(f'{NewFileDirectory}\\ShockLocation_{slice_loc}mm_{CaseName}{WR["avg_shock_angle"]:.0f}deg.txt', 
     # np.savetxt(f'{NewFileDirectory}\\ShockLocation_{CaseName}-{NewRef}-{round(WR[3])}deg.txt', 
                 ShockLocationfile,  delimiter = ",")
 else:
-    np.savetxt(f'{NewFileDirectory}\\ShockLocation_{HLP}mm_{CaseName}.txt', 
+    np.savetxt(f'{NewFileDirectory}\\ShockLocation_{slice_loc}mm_{CaseName}.txt', 
                 ShockLocationfile,  delimiter = ",")
 
 print("Shock oscillation domain",max(ShockLocation)-min(ShockLocation))
@@ -229,9 +263,9 @@ ax.minorticks_on()
 ax.grid(True, which='minor', color='#D8D8D8', linestyle='-', alpha=0.2)
 
 if len(WR) > 3:
-    fig.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{HLP}mm_tk_{SliceThickness}_{CaseName}_{round(WR[3])}deg_DispPSD.png")
+    fig.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{slice_loc}mm_tk_{SliceThickness}_{CaseName}_{round(WR['avg_shock_angle'])}deg_DispPSD.png")
 else:
-    fig.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{HLP}mm_tk_{SliceThickness}_{CaseName}_DispPSD.png")
+    fig.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{slice_loc}mm_tk_{SliceThickness}_{CaseName}_DispPSD.png")
 
 # To define the peakes on PSD signal with horizontal line
 # ax.axvline(x = 19.5,ls='--',color='k',alpha=0.4)
@@ -287,9 +321,9 @@ ax2.grid(True, which='major', color='#D8D8D8', linestyle='-', alpha=0.3, lw = 1.
 ax2.minorticks_on()
 ax2.grid(True, which='minor', color='#D8D8D8', linestyle='-', alpha=0.2)
 if len(WR) > 3:
-    fig2.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{HLP}mm_tk_{SliceThickness}_{CaseName}_{round(WR[3])}deg_VelPSD.png")
+    fig2.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{slice_loc}mm_tk_{SliceThickness}_{CaseName}_{round(WR['avg_shock_angle'])}deg_VelPSD.png")
 else:
-    fig2.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{HLP}mm_tk_{SliceThickness}_{CaseName}_VelPSD.png")   
+    fig2.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{slice_loc}mm_tk_{SliceThickness}_{CaseName}_VelPSD.png")   
 
 
 fig1, ax1 = plt.subplots(figsize=(60,800))
@@ -314,9 +348,9 @@ ax1.set_xlabel(r"Shock oscillation domain ($x$) [mm]");
 ax1.plot(A, range(n),'x', lw = 1, color = 'g', ms = 7)
 ax1.plot(uncertain, Loc,'x', lw = 1, color = 'r', ms = 5)
 if len(WR) > 3:
-    fig1.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{HLP}mm_tk_{SliceThickness}_{CaseName}_{round(WR[3])}deg_TrackedPoints.png")
+    fig1.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{slice_loc}mm_tk_{SliceThickness}_{CaseName}_{round(WR['avg_shock_angle'])}deg_TrackedPoints.png")
 else:
-    fig1.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{HLP}mm_tk_{SliceThickness}_{CaseName}_TrackedPoints.png")
+    fig1.savefig(f"{NewFileDirectory}\\{f/1000}kHz_{slice_loc}mm_tk_{SliceThickness}_{CaseName}_TrackedPoints.png")
 
 # ax1.set_ylim([0,400])
 # plt.show()
