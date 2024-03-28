@@ -100,7 +100,9 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
         if count > -1: ax.set_title(count)
         print("\n The error is: ",e)
     
-    if Plot: ax.plot([ShockRegion[0][0]+5,ShockRegion[0][-1]-5],[LocMinAvg,LocMinAvg],'-.r', label = 'Average line of largest local minimum')
+    if Plot: 
+        ax.plot([ShockRegion[0][0]+5,ShockRegion[0][-1]-5],
+                [LocMinAvg,LocMinAvg],'-.r', label = 'Average line of largest local minimum')
     
     localmin2 = [] # .............................. sub-local minimum value
     LocMinI2 = [] # ............................ sub-local minimum location

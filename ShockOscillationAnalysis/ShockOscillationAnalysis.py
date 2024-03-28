@@ -34,7 +34,7 @@ class CVColor:
     GRAY = (128, 128, 128)
 
 class SOA:
-    def __init__(self, f = 1, D = 1, pixelScale = 1, Type = 'single pixel raw'):
+    def __init__(self, f = 1, D = 1, pixelScale = 1):
         self.f = f # ----------------------- sampling rate (fps)
         self.D = D # ----------------------- refrence distance (mm)
         self.pixelScale = pixelScale # ----- initialize scale of the pixels
@@ -45,7 +45,6 @@ class SOA:
         self.Reference = [] # -------------- initialize croping limits or line set
         self.line_coordinates = [] # ------- initialize Line coordinate
         self.outputPath = '' # ------------- Image output
-        self.Type = Type # ----------------- Type of shock analysis ['single pixel raw', 'multi point traking']
     
     
     def screenMidLoc(self, shp):
@@ -204,7 +203,7 @@ class SOA:
     
     def DefineReferences(self, img, shp, Ref_x0, scale_pixels, Ref_y0 = -1, Ref_y1 = -1, slice_loc = 0):
         Ref_x0.sort(); start, end = Ref_x0
-        x0_diff = abs(end-start);  draw_x0 = x0_diff == 0       
+        x0_diff = abs(end-start);  draw_x0 = x0_diff == 0
         
         if draw_x0:
             # Vertical limits and scale 
@@ -281,7 +280,8 @@ class SOA:
             if arg == 'SL_Brightness/Contrast': CorrectedImg = BrightnessAndContrast(CorrectedImg, **kwargs)
         return CorrectedImg
     
-    def ShockTrakingAutomation(self, img, method = 'integral', reviewInterval = [0,0], Signalfilter=None, CheckSolutionTime = True, **kwargs):
+    def ShockTrakingAutomation(self, img, method = 'integral', reviewInterval = [0,0], 
+                               Signalfilter=None, CheckSolutionTime = True, **kwargs):
         return GenerateShockSignal(img, method, Signalfilter, reviewInterval, CheckSolutionTime, **kwargs)
     
     def VelocitySignal(self, Signal, TotalTime):
@@ -297,4 +297,3 @@ class SOA:
         V_avg = np.mean(dx_dt) 
         V = dx_dt - V_avg
         return V
-        

@@ -14,18 +14,23 @@ import matplotlib.pyplot as plt
 from ..__preview import plot_review
 from ..ShockOscillationAnalysis import CVColor
 from ..__shocktracking import ShockTraking
-from sklearn.linear_model import LinearRegression
-from ..__linedrawingfunctions import InclinedLine
-from ..__imgcleaningfunctions import ImgListAverage
+from ..__linedrawingfunctions import InclinedLine, AngleFromSlope
+# from ..__imgcleaningfunctions import ImgListAverage
 from ..__slice_list_generator.__list_generation_tools import GenerateIndicesList
 
 px = 1/plt.rcParams['figure.dpi']
+plt.rcParams.update({'font.size': 25})
+plt.rcParams["text.usetex"] =  True
+plt.rcParams["font.family"] = "Times New Roman"
 
 class inclinedShockTracking(SOA):
-    def __init__(self, f, D=1, pixelScale = 1, Type='single pixel raw'):
-        super().__init__(f, D, pixelScale, Type)
+    def __init__(self, f = 1, D=1, pixelScale = 1):
+        self.f = f # ----------------------- sampling rate (fps)
+        self.D = D # ----------------------- refrence distance (mm)
+        self.pixelScale = pixelScale # ----- initialize scale of the pixels
+        super().__init__(f, D, pixelScale)
         
-    def shockDomain(self, Loc, P1, HalfSliceWidth, LineSlope, imgShape, preview_img = []):
+    def shockDomain(self, Loc, P1, HalfSliceWidth, LineSlope, imgShape, preview_img = None):
         """
         Generate and visualize a shock domain based on the slice width and 
         the drawn line parameters (one point and slope).
@@ -54,15 +59,31 @@ class inclinedShockTracking(SOA):
         if Loc =='up': P1new = (P1[0] - HalfSliceWidth, P1[1])
         else: P1new = (P1[0] + HalfSliceWidth, P1[1])  
         anew = P1new[1] - LineSlope*P1new[0] # y-intercept
-        P1new,P2new,m,a = InclinedLine(P1new, slope = LineSlope, imgShape=imgShape)            
-        cv2.line(preview_img, P1new, P2new, CVColor.RED, 1)
+        P1new,P2new,m,a = InclinedLine(P1new, slope = LineSlope, imgShape=imgShape)
+        if preview_img is not None: cv2.line(preview_img, P1new, P2new, CVColor.RED, 1)
         return anew 
-        
+
+    def anglesInterpolation(self, pnts_y_list, input_locs, angles_list):
+        new_ang_value = []; 
+        if min(input_locs) > min(pnts_y_list) or max(input_locs) < max(pnts_y_list): 
+            print('provided y-domain is out of valid range')
+            print('aborting input angle consideration ... ')
+            return []
+        for yi in pnts_y_list:
+            r = len(angles_list)-1; l = 0
+            while r > l and r-l > 1:
+                mid = (r + l) // 2
+                if input_locs[mid] <= yi: r = mid
+                elif input_locs[mid] > yi: l = mid
+            new_ang_value.append(angles_list[r]+(yi-input_locs[r])*(angles_list[l]-angles_list[r])/(input_locs[l]-input_locs[r]))
+        return new_ang_value
+
+
     def InclinedShockDomainSetup(self, CheckingWidth, CheckingHieght, inclined_ref_line, imgShape,
-                                 VMidPnt = 0, nPnts = 0, preview_img = []):
+                                 VMidPnt = 0, nPnts = 0, preview_img = None):
         """
         Set up shock inclination test using inclined shock lines.
-    
+
         Parameters:
         - CheckingWidth (int): Width for shock domain checking (sliceWidth).
         - CheckingHeight (int or list): Height for shock domain checking. If a list is provided,
@@ -70,13 +91,13 @@ class inclinedShockTracking(SOA):
         - imgShape (tuple): Shape of the image (y-length, x-length).
         - VMidPnt (int, optional): Vertical midpoint. Default is 0.
         - nPnts (int, optional): Number of points to generate for inclined shock lines. Default is 0.
-    
+
         Returns:
         tuple: A tuple containing:
         - SlicesInfo (list): List of shock domain slices, [[x-domainStrt,x-domainEnd],y-sliceLoc].
         - nPnts (int): Number of slices generated for inclined shock.
         - inclinationCheck (bool): Boolean indicating whether the shock inclination test is applicable.
-    
+
         Example:
         >>> from __importImages import importSchlierenImages
         >>> instance = importSchlierenImages(f)
@@ -86,14 +107,14 @@ class inclinedShockTracking(SOA):
         >>> points = 5
         >>> slices, nPnts, success = instance.InclinedShockDomainSetup(width, height, shape, nPnts=points)
         >>> print(slices, nPnts, success)
-    
+
         Note:
        - The function sets up shock inclination testing by visualizing the shock domain.
        - It returns a list of Slices location and range, the number of slices, and the inclination applicability.
-    
+
         """
         print('Shock inclination test and setup ...', end=" ")
-        SlicesInfo = []; inclinationCheck = True
+        slices_info = []; inclinationCheck = True
         
         # generat the points
         if hasattr(CheckingHieght, "__len__"):
@@ -107,109 +128,133 @@ class inclinedShockTracking(SOA):
             else:
                 print(u'\u2717')
                 print('Escaping the shock angle checking... \nSlice thickness is not sufficient for check the shock angle')
-                return SlicesInfo, 0, False
+                return slices_info, 0, False
         
-        # IncInfoIndx = len(self.Reference) - 1           
+        # IncInfoIndx = len(self.Reference) - 1
         HalfSliceWidth = round(CheckingWidth/2) 
-        
+
         # Define the estimated shock line using 2 points P1, P2 --> User defined
         P1 = (round(inclined_ref_line[0][0]), round(inclined_ref_line[0][1]))            
         LineSlope = inclined_ref_line[2]
-
+        
         aUp = self.shockDomain('up', P1, HalfSliceWidth, LineSlope, imgShape, preview_img)
         aDown = self.shockDomain('down', P1, HalfSliceWidth, LineSlope, imgShape, preview_img)
-
-        for i in Pnts: 
-            y_i = int(i+DatumY)
-            if LineSlope != 0 and LineSlope != np.inf: 
-                x_i1 = round((i+DatumY-aUp)/LineSlope)
-                x_i2 = round((i+DatumY-aDown)/LineSlope)
-            elif LineSlope == np.inf: 
-                x_i1 = P1[0] - HalfSliceWidth; x_i2 = P1[0] + HalfSliceWidth
-            elif LineSlope == 0: 
-                print('Software is not supporting horizontal shock waves, aborting...')
-                sys.exit()
-                
-            cv2.circle(preview_img, (x_i1,y_i), radius=3, color=CVColor.RED, thickness=-1)
-            cv2.circle(preview_img, (x_i2,y_i), radius=3, color=CVColor.RED, thickness=-1)                
-            SlicesInfo.append([[x_i1,x_i2],y_i])
-        print(u'\u2713')
-        return SlicesInfo, nPnts, inclinationCheck
-    
-    def InclinedShockTracking(self, imgSet, nSlices, Ref, nReview = 0, slice_thickness = 1, OutputDirectory = ''):        
-        AvgAngleGlob= 0;   count = 0; xLoc = [];
-        AvgSlope = 0; AvgMidLoc = 0;
-        shp = imgSet[0].shape; 
-        slice_width = Ref[0][0][1]-Ref[0][0][0]
-        if len(shp) > 2: zero_slice = np.zeros([1,slice_width,3])
-        else: zero_slice = np.zeros([1,slice_width])
         
-        if slice_thickness > 1: Ht = int(slice_thickness/2)  # Half Thickness
+        y_i = np.array(Pnts + DatumY).astype(int)
+        if LineSlope != 0 and LineSlope != np.inf:
+            x_i1 = np.array((y_i - aUp) / LineSlope).astype(int)
+            x_i2 =  np.array((y_i - aDown) / LineSlope).astype(int)
+        elif LineSlope == np.inf:
+            x_i1 = np.full(nPnts, P1[0] - HalfSliceWidth)
+            x_i2 = np.full(nPnts, P1[0] + HalfSliceWidth)
+        elif LineSlope == 0:
+            print('Software is not supporting horizontal shock waves, aborting...')
+            sys.exit()
+            
+        if preview_img is not None:
+            for pnt in range(len(Pnts)):
+                cv2.circle(preview_img, (x_i1[pnt],y_i[pnt]), radius=3, color=CVColor.RED, thickness=-1)
+                cv2.circle(preview_img, (x_i2[pnt],y_i[pnt]), radius=3, color=CVColor.RED, thickness=-1)
+        slices_info = x_i1,x_i2,y_i
+        print(u'\u2713')
+        return slices_info, nPnts, inclinationCheck
+
+    def InclinedShockTracking(self, imgSet, nSlices, Ref, nReview = 0, slice_thickness = 1, 
+                              OutputDirectory = '', **kwargs):
+        
+        avg_ang_glob= 0;   count = 0; midLocs =[] ; xLocs = [];
+        avg_slope = 0; AvgMidLoc = 0; columnY = []; m = []
+        uncertain_list = []; uncertainY_list = []
+        shp = imgSet[0].shape; 
+
+        avg_preview_mode = kwargs.get('avg_preview_mode', None)
+
+        if slice_thickness > 1: Ht = int(slice_thickness/2)  # Ht -> Half Thickness
         else: Ht = 1; slice_thickness = 2;
         
         upper_bounds = np.zeros(nSlices, dtype = int); lower_bounds = np.zeros(nSlices, dtype = int)
+        
         for i in range(nSlices): 
-            upper_bounds[i] = Ref[i][1] - Ht
-            lower_bounds[i] = Ref[i][1] + Ht if slice_thickness%2 == 0 else Ref[i][1] + Ht + 1
-            
-        for img in imgSet:
-            if count > 1: xLocOld = xLoc.copy()
-            
-            xLoc = []; ColumnY = []; uncertain = [];uncertainY = []
-            for i in range(nSlices):
-                y_i = Ref[i][1]
-                x_i1 = Ref[i][0][0];x_i2 = Ref[i][0][1]
+            upper_bounds[i] = Ref[2][i] - Ht
+            lower_bounds[i] = Ref[2][i] + Ht if slice_thickness%2 == 0 else Ref[2][i] + Ht + 1
+            columnY.append(Ref[2][i]) 
+        columnY = np.array(columnY)
 
-                Slice = zero_slice.copy()
-                for sl in range(upper_bounds[i],lower_bounds[i]): 
-                    Slice += img[sl-1 : sl, x_i1: x_i2]
-                Slice /= slice_thickness
-                
-                if count > 1: LastShockLoc = xLocOld[i]
-                else: LastShockLoc = -1
-                
-                # print(Slice)
-                
-                ShockLoc, certainLoc, reason  = ShockTraking(Slice[0], LastShockLoc = LastShockLoc)
-                ColumnY.append(y_i)
-                xLoc.append(ShockLoc + Ref[i][0][0])
-                if not certainLoc:
-                    uncertain.append(xLoc[-1])
-                    uncertainY.append(y_i)
-            
+        midIndx = nSlices // 2
+        midIndx2 = midIndx if nSlices % 2 != 0 else midIndx - 1
+        y = (columnY[midIndx2] + columnY[midIndx]) / 2
+        LastShockLoc = -1
+
+        xLoc = -1*np.ones(nSlices)
+        AngReg = []
+        for count, img in enumerate(imgSet):
+            xLocOld = xLoc.copy()
+            xLoc = [];  uncertain = [];uncertainY = []
+            for i in range(nSlices):
+                x_i1, x_i2 = Ref[0][i], Ref[1][i]
+                Slice = np.sum(img[upper_bounds[i]-1:lower_bounds[i], x_i1:x_i2], axis=0) / slice_thickness
+
+                LastShockLoc = xLocOld[i]
+
+                ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc)
+                xLoc.append(ShockLoc + Ref[0][i])
+                if not certainLoc: uncertain.append(xLoc[-1]); uncertainY.append(Ref[2][i])
+
             # finding the middle point
-            midIndx = nSlices // 2 + 1 if nSlices % 2 != 0 else nSlices // 2
-            midLoc = xLoc[midIndx] if nSlices % 2 != 0 else (xLoc[midIndx - 1] + xLoc[midIndx]) / 2
-            y = ColumnY[midIndx] if nSlices % 2 != 0 else (ColumnY[midIndx - 1] + ColumnY[midIndx]) / 2
-                
-            ColumnXLoc = np.array(xLoc).reshape((-1, 1))
-            ColumnY = np.array(ColumnY).reshape((-1, 1))
-            model = LinearRegression().fit(ColumnXLoc, ColumnY)
-            m = model.coef_[0][0]
+            midLocs.append(np.mean([xLoc[midIndx], xLoc[midIndx2]]))
+
+            xy = np.array(xLoc)*columnY; yy = columnY**2
+            x_sum = np.sum(xLoc)       ; y_sum = np.sum(columnY)
+            xy_sum = np.sum(xy)        ; yy_sum = np.sum(yy)
+
+            m.append(1/((nSlices*xy_sum - x_sum * y_sum)/(nSlices*yy_sum - y_sum**2)))
+
+            AngReg.append(AngleFromSlope(m[-1]))
+            xLocs.append(xLoc)
+            uncertain_list.append(uncertain); uncertainY_list.append(uncertainY)
             
-            if   m > 0:AngReg = 180 - np.arctan(m)*180/np.pi
-            elif m < 0:AngReg = abs(np.arctan(m)*180/np.pi)
-            else:      AngReg = 90
-                
-            AvgMidLoc += midLoc
-            AvgAngleGlob += AngReg
-            AvgSlope += m
-            if nReview > 0 and count < nReview:                 
-                fig, ax = plt.subplots(figsize=(int(img.shape[1] * 1.5*px), int(img.shape[0] * 1.5*px)))
-                plot_review(ax, img, xLoc, ColumnY, uncertain, uncertainY, midLoc, y)
-                
-                if len(OutputDirectory)> 0:
-                    fig.savefig(OutputDirectory +f'\\ShockAngleReview_{count:04d}_Ang{AngReg:.2f}.png')
-            count += 1
-        return AvgAngleGlob/count, AvgSlope/count, AvgMidLoc/count
+        AvgMidLoc= np.mean(midLocs);  avg_ang_glob = np.mean(AngReg);
+        if avg_preview_mode != 'avg_ang':
+            avg_slope = np.mean(m)*np.ones(nReview)
+            avg_midLoc = AvgMidLoc*np.ones(nReview)
+            avg_ang = avg_ang_glob*np.ones(nReview)
+        else:
+            avg_slope = m; avg_midLoc = midLocs; avg_ang = AngReg
+
+        print('Plotting tracked data ...')
+        if nReview > 0:
+            if nReview > 20: 
+                print('For memory reasons, only 20 imgs will be displayed.')
+                print('note: this will not be applied on imgs storing')
+            for i in range(nReview):
+                fig, ax = plt.subplots(figsize=(int(shp[1]*1.75*px), int(shp[0]*1.75*px)))
+                ax.set_ylim([shp[0],0]); ax.set_xlim([0,shp[1]])
+                plot_review(ax, imgSet[i], shp, xLocs[i], columnY, 
+                            uncertain_list[i], uncertainY_list[i], 
+                            avg_slope[i], avg_ang[i], avg_midLoc[i] , y, **kwargs)
+                if len(OutputDirectory)> 0: 
+                    fig.savefig(fr'{OutputDirectory}\ShockAngleReview_{i:04d}_Ang{avg_ang_glob:.2f}.png')
+
+                if i > 18:
+                    if len(OutputDirectory) == 0: plt.close(fig); break
+                    else: plt.close(fig)
+
+                sys.stdout.write('\r')
+                sys.stdout.write("[%-20s] %d%%" % ('='*int((i+1)/(nReview/20)), int(5*(i+1)/(nReview/20))))
+            print()
+
+        print(f'Angle range variation: [{min(AngReg):0.2f},{max(AngReg):0.2f}], \u03C3 = {np.std(AngReg):0.2f}')
+        return avg_ang_glob, AvgMidLoc
     
     def ImportingFiles(self, pathlist, indices_list, n_images, imgs_shp, **kwargs):
+        print(f'Importing {n_images} images ...')
         img_list=[]; n = 0; original_img_list=[]
         BG_path = kwargs.get('BG_path', '')
         resize_img = kwargs.get('resize_img', (imgs_shp[1],imgs_shp[0]))
         for i in indices_list:
             img = cv2.imread(pathlist[i])
             original_img_list.append(cv2.resize(img.astype('float32'), resize_img))
+            img_list.append(cv2.cvtColor(original_img_list[-1], cv2.COLOR_BGR2GRAY))
             n += 1
             sys.stdout.write('\r')
             sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n_images/20)), int(5*n/(n_images/20))))
@@ -230,9 +275,8 @@ class inclinedShockTracking(SOA):
             if BG_len < img_len: img_len = BG_len; img_wid = BG_Wid
             else: BG = BG[0:img_len,0:img_wid]
             
-            for img in original_img_list:
-                New_img = cv2.subtract(img[0:img_len,0:img_wid],BG)
-                img_list.append(New_img)
+            for img in img_list:
+                img = cv2.subtract(img[0:img_len,0:img_wid],BG)
             print(u'\u2713')
         return original_img_list, img_list
     
@@ -273,7 +317,6 @@ class inclinedShockTracking(SOA):
         if draw_y:
             tracking_V_range = []
             # Vertical limits and scale 
-            
             try:
                 Ref_y1 = self.LineDraw(self.clone, 'H', 2)[-1]
             except Exception:
@@ -291,7 +334,7 @@ class inclinedShockTracking(SOA):
             tracking_V_range.sort()
             if Ref_y1 > Ref_y2: Ref_y11 = Ref_y2; Ref_y2 = Ref_y1; Ref_y1 = Ref_y11;
         else:
-            tracking_V_range.sort()
+            tracking_V_range.sort() if Ref_y0 > -1 else tracking_V_range.sort(reverse=True)
             Ref_y2, Ref_y1  = [round(Ref_y0 - (x / self.pixelScale)) for x in tracking_V_range] if Ref_y0 > -1 else tracking_V_range
             if Ref_y1< 0 or Ref_y2 > shp[0]: print('Vertical range of tracking is not sufficient!'); sys.exit()
             cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), CVColor.YELLOW, 1)
@@ -319,7 +362,7 @@ class inclinedShockTracking(SOA):
             P1,P2,m,a = InclinedLine(inclination_info[1],inclination_info[2],imgShape = shp)
             cv2.line(self.clone, P1, P2, (0,255,0), 1)
             inclined_ref_line = [P1,P2,m,a]
-            CheckingWidth = inclination_info
+            CheckingWidth = inclination_info[0]
         
         if nPnts == 0: 
             while nPnts == 0:
@@ -331,12 +374,24 @@ class inclinedShockTracking(SOA):
                                                                        inclined_ref_line,
                                                                        shp, nPnts = nPnts,
                                                                        preview_img = self.clone)
-       
+        
+
+        pnts_y_list = []
+        for i in range(nSlices): pnts_y_list.append((Ref_y0-Ref[2][i])*self.pixelScale)
+        input_locs = kwargs.get('input_locs', [])
+        angles_list = kwargs.get('angles_list', [])
+        Mach_ang_mode = kwargs.get('Mach_ang_mode', None)
+        if len(angles_list) > 0 and Mach_ang_mode != None:
+            inflow_dir_deg = self.anglesInterpolation(pnts_y_list, input_locs, angles_list)
+            inflow_dir_rad = np.array(inflow_dir_deg)*np.pi/180
+            kwargs['inflow_dir_deg'] = inflow_dir_deg
+            kwargs['inflow_dir_rad'] = inflow_dir_rad
+
         if preview:
             cv2.imshow('investigation domain before rotating', self.clone)
             cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
             
-            cv2.imwrite(f'{OutputDirectory}\\AnalysisDomain-Points.jpg', self.clone)
+            cv2.imwrite(fr'{OutputDirectory}\AnalysisDomain-Points.jpg', self.clone)
 
         import_n_files = kwargs.get('n_files', 0);
         if import_n_files == 0: import_n_files = kwargs.get('within_range', [0,0])
@@ -346,16 +401,12 @@ class inclinedShockTracking(SOA):
         if inclinationCheck:
             original_img_list, img_list = self.ImportingFiles(files, indices_list, n_images, shp, **kwargs)
             
-        slice_thickness = kwargs.get('slice_thickness', 1)
-        avg_shock_angle, avg_slope, avg_shock_loc = self.InclinedShockTracking(original_img_list, 
-                                                                               nSlices, Ref,  
-                                                                               slice_thickness = slice_thickness,
-                                                                               nReview = n_images,
-                                                                               OutputDirectory = OutputDirectory)
+        print('Shock tracking started ...')
+        avg_shock_angle, avg_shock_loc = self.InclinedShockTracking(img_list, 
+                                                                    nSlices, Ref,  
+                                                                    nReview = n_images,
+                                                                    OutputDirectory = OutputDirectory,
+                                                                    **kwargs)
+        print('Average inclination angle {:.2f} deg'.format(avg_shock_angle))
         
-        
-        
-            
-        
-        
-        
+        return avg_shock_angle, avg_shock_loc

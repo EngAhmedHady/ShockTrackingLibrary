@@ -9,7 +9,7 @@ import cv2
 import matplotlib.pyplot as plt
 from PIL import Image, ImageEnhance
 
-def plotting(FFT,y,Spectlocation):
+def plotting(FFT:np.array, y:int, Spectlocation: list) -> None:
     """
     Plot the magnitude spectrum of a Fourier-transformed image.
 
@@ -47,7 +47,7 @@ def plotting(FFT,y,Spectlocation):
     ax.set_ylim([int(y/2)-20,int(y/2)+MaxY+147])
 
 
-def SliceListAverage(img):
+def SliceListAverage(img: np.array) -> np.array:
     """
     Compute the average intensity profile across the width of an image and subtract it from each row.
 
@@ -86,7 +86,7 @@ def SliceListAverage(img):
     print(u'\u2713')
     return Newimg
 
-def ImgListAverage(imgList):
+def ImgListAverage(imgList: list[np.array]) -> list[np.array]:
     NewImg = []; n = len(imgList)
     shp = imgList[0].shape
     AvgImg = np.zeros(shp)
@@ -98,7 +98,8 @@ def ImgListAverage(imgList):
     return NewImg
     
 
-def CleanIlluminationEffects(img, filterCenter = [(0, 233)], D = 10, n=10, ShowIm = False ,**kwargs):
+def CleanIlluminationEffects(img: np.array, filterCenter:list[tuple] = [(0, 233)], 
+                             D:int = 10, n:int = 10, ShowIm:bool = False ,**kwargs) -> np.array:
     
     """
     Clean illumination effects from an image using a frequency domain approach.
@@ -179,7 +180,9 @@ def CleanIlluminationEffects(img, filterCenter = [(0, 233)], D = 10, n=10, ShowI
     print(u' \u2713')
     return CleanedImage
 
-def BrightnessAndContrast(img, Brightness = 1, Contrast = 1, Sharpness = 1, ShowIm =False, **kwargs):
+def BrightnessAndContrast(img:np.array, 
+                          Brightness:float = 1, Contrast:float = 1, Sharpness:float = 1, 
+                          ShowIm:bool = False, **kwargs) -> np.array:
     """
     Adjusts the brightness, contrast, and sharpness of an image.
 

@@ -49,7 +49,7 @@ if __name__ == '__main__':
     #                                                             comment = '-')
     # timeInSec =  time.time() - start_time
     # TimeCalculation(timeInSec)
-    
+
     start_time = time.time()
     SA_opt = SOA_opt(f,D)
     ShockwaveRegion ,n ,WR, Scale = SA_opt.GenerateSlicesArray(imgPath,
@@ -59,9 +59,9 @@ if __name__ == '__main__':
                                                                 scale_pixels = True,
                                                                 slice_loc = 10, #mm
                                                                 full_img_width = False,
-                                                                slice_thickness = 60, 
+                                                                slice_thickness = 130, 
                                                                 shock_angle_samples = 60, 
-                                                                angle_samples_review = 0,
+                                                                angle_samples_review = 10,
                                                                 OutputDirectory = NewFileDirectory,
                                                                 comment='-opt', 
                                                                 # inclination_est_info =  110,
@@ -69,8 +69,6 @@ if __name__ == '__main__':
                                                                 Ref_x0 = [108, 725], Ref_y1 = 542,
                                                                 # avg_shock_angle = 88, avg_shock_loc = 467,
                                                                 preview =  True)
-    
+
     timeInSec =  time.time() - start_time
     TimeCalculation(timeInSec)
-    
-    

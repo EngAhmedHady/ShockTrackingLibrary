@@ -104,3 +104,9 @@ def InclinedLine(P1, P2 = (), slope = None, imgShape = ()):
     else:
         return (0,P1[1]), (imgShape[1],P1[1]), 0, P1[1]  
 
+
+def AngleFromSlope(slope):
+    if   slope > 0:ang_deg = 180 - np.arctan(slope)*180/np.pi
+    elif slope < 0:ang_deg = abs(np.arctan(slope)*180/np.pi)
+    else:  ang_deg = 90
+    return ang_deg

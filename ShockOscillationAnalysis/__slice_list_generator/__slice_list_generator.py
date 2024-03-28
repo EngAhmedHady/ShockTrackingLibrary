@@ -77,9 +77,11 @@ class sliceListGenerator(SOA):
             img = cv2.warpAffine(img, M, (imgs_shp[1],imgs_shp[0]))
             cropped_image = np.zeros([1,x_range[1]-x_range[0],3])
             
+            # cropped_image = np.sum(img[tk[0]-1:tk[1], x_range[0]:x_range[1]], axis=0) / slice_thickness
+            
             for j in range(tk[0],tk[1]): 
                 cropped_image += img[j-1 : j,
-                                     x_range[0]: x_range[1]]
+                                      x_range[0]: x_range[1]]
             cropped_image /= slice_thickness
             
             img_list.append(cropped_image.astype('float32'))
@@ -190,14 +192,14 @@ class sliceListGenerator(SOA):
                 k += 1
                 sys.stdout.write('\r')
                 sys.stdout.write("[%-20s] %d%%" % ('='*int(k/(shock_angle_samples/20)), int(5*k/(shock_angle_samples/20))))
-            print('')            
+            print('')
 
             if angle_samples_review < shock_angle_samples: NSamplingReview = angle_samples_review
             else:
                 NSamplingReview = shock_angle_samples
                 print('Warning: Number of samples is larger than requested to review!, all samples will be reviewed')
-         
-            avg_shock_angle, avg_slope, avg_shock_loc = self.inc_trac.InclinedShockTracking(samplesList, nSlices, Ref,
+
+            avg_shock_angle, avg_shock_loc = self.inc_trac.InclinedShockTracking(samplesList, nSlices, Ref,
                                                                                             nReview = NSamplingReview, 
                                                                                             OutputDirectory = OutputDirectory)
         print('Average inclination angle {:.2f} deg'.format(avg_shock_angle))

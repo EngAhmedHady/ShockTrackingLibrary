@@ -19,7 +19,7 @@ plt.rcParams.update({'font.size': 25})
 # px = 1/plt.rcParams['figure.dpi']
 
 f = 1500
-D = 60     # Distance in mm
+D = 80     # Distance in mm
 slice_loc = 7   # Horizontal line position in mm[slice location to a reference line]
 # Scale = 0.12987012987012986
 # Scale = 0.13008130081300814
@@ -93,19 +93,19 @@ ImpImg = ImpS(f,D)
 
 ShockwaveRegion ,n ,WR, Scale = ImpImg.GenerateSlicesArray(imgPath,
                                                             # n_files = 500,
-                                                            # within_range = [100,300],
+                                                            within_range = [100,300],
                                                             # every_n_files = 10,
                                                             scale_pixels = True,
                                                             slice_loc = slice_loc, #mm
                                                             full_img_width = True,
                                                             Ref_x0 = [109, 726], Ref_y0 = 618, #Ref_y1 = 565,  #P1_2kHz
                                                             # Ref_x0 = [240, 693], Ref_y0 = 311,#Ref_y1 = 199, #MidRe-Test 8-leading edge (15mm)
-                                                            #                      Ref_y1 = 260, #MidRe-Test 8-leading edge (7mm)
+                                                            #                       Ref_y1 = 260, #MidRe-Test 8-leading edge (7mm)
                                                             # Ref_x0 = [109, 726], Ref_y1 = 276, #P1_3kHz
                                                             # Ref_x0 = [111, 725], Ref_y1 = 75,  #P1-6kHz
                                                             # Ref_x0 = [111, 725], Ref_y1 = 67,  #P1-10kHz
                                                             slice_thickness = SliceThickness, 
-                                                            shock_angle_samples  = 4500, 
+                                                            shock_angle_samples  = 100, 
                                                             angle_samples_review = 20,
                                                             inclination_est_info = 110,
                                                             # inclination_est_info =  [110, (474, 591),(463, 482)],
@@ -121,7 +121,7 @@ ShockwaveRegion ,n ,WR, Scale = ImpImg.GenerateSlicesArray(imgPath,
                                                             # avg_shock_angle = 88, avg_shock_loc = 467,
                                                             OutputDirectory = NewFileDirectory,
                                                             comment= f'{CaseName}',
-                                                            preview =  True)
+                                                            preview =  False)
 
 # ImgList = cv2.imread(NewFileDirectory+'\\2.0kHz_50mm_0.1360544217687075mm-px_ts_10_slice.png')
 # File = f"{f/1000}kHz_{HLP}mm_{Scale}mm-px_ts_{SliceThickness}_slice_{CaseName}.png"
@@ -170,12 +170,12 @@ print('Shock Regions:',NewRef,'\t Represents:' ,xPixls, 'px \t Shock Regions in 
 #                                     ShowIm = False)
 
 ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
-                                    # 'SL_Average',
-                                    # 'SL_FFT',
-                                    'SL_Brightness/Contrast',
+                                    'SL_Average',
+                                    'SL_FFT',
+                                    # 'SL_Brightness/Contrast',
                                     # 'FFT',
-                                    # filterCenter = [(0, 233)], D = 20, n = 5,
-                                    filterCenter = [(0, 465), (-10, 465), (10, 465), (0, 495)], D = 25, n = 5,
+                                    filterCenter = [(0, 233)], D = 20, n = 5,
+                                    # filterCenter = [(0, 465), (-10, 465), (10, 465), (0, 495)], D = 25, n = 5,
                                     Brightness = 0.5, Contrast = 2, Sharpness = 1.5,
                                     # Brightness = 1.15, Contrast = 2, Sharpness = 1,
                                     ShowIm = False)

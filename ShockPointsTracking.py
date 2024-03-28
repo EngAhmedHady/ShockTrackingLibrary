@@ -322,19 +322,19 @@ imgPath ='D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\
 # imgPath ='D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\2022_11_30\\*.jpg'
 # imgPath ='C:\\Users\\Hady-PC\\Desktop\\PhD\\TFAST\\TEAMAero Experiments\\2023_04_24\\Rough-2kHz-4sec (test 5)\\*.png'
 NSnapshots = 2000  # ---------------------- SnapShopts to import (-1 to import all)
-# ResizeImg = (1620,1080)  # ------------- In case of need to change image resolution  
+# ResizeImg = (1620,1080)  # ----------- In case of need to change image resolution  
 useOrgImg = False # ----------- Use Original image in case of subtracting Avg image
 # Traking points ------------------------------------------------------------------
 N_Slices = 4 # --------------------------------------------------- Number of points
 SliceWidth = 120 # --------------------------------------- Shock Oscillation domain
-SliceThickness = 9 # ------------------- Slice Thickness to average befor tracking
+SliceThickness = 9 # -------------------- Slice Thickness to average befor tracking
 # Flow Parameters -----------------------------------------------------------------
 InletM = 1.26 # -------------- Avg. measured inlflow mach number upstream the shock
 # Plots Configuration ------------------------------------------------------------- 
 AvgAngleYloc = 350 # Average Angle values Y-position in plot (est. from img. hight)
 ArrowLen = 50 # -------------- Inflow Mach number in x direction Arrow length in px 
 TextSize = 26 # ------------- Inflow Mach number and angle in x direction text size
-M1Color  = 'orange' # - Inflow Mach number and angle in x direction text/lines color
+M1Color  = 'orange' #  Inflow Mach number and angle in x direction text/lines color
 M1dColor = 'maroon' # ----- Inflow Mach number and angle estimated from shock angle
 # =================================================================================
 
