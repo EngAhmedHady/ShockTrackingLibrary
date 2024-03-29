@@ -236,7 +236,6 @@ def ImportSchlierenImages(path, ResizeImg = (), BGPath = '', nt = -1, Mode = -1)
                     n += 1
                     sys.stdout.write('\r')
                     sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n1/20)), int(5*n/(n1/20))))
-                    sys.stdout.flush()
                 o += 1
             print('')
         else:
@@ -316,24 +315,26 @@ def ShockLoc(ImgSlice, plot = False):
 
 # Input Parameters ================================================================
 # Snapshots -----------------------------------------------------------------------
-imgPath ='D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Half Open\\2023_01_19\\Test 4-5\\*.jpg'
-BGPath ='D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Half Open\\2023_01_19\\Test 4-5\\Avg\\Avg4.JPG'
+# imgPath ='D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Fully Open\\2023-03-29_Sync_Oil_sch-fully open\\Oil-sch test 7 - half covered 25fps - 5%\\Oil-Sch test7\\*.png'
+# imgPath ='D:\\TFAST\\TEAMAero experiments\\Philipp Cases, tripping\\2023_04_11\Fast Schlieren\\Test 7 - 180deg from the ref\\*.png'
+imgPath ='D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
+# BGPath ='D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Half Open\\2023_01_19\\Test 4-5\\Avg\\Avg4.JPG'
 # imgPath ='D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\2022_11_30\\*.jpg'
 # imgPath ='C:\\Users\\Hady-PC\\Desktop\\PhD\\TFAST\\TEAMAero Experiments\\2023_04_24\\Rough-2kHz-4sec (test 5)\\*.png'
 NSnapshots = 2000  # ---------------------- SnapShopts to import (-1 to import all)
-ResizeImg = (1620,1080)  # ------------- In case of need to change image resolution  
+# ResizeImg = (1620,1080)  # ----------- In case of need to change image resolution  
 useOrgImg = False # ----------- Use Original image in case of subtracting Avg image
 # Traking points ------------------------------------------------------------------
 N_Slices = 4 # --------------------------------------------------- Number of points
 SliceWidth = 120 # --------------------------------------- Shock Oscillation domain
-SliceThickness = 9 # ------------------- Slice Thickness to average befor tracking
+SliceThickness = 9 # -------------------- Slice Thickness to average befor tracking
 # Flow Parameters -----------------------------------------------------------------
 InletM = 1.26 # -------------- Avg. measured inlflow mach number upstream the shock
 # Plots Configuration ------------------------------------------------------------- 
 AvgAngleYloc = 350 # Average Angle values Y-position in plot (est. from img. hight)
 ArrowLen = 50 # -------------- Inflow Mach number in x direction Arrow length in px 
 TextSize = 26 # ------------- Inflow Mach number and angle in x direction text size
-M1Color  = 'b' # - Inflow Mach number and angle in x direction text/lines color
+M1Color  = 'orange' #  Inflow Mach number and angle in x direction text/lines color
 M1dColor = 'maroon' # ----- Inflow Mach number and angle estimated from shock angle
 # =================================================================================
 
@@ -347,14 +348,17 @@ if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
 # ---------------------------------------------------------------------------------
 
 # ----------------------- Import working images -----------------------------------
-ImgList, n, imgSize, reductionRatio, originalImg_list = ImportSchlierenImages(imgPath, ResizeImg)
-
+# ImgList, n, imgSize, reductionRatio, originalImg_list = ImportSchlierenImages(imgPath, ResizeImg)
+ImgList, n, imgSize, reductionRatio, originalImg_list = ImportSchlierenImages(imgPath, nt = -1, Mode = 3)
 
 if len(originalImg_list) > 0: useOrgImg = True 
 print('Number of imported snapshoots: %s' %n)
    
 P1 = (int(Reference[2][0][0]/reductionRatio), int(Reference[2][0][1]/reductionRatio))
 P2 = (int(Reference[2][1][0]/reductionRatio), int(Reference[2][1][1]/reductionRatio))
+
+
+print(Reference)
 HalfSliceWidth = int(SliceWidth/2)
 NewP1 = (P1[0]-HalfSliceWidth, P1[1])
 NewP2 = (P2[0]-HalfSliceWidth, P2[1])
@@ -404,6 +408,11 @@ for j in ImgList:
         # fig1, ax1 = plt.subplots(figsize=(10, 5))
         # ax1.plot(Slice[0])
         # xLoc.append(int(ShockLoc(Slice[0]))+Ref[i][0])
+        # minLoc, certain, reason = SOA.ShockTraking(Slice, 
+        #                                            LastShockLoc = -1, 
+        #                                            Plot = False, 
+        #                                            count = -1)
+        
         xLoc.append(int(ShockLoc(Slice[0]))+Ref[i][0])
         
         if i > 0 and i < N_Slices-1:
@@ -416,7 +425,7 @@ for j in ImgList:
                 else: AngDeg = 180-(AngRad*180/np.pi)
                 
                     
-                
+            # ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1)    
             DAlfa = (AngDeg + Alfa)*np.pi/180
             aOfAlfa = y_i - DAlfa*xLoc[i]
             y2 = DAlfa*(xLoc[i]+80)+aOfAlfa
@@ -428,29 +437,29 @@ for j in ImgList:
             else:
                 arc1 = Arc((xLoc[i], Pnts[i]),50, 50, theta1=AngDeg, theta2=0, color = M1Color)   
                 
-            ax.add_patch(arc1);            
-            ax.text(xLoc[i]+40 ,Pnts[i]-3 , str(abs(round(AngDeg,2)))+'$^o$',size = TextSize, color = M1Color);
+            # ax.add_patch(arc1);            
+            # ax.text(xLoc[i]+40 ,Pnts[i]-3 , str(abs(round(AngDeg,2)))+'$^o$',size = TextSize, color = M1Color);
             
-            arc1 = Arc((xLoc[i], Pnts[i]),100, 100, theta1=AngDeg, theta2=(AngDeg + Alfa), color = M1dColor)
-            ax.add_patch(arc1);
-            ax.text(xLoc[i]+60 ,Pnts[i]-(y3-Pnts[i])-5 , str(abs(round(Alfa,2)))+'$^o$',size = 25, color = M1dColor);
+            # arc1 = Arc((xLoc[i], Pnts[i]),100, 100, theta1=AngDeg, theta2=(AngDeg + Alfa), color = M1dColor)
+            # ax.add_patch(arc1);
+            # ax.text(xLoc[i]+60 ,Pnts[i]-(y3-Pnts[i])-5 , str(abs(round(Alfa,2)))+'$^o$',size = 25, color = M1dColor);
             
-            ax.plot([xLoc[i]-10,xLoc[i]+60], [y_i,y_i],'--',color = M1Color,ms = 15)
-            AngRad = abs(AngDeg)*np.pi/180
-            M1 = round(1/np.sin(AngRad),2)
+            # ax.plot([xLoc[i]-10,xLoc[i]+60], [y_i,y_i],'--',color = M1Color,ms = 15)
+            # AngRad = abs(AngDeg)*np.pi/180
+            # M1 = round(1/np.sin(AngRad),2)
             
-            ax.annotate(r'M$_1$ = '+str(M1), xy=(xLoc[i], Pnts[i]),  xycoords='data',color=M1Color, size = TextSize,
-                    xytext=(xLoc[i] - ArrowLen, Pnts[i]), arrowprops=dict(headwidth = 5, color=M1Color, width=2),
-                    horizontalalignment='right', verticalalignment='center')
+            # ax.annotate(r'M$_1$ = '+str(M1), xy=(xLoc[i], Pnts[i]),  xycoords='data',color=M1Color, size = TextSize,
+            #         xytext=(xLoc[i] - ArrowLen, Pnts[i]), arrowprops=dict(headwidth = 5, color=M1Color, width=2),
+            #         horizontalalignment='right', verticalalignment='center')
             
             # ax.annotate(r'M$_1$ = '+str(M1), xy=(xLoc[i], Pnts[i]),  xycoords='data',color=M1Color, size = TextSize,
             #         xytext=(xLoc[i] - 100*(M1/InletM), Pnts[i]), arrowprops=dict(headwidth = 5, color=M1Color, width=2),
             #         horizontalalignment='right', verticalalignment='center')
             
             # M1d
-            ax.annotate(r'M$_{1d}$ = '+str(InletM), xy=(xLoc[i], y_i),  xycoords='data',color=M1dColor, size = TextSize,
-                    xytext=(xLoc[i] - 100, y3), arrowprops=dict(headwidth = 10, color=M1dColor, width=2),
-                    horizontalalignment='right', verticalalignment='center')
+            # ax.annotate(r'M$_{1d}$ = '+str(InletM), xy=(xLoc[i], y_i),  xycoords='data',color=M1dColor, size = TextSize,
+            #         xytext=(xLoc[i] - 100, y3), arrowprops=dict(headwidth = 10, color=M1dColor, width=2),
+            #         horizontalalignment='right', verticalalignment='center')
             
             # arcontalalignment='right', verticalalignment='center')
     
@@ -469,8 +478,14 @@ for j in ImgList:
     
     # AngReg = np.arctan(m)*180/np.pi
     
-    if m < 0:   AngReg = np.arctan(m)*180/np.pi
-    else: AngReg = 180 - np.arctan(m)*180/np.pi
+    # if m < 0:   AngReg = np.arctan(m)*180/np.pi
+    # else: AngReg = 180 - np.arctan(m)*180/np.pi
+    if m > 0:   
+        AngReg = 180 - np.arctan(m)*180/np.pi
+    elif m <= 0: 
+        AngReg = abs(np.arctan(m)*180/np.pi)
+    else:
+        AngReg = 90
     
     AvgAngleGlob += AngReg
     
@@ -482,15 +497,14 @@ for j in ImgList:
         Xmax = int((imgSize[1]-a)/m)
         X = int((AvgAngleYloc-a)/m);
         
-        ax.plot([Xmin,Xmax], [0,imgSize[1]],'-.w', lw = 3)
+        # ax.plot([Xmin,Xmax], [0,imgSize[1]],'-.w', lw = 3)
     
-    
-        arc1 = Arc((X, AvgAngleYloc),80, 80, theta1=AngReg, theta2=0, color = 'w')
-        ax.add_patch(arc1);
-        ax.text(X+45 ,AvgAngleYloc-10 , str(abs(round(AngReg,2)))+'$^o$',size = 50, color = 'w');
-        ax.plot([X-10,X+200], [AvgAngleYloc,AvgAngleYloc],'--w',ms = 10, lw = 3)
-        ax.set_xlim(0,imgSize[1])
-        ax.set_ylim(imgSize[0],0)
+        # arc1 = Arc((X, AvgAngleYloc),80, 80, theta1=AngReg, theta2=0, color = 'w')
+        # ax.add_patch(arc1);
+        # ax.text(X+45 ,AvgAngleYloc-10 , str(abs(round(AngReg,2)))+'$^o$',size = 50, color = 'w');
+        # ax.plot([X-10,X+200], [AvgAngleYloc,AvgAngleYloc],'--w',ms = 10, lw = 3)
+        # ax.set_xlim(0,imgSize[1])
+        # ax.set_ylim(imgSize[0],0)
 
     
     plt.close(fig)
@@ -502,5 +516,5 @@ for j in ImgList:
     sys.stdout.flush()
     l += 1
 
-imageio.mimsave(NewFileDirectory +'\\movie.avi', imList, fps=10)
+imageio.mimsave(NewFileDirectory +'\\movie.avi', imList, fps=60)
 print('\n',abs(round(AvgAngleGlob/n,2)))
