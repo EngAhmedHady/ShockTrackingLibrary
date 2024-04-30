@@ -165,7 +165,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
     
     if Plot:
         ax.axvline(minLoc, linestyle = '--', color = 'tab:purple', label = 'Middle line of local minimum')
-        # if count > -1: ax.set_title(count)
+        if count > -1: ax.set_title(count)
         if LastShockLoc > -1:
             ax.axvline(LastShockLoc,linestyle = '--',color = 'tab:red', label = 'Location shock on previous snapshot')
             handles, labels = plt.gca().get_legend_handles_labels()
@@ -195,11 +195,21 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
             reason = 'Almost equal Valleys'
     
     if n > 1 and certainLoc:
-        for Area in AreaSet2:
-            if MaxArea2 > 0: Ra = Area/MaxArea2
-            if Ra > 0.5 and Ra < 1 and certainLoc: certainLoc = False; reason = 'Almost equal sub-Valleys'   
-            if MaxArea2 !=  abs(np.trapz(LocMinAvg-ShockRegion[1])) and certainLoc: 
-                certainLoc = False; reason = 'different sub-Valleys than smallest'
+        try:
+            for Area in AreaSet2:
+                if MaxArea2 > 0: Ra = Area/MaxArea2
+                if Ra > 0.5 and Ra < 1 and certainLoc: certainLoc = False; reason = 'Almost equal sub-Valleys'   
+                if MaxArea2 !=  abs(np.trapz(LocMinAvg-ShockRegion[1])) and certainLoc: 
+                    certainLoc = False; reason = 'different sub-Valleys than smallest'
+        except Exception as e:
+            fig, ax = plt.subplots(figsize=(10,5))
+            ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
+            ax.text(0.99, 0.99, f'Error: {e}',
+                    ha = 'right', va ='top', transform = ax.transAxes,
+                    color = 'red', fontsize=14)
+            if count > -1: ax.set_title(count)
+            print("\n The error is: ",e)
+        
     
     if (not certainLoc) and Plot: 
         ax.text(0.99, 0.99, 'uncertain: '+ reason,

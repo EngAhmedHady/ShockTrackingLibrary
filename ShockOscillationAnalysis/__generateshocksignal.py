@@ -76,7 +76,7 @@ def DarkestSpotShocktracking(SnapshotSlice,Plot,count,ShockLocation, uncertain):
     return ShockLocation, uncertain
 
 def GenerateShockSignal(img, method = 'integral', 
-                        signalfilter=None, reviewInterval = [0,0],
+                        signalfilter=None, review_slice_tracking = -1,
                         CheckSolutionTime = True, **kwargs):
     """
     Find the shockwave locations in a series of snapshots with optional signal processing filters.
@@ -111,9 +111,14 @@ def GenerateShockSignal(img, method = 'integral',
     count = 0 # ................................ Processed snapshot counter
     
     # check ploting conditions
-    reviewInterval.sort(); start, end = reviewInterval
-    plotingInterval = abs(end-start)
-    ploting = plotingInterval > 0
+    if hasattr(review_slice_tracking, "__len__") and len(review_slice_tracking) == 2:
+        review_slice_tracking.sort(); start, end = review_slice_tracking
+        plotingInterval = abs(end-start)
+        ploting = plotingInterval > 0
+    elif not hasattr(review_slice_tracking, "__len__") and review_slice_tracking> -1:
+        start = review_slice_tracking; end = review_slice_tracking + 1
+        plotingInterval = 1
+        ploting = plotingInterval > 0
     
     # check if the image on grayscale or not and convert if not
     ShockRegion = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img

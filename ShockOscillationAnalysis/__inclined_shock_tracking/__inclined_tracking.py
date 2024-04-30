@@ -12,8 +12,8 @@ from .. import SOA
 import numpy as np
 import matplotlib.pyplot as plt
 from ..__preview import plot_review
-from ..ShockOscillationAnalysis import CVColor
 from ..__shocktracking import ShockTraking
+from ..ShockOscillationAnalysis import CVColor
 from ..__linedrawingfunctions import InclinedLine, AngleFromSlope
 # from ..__imgcleaningfunctions import ImgListAverage
 from ..__slice_list_generator.__list_generation_tools import GenerateIndicesList
@@ -24,7 +24,7 @@ plt.rcParams["text.usetex"] =  True
 plt.rcParams["font.family"] = "Times New Roman"
 
 class inclinedShockTracking(SOA):
-    def __init__(self, f = 1, D=1, pixelScale = 1):
+    def __init__(self, f = 1, D = 1, pixelScale = 1):
         self.f = f # ----------------------- sampling rate (fps)
         self.D = D # ----------------------- refrence distance (mm)
         self.pixelScale = pixelScale # ----- initialize scale of the pixels
@@ -65,17 +65,21 @@ class inclinedShockTracking(SOA):
 
     def anglesInterpolation(self, pnts_y_list, input_locs, angles_list):
         new_ang_value = []; 
-        if min(input_locs) > min(pnts_y_list) or max(input_locs) < max(pnts_y_list): 
-            print('provided y-domain is out of valid range')
-            print('aborting input angle consideration ... ')
-            return []
+        # if min(input_locs) > min(pnts_y_list) or max(input_locs) < max(pnts_y_list): 
+        #     print('provided y-domain is out of valid range')
+        #     # print('aborting input angle consideration ... ')
+        #     return []
         for yi in pnts_y_list:
             r = len(angles_list)-1; l = 0
             while r > l and r-l > 1:
                 mid = (r + l) // 2
                 if input_locs[mid] <= yi: r = mid
                 elif input_locs[mid] > yi: l = mid
-            new_ang_value.append(angles_list[r]+(yi-input_locs[r])*(angles_list[l]-angles_list[r])/(input_locs[l]-input_locs[r]))
+            if input_locs[r] >= yi: ang_value = angles_list[input_locs.index(min(input_locs))]
+            elif input_locs[l] <= yi: ang_value = angles_list[input_locs.index(max(input_locs))]
+            else:
+                ang_value = angles_list[r]+(yi-input_locs[r])*(angles_list[l]-angles_list[r])/(input_locs[l]-input_locs[r])
+            new_ang_value.append(ang_value)
         return new_ang_value
 
 
@@ -157,6 +161,7 @@ class inclinedShockTracking(SOA):
                 cv2.circle(preview_img, (x_i2[pnt],y_i[pnt]), radius=3, color=CVColor.RED, thickness=-1)
         slices_info = x_i1,x_i2,y_i
         print(u'\u2713')
+        # print(slices_info)
         return slices_info, nPnts, inclinationCheck
 
     def InclinedShockTracking(self, imgSet, nSlices, Ref, nReview = 0, slice_thickness = 1, 
@@ -168,9 +173,18 @@ class inclinedShockTracking(SOA):
         shp = imgSet[0].shape; 
 
         avg_preview_mode = kwargs.get('avg_preview_mode', None)
+        review_slice_tracking = kwargs.get('review_slice_tracking', -1)
+        slice_ploting_array = np.zeros(nReview)
+        if hasattr(review_slice_tracking, "__len__") and len(review_slice_tracking) == 2:
+            review_slice_tracking.sort(); start, end = review_slice_tracking
+            for i in range(start, end): slice_ploting_array[i] = 1
+        elif not hasattr(review_slice_tracking, "__len__") and review_slice_tracking > -1:
+            slice_ploting_array[review_slice_tracking] = 1
+        
 
         if slice_thickness > 1: Ht = int(slice_thickness/2)  # Ht -> Half Thickness
         else: Ht = 1; slice_thickness = 2;
+        
         
         upper_bounds = np.zeros(nSlices, dtype = int); lower_bounds = np.zeros(nSlices, dtype = int)
         
@@ -194,9 +208,10 @@ class inclinedShockTracking(SOA):
                 x_i1, x_i2 = Ref[0][i], Ref[1][i]
                 Slice = np.sum(img[upper_bounds[i]-1:lower_bounds[i], x_i1:x_i2], axis=0) / slice_thickness
 
-                LastShockLoc = xLocOld[i]
-
-                ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc)
+                LastShockLoc = xLocOld[i]-Ref[0][i]
+                
+                # ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count, Plot = slice_ploting_array[count])
+                ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count)
                 xLoc.append(ShockLoc + Ref[0][i])
                 if not certainLoc: uncertain.append(xLoc[-1]); uncertainY.append(Ref[2][i])
 
@@ -233,7 +248,7 @@ class inclinedShockTracking(SOA):
                             uncertain_list[i], uncertainY_list[i], 
                             avg_slope[i], avg_ang[i], avg_midLoc[i] , y, **kwargs)
                 if len(OutputDirectory)> 0: 
-                    fig.savefig(fr'{OutputDirectory}\ShockAngleReview_{i:04d}_Ang{avg_ang_glob:.2f}.png')
+                    fig.savefig(fr'{OutputDirectory}\ShockAngleReview_{i:04d}_Ang{avg_ang_glob:.2f}.png', bbox_inches='tight', pad_inches=0.1)
 
                 if i > 18:
                     if len(OutputDirectory) == 0: plt.close(fig); break
@@ -253,8 +268,8 @@ class inclinedShockTracking(SOA):
         resize_img = kwargs.get('resize_img', (imgs_shp[1],imgs_shp[0]))
         for i in indices_list:
             img = cv2.imread(pathlist[i])
-            original_img_list.append(cv2.resize(img.astype('float32'), resize_img))
-            img_list.append(cv2.cvtColor(original_img_list[-1], cv2.COLOR_BGR2GRAY))
+            # original_img_list.append(cv2.resize(img.astype('float32'), resize_img))
+            img_list.append(cv2.cvtColor(cv2.resize(img.astype('float32'), resize_img), cv2.COLOR_BGR2GRAY))
             n += 1
             sys.stdout.write('\r')
             sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n_images/20)), int(5*n/(n_images/20))))
@@ -289,6 +304,8 @@ class inclinedShockTracking(SOA):
         if n1 < 1: print('No files found!'); sys.exit();
         # Open first file and set the limits and scale
         Refimg = cv2.imread(files[0])
+        Refimg = cv2.cvtColor(Refimg, cv2.COLOR_BGR2GRAY)
+        Refimg = cv2.cvtColor(Refimg, cv2.COLOR_GRAY2BGR)
         shp = Refimg.shape; print('Img Shape is:', shp)
         Ref_x0 = kwargs.get('Ref_x0', [0,0])
         Ref_y0 = kwargs.get('Ref_y0', -1)
@@ -302,14 +319,14 @@ class inclinedShockTracking(SOA):
         screen_width, screen_height = screen.width, screen.height
         print(f'Screen resolution: {screen_width}, {screen_height}')
         
-        if shp[0] >= screen_height*0.85:
-            r = shp[0]/shp[1] # ---------- Image aspect ratio
-            NewImgSize = (round(screen_height*0.85/r),round(screen_height*0.85))
-            Refimg = cv2.resize(Refimg, NewImgSize)
-            reductionRatio = NewImgSize[0]/shp[0]
-            shp = NewImgSize
-            print('Warning: Image hieght is larger than your monitor hieght')
-            print(f'Only reference image will be adjusted to {shp}')
+        # if shp[0] >= screen_height*0.85:
+        #     r = shp[0]/shp[1] # ---------- Image aspect ratio
+        #     NewImgSize = (round(screen_height*0.85/r),round(screen_height*0.85))
+        #     Refimg = cv2.resize(Refimg, NewImgSize)
+        #     reductionRatio = NewImgSize[0]/shp[0]
+        #     shp = NewImgSize
+        #     print('Warning: Image hieght is larger than your monitor hieght')
+        #     print(f'Only reference image will be adjusted to {shp}')
         
         tracking_V_range.sort(); start, end = tracking_V_range
         y_diff = abs(end-start);  draw_y = y_diff == 0       
@@ -318,13 +335,13 @@ class inclinedShockTracking(SOA):
             tracking_V_range = []
             # Vertical limits and scale 
             try:
-                Ref_y1 = self.LineDraw(self.clone, 'H', 2)[-1]
+                Ref_y1 = self.LineDraw(self.clone, 'H', 2, line_color = CVColor.ORANGE)[-1]
             except Exception:
                 Ref_y1 = Ref_y0;
                 print(f'Nothing was drawn! Ref_y1 value is {Ref_y1}')
             tracking_V_range.append((Ref_y0 - Ref_y1)* self.pixelScale)
             try:
-                Ref_y2 = self.LineDraw(self.clone, 'H', 2)[-1]
+                Ref_y2 = self.LineDraw(self.clone, 'H', 2, line_color = CVColor.ORANGE)[-1]
             except Exception:
                 Ref_y2 = Ref_y1;
                 print(f'Nothing was drawn! Ref_y1 value is {Ref_y2}')
@@ -337,8 +354,8 @@ class inclinedShockTracking(SOA):
             tracking_V_range.sort() if Ref_y0 > -1 else tracking_V_range.sort(reverse=True)
             Ref_y2, Ref_y1  = [round(Ref_y0 - (x / self.pixelScale)) for x in tracking_V_range] if Ref_y0 > -1 else tracking_V_range
             if Ref_y1< 0 or Ref_y2 > shp[0]: print('Vertical range of tracking is not sufficient!'); sys.exit()
-            cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), CVColor.YELLOW, 1)
-            cv2.line(self.clone, (0,Ref_y2), (shp[1],Ref_y2), CVColor.YELLOW, 1)
+            cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), CVColor.ORANGE, 1)
+            cv2.line(self.clone, (0,Ref_y2), (shp[1],Ref_y2), CVColor.ORANGE, 1)
             
         print(f'Vertical range of tracking points starts from {tracking_V_range[0]:0.2f}mm to {tracking_V_range[1]:0.2f}mm')
         print(f'But In pixels from {Ref_y1}px to {Ref_y2}px')
@@ -376,7 +393,7 @@ class inclinedShockTracking(SOA):
                                                                        preview_img = self.clone)
         
 
-        pnts_y_list = []
+        pnts_y_list = []; inflow_dir_deg = []
         for i in range(nSlices): pnts_y_list.append((Ref_y0-Ref[2][i])*self.pixelScale)
         input_locs = kwargs.get('input_locs', [])
         angles_list = kwargs.get('angles_list', [])
@@ -384,6 +401,7 @@ class inclinedShockTracking(SOA):
         if len(angles_list) > 0 and Mach_ang_mode != None:
             inflow_dir_deg = self.anglesInterpolation(pnts_y_list, input_locs, angles_list)
             inflow_dir_rad = np.array(inflow_dir_deg)*np.pi/180
+        if len(inflow_dir_deg) > 0 and Mach_ang_mode != None:
             kwargs['inflow_dir_deg'] = inflow_dir_deg
             kwargs['inflow_dir_rad'] = inflow_dir_rad
 

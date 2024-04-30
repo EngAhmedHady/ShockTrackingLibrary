@@ -13,7 +13,7 @@ import cv2
 plt.rcParams.update({'font.size': 25})
 
 # Dir = 'D:\\TFAST\\TEAMAero experiments\\2023_06_12\\'
-Dir = 'tests\\'
+Dir = '..\\Shock wave pixels\\SuctionComp\Rotated\\'
 # Paths = ['Shock wave pixels\\Philipp exp\\6.0kHz_7mm_ts_50_90 from the ref with step.png']#,
 #          'Shock wave pixels\\Philipp exp\\6.0kHz_7mm_ts_50_90deg from the ref.png']
 # Paths = ['Shock wave pixels\\Philipp exp\\6.0kHz_7mm_ts_50_180 from the ref with step.png',
@@ -23,7 +23,6 @@ Dir = 'tests\\'
 #          'Shock wave pixels\\Philipp exp\\6.0kHz_22mm_ts_50_360deg from the ref.png']
 # Paths = ['Shock wave pixels\\Philipp exp\\6.0kHz_15mm_ts_50_neg 180 from the ref with step.png',
 #           'Shock wave pixels\\Philipp exp\\6.0kHz_15mm_ts_50_neg 180 from the ref.png']
-
 
 
 # Paths = ['Shock wave pixels\\Philipp exp\\6.0kHz_7mm_ts_50_90deg from the ref.png',
@@ -77,20 +76,30 @@ Dir = 'tests\\'
 #          '10mm-trip_6.0kHz_7mm_0.13707865168539327mm-px_ts_35_slice.png',
 #          '25mm-trip_6.0kHz_7mm_0.1383219954648526mm-px_ts_35_slice.png']
 
-Paths = ['2.0kHz_7mm_0.12965964343598055mm-px_ts_60_slice-Rotated-.png',
-          '3.0kHz_7mm_0.12965964343598055mm-px_ts_60_slice-Rotated-.png',
-          '6.0kHz_7mm_0.13029315960912052mm-px_ts_60_slice-Rotated-.png',
-          '10.0kHz_7mm_0.13029315960912052mm-px_ts_60_slice-Rotated-.png',
-          '15.0kHz_7mm_0.12944983818770225mm-px_ts_60_slice-Rotated-.png']
+# Paths = ['2.0kHz_7mm_0.12965964343598055mm-px_ts_60_slice-Rotated-.png',
+#          '3.0kHz_7mm_0.12965964343598055mm-px_ts_60_slice-Rotated-.png',
+#          '6.0kHz_7mm_0.13029315960912052mm-px_ts_60_slice-Rotated-.png',
+#          '10.0kHz_7mm_0.13029315960912052mm-px_ts_60_slice-Rotated-.png',
+#          '15.0kHz_7mm_0.12944983818770225mm-px_ts_60_slice-Rotated-.png']
 
+# Paths = ['2.0kHz_7mm_0.12965964343598055mm-px_ts_60_slice-Rotated-.png',
+#           '3.0kHz_7mm_0.12965964343598055mm-px_ts_60_slice-Rotated-.png',
+#           '6.0kHz_7mm_0.13029315960912052mm-px_ts_60_slice-Rotated-.png',
+#           '10.0kHz_7mm_0.13029315960912052mm-px_ts_60_slice-Rotated-.png',
+#           '15.0kHz_7mm_0.12944983818770225mm-px_ts_60_slice-Rotated-.png']
 
+Paths = ['2.0kHz_7mm_0.136986301369863mm-px_tk_60px_100suc-fullsuc-base-passage.png',
+         '2.0kHz_7mm_0.136986301369863mm-px_tk_60px_67suc-fullsuc-base-passage.png',
+         '2.0kHz_7mm_0.136986301369863mm-px_tk_60px_50suc-fullsuc-base-passage.png',
+         '2.0kHz_7mm_0.136986301369863mm-px_tk_60px_33suc-fullsuc-base-passage.png',
+         '2.0kHz_7mm_0.136986301369863mm-px_tk_60px_17suc-fullsuc-base-passage.png']
 
 count = 0
 fig,ax = plt.subplots(figsize=(10,10))
 fig2,ax2 = plt.subplots(figsize=(10,10))
 fig3,ax3 = plt.subplots(figsize=(10,10))
 
-linstyl=['-','--',':','-.',(0, (3, 5, 1, 5, 1, 5))]
+linstyl=['-','--',':','-.',(0, (15, 2, 1, 2, 1, 2))]
 for i in Paths:
     # FileDirectory = 'C:\\Users\\admin\\Nextcloud\\Documents\\TeamAero Experiments\\Shock wave pixels\\ReynoldsNumComp\\'
     Folders = i.split(".png")
@@ -101,7 +110,7 @@ for i in Paths:
     # f = float(Folders[0].split("_")[1].split("kHz")[0])*1000
     f = float(Folders[0].split("_")[0].split("kHz")[0])*1000
     # CaseName = Folders[0].split("_")[0]
-    CaseName = Folders[0].split("_")[0]
+    CaseName = Folders[0].split("_")[-1].split(".png")[0]
     
     ts = Folders[0].split("_")[-2]  
     
@@ -109,7 +118,8 @@ for i in Paths:
     print('*** Loading shock location for case: ',CaseName,' ***')
 
     
-    ImgList = cv2.imread(f'{Dir}{int(f/1000)}kHz\\{i}')
+    # ImgList = cv2.imread(f'{Dir}{int(f/1000)}kHz\\{i}')
+    ImgList = cv2.imread(f'{Dir}\\{i}')
     LELoc = Folders[0].split("_")[2]
     
     Scale = float(Folders[0].split("_")[-4].split('mm-px')[0])
@@ -119,11 +129,18 @@ for i in Paths:
     # ShockName = ['passage shock', 'reflected shock']
     ShockName = ['passage shock']
     for j in ShockName:
-        if   CaseName == '2.0kHz' :  NewRef = [282, 435]; CaseName = '2kHz';
-        elif CaseName == '3.0kHz' :  NewRef = [288, 431]; CaseName = '3kHz';
-        elif CaseName == '6.0kHz' :  NewRef = [286, 433]; CaseName = '6kHz';
-        elif CaseName == '10.0kHz':  NewRef = [283, 440]; CaseName = '10kHz';
-        elif CaseName == '15.0kHz':  NewRef = [291, 426]; CaseName = '15kHz';
+        NewRef = [372, 538];
+        if   CaseName == '17suc-fullsuc-base-passage' :  CaseName = '16.7\%-suc';
+        elif CaseName == '33suc-fullsuc-base-passage' :  CaseName = '33.3\%-suc';
+        elif CaseName == '50suc-fullsuc-base-passage' :  CaseName = '50.0\%-suc';
+        elif CaseName == '67suc-fullsuc-base-passage':   CaseName = '66.7\%-suc';
+        elif CaseName == '100suc-fullsuc-base-passage':  CaseName = 'Full-suc';
+        
+        # if   CaseName == '2.0kHz' :  NewRef = [282, 435]; CaseName = '2kHz';
+        # elif CaseName == '3.0kHz' :  NewRef = [288, 431]; CaseName = '3kHz';
+        # elif CaseName == '6.0kHz' :  NewRef = [286, 433]; CaseName = '6kHz';
+        # elif CaseName == '10.0kHz':  NewRef = [283, 440]; CaseName = '10kHz';
+        # elif CaseName == '15.0kHz':  NewRef = [291, 426]; CaseName = '15kHz';
         
         
         # 10kHz
@@ -172,11 +189,16 @@ for i in Paths:
         print('Shock Regions:',NewRef,'\t Represents:' ,xPixls, 'px \t Shock Regions in mm:', ShockResionScale)
     
         print('Cleaning illumination instability ...')
-        ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
-                                            'Average', 'FFT', #'Brightness and Contrast',
-                                            filterCenter = [(0,233)], D = 20, n = 5,
-                                            # Brightness = 2, Contrast = 1.7, Sharpness = 2,
-                                            ShowIm = False)
+        # ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
+        #                                     'Average', 'FFT', #'Brightness and Contrast',
+        #                                     filterCenter = [(0,190)], D = 20, n = 5,
+        #                                     # Brightness = 2, Contrast = 1.7, Sharpness = 2,
+        #                                     ShowIm = False)
+        # ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
+        #                                     'SL_Average',
+        #                                     # 'SL_FFT',
+        #                                     filterCenter = [(0, 190)], D = 20, n = 5,
+        #                                     ShowIm = False)
         
         ShockLocation, Uncer = SA.ShockTrakingAutomation(ShockwaveRegion, 
                                                            reviewInterval = [0,0],
@@ -202,12 +224,12 @@ for i in Paths:
             domain.append(max(shockLoc)-min(shockLoc))
         avgDomain = np.mean(domain)    
             
-        fig1, ax1 = plt.subplots(figsize=(20,200))
-        ax1.imshow(ShockwaveRegion, extent=[0, ShockResionScale, nShoots, 0], aspect='0.1', cmap='gray');
-        ax1.plot(A, range(nShoots),'x', lw = 1, color = 'g', ms = 2)
-        # ax1.xaxis.set_major_locator(MultipleLocator(int(ShockResionScale/4)))
-        ax1.xaxis.set_major_formatter('{x:.0f}')
-        ax1.set_ylim([0,nShoots])
+        # fig1, ax1 = plt.subplots(figsize=(20,200))
+        # ax1.imshow(ShockwaveRegion, extent=[0, ShockResionScale, nShoots, 0], aspect='0.1', cmap='gray');
+        # ax1.plot(A, range(nShoots),'x', lw = 1, color = 'g', ms = 2)
+        # # ax1.xaxis.set_major_locator(MultipleLocator(int(ShockResionScale/4)))
+        # ax1.xaxis.set_major_formatter('{x:.0f}')
+        # ax1.set_ylim([0,nShoots])
      
         print("Shock oscillation domain",max(ShockLocation)-min(ShockLocation))
         print("Average Shock oscillation domain",avgDomain)
@@ -216,34 +238,23 @@ for i in Paths:
         #                       nperseg = 512*f/2000, noverlap=0, nfft=None, detrend='constant',
         #                       return_onesided=True, scaling='density')
         Freq, psd = signal.welch(x = ShockLocation, fs = f, window='barthann',
-                              nperseg = 512, noverlap=0, nfft=None, detrend='constant',
+                              nperseg = 512, noverlap=384, nfft=None, detrend='constant',
                               return_onesided=True, scaling='density')
         
-        # Intpsd = np.trapz(psd,Freq)
+        Intpsd = np.trapz(psd,Freq)
+        
         
         # ax.semilogx(Freq, psd, lw = '2', label = CaseName, linestyle = linstyl[count])
         ax.loglog(Freq, psd, lw = '2', label = CaseName, linestyle = linstyl[count])
         # ax3.loglog(Freq, psd/Intpsd, lw = '2', label = CaseName, linestyle = linstyl[count])
+        ax3.semilogx(Freq, psd/Intpsd, lw = '2', label = CaseName, linestyle = linstyl[count])
         # ax.axvline(x = 19.5,ls='--',color='k',alpha=0.4)
         # ax.axvline(x = 287,ls='--',color='k',alpha=0.4)
         
         T = nShoots/f
         print("Total measuring time: ", T, "sec")
         
-        dx_dt = []; dt = T/nShoots; t = np.linspace(0,T,nShoots);
-        # dx_dtNP = np.gradient(ShockLocation, dt*1000)
-        
-        for xi in range(nShoots):
-            if xi > 0 and xi < nShoots-1:
-                dx_dt.append((ShockLocation[xi+1]-ShockLocation[xi-1])/(2*dt*1000))
-            elif xi == 0: 
-                dx_dt.append((ShockLocation[xi+1]-ShockLocation[xi])/(dt*1000))
-            elif xi == nShoots-1:
-                dx_dt.append((ShockLocation[xi]-ShockLocation[xi-1])/(dt*1000))
-
-
-        V_avg = np.mean(dx_dt) 
-        V = dx_dt - V_avg
+        V = SA.VelocitySignal(ShockLocation, T)
         
         # V_np_avg = np.mean(dx_dtNP)
         # V_np = dx_dtNP - V_avg
@@ -252,8 +263,23 @@ for i in Paths:
         #                       nperseg = 512*f/2000, noverlap=0, nfft=None, detrend='constant',
         #                       return_onesided=True, scaling='density')
         Freq2, psd2 = signal.welch(x = V, fs = f, window='barthann',
-                              nperseg = 512, noverlap=0, nfft=None, detrend='constant',
+                              nperseg = 512, noverlap=384, nfft=None, detrend='constant',
                               return_onesided=True, scaling='density')
+        
+        print('max peak within 50:100 is ',Freq2[psd2[50:100].argmax(axis=0)])
+        print('max peak within 100:150 is ',Freq2[psd2[100:150].argmax(axis=0)]+100)
+        print('max peak within 100:200 is ',Freq2[psd2[100:200].argmax(axis=0)]+100)
+        
+        if CaseName == '16.7\%-suc': ax2.axvline(x = 170,ls='--',color='tab:purple',alpha=0.4);
+        elif CaseName == '33.3\%-suc' :  ax2.axvline(x = 98,ls='--',color='tab:red',alpha=0.4);
+        elif CaseName == '66.7\%-suc' :  ax2.axvline(x = 118,ls='--',color='tab:orange',alpha=0.4);
+        elif CaseName == 'Full-suc' :  ax2.axvline(x = 139,ls='--',color='tab:blue',alpha=0.4);
+        # elif CaseName == '50suc-fullsuc-base-passage' :  CaseName = '50.0\%-suc';
+        # elif CaseName == '67suc-fullsuc-base-passage':   CaseName = '66.7\%-suc';
+        # elif CaseName == '100suc-fullsuc-base-passage':  CaseName = 'Full-suc';
+        
+        
+            
         
         # FreqNP, psdNP = signal.welch(x = V_np, fs = f, window='barthann',
         #                       nperseg = 512*f/2000, noverlap=0, nfft=None, detrend='constant',
@@ -284,16 +310,16 @@ for i in Paths:
             if len(Loc) < k and i == Loc[k]:  uncer == 0; k +=1
             ShockLocationfile.append([i, ShockLocation[i], V[i], uncer])
             
-        np.savetxt(f'{Dir}\\ShockLocation-{CaseName}.txt', 
-                    ShockLocationfile,  delimiter = ",")
+        # np.savetxt(f'{Dir}\\ShockLocation-{CaseName}.txt', 
+        #             ShockLocationfile,  delimiter = ",")
         
         
         # =================================
         
         
         # ax2.plot(t, dx_dt, lw = '2')
-        # ax2.semilogx(Freq2, psd2 , lw = '2', label = CaseName, linestyle = linstyl[count])
-        ax2.loglog(Freq2, psd2 , lw = '2', label = CaseName, linestyle = linstyl[count])
+        ax2.semilogx(Freq2, psd2 , lw = '2', label = CaseName, linestyle = linstyl[count])
+        # ax2.loglog(Freq2, psd2 , lw = '2', label = CaseName, linestyle = linstyl[count])
         # ax2[1].loglog(FreqNP, psdNP , lw = '2', label = CaseName)
         # ax2.axvline(x =Freq2[psd2.argmax(axis=0)],ls='--',color='k',alpha=0.4)
         ax2.set_ylabel(r"PSD $[m^2.s^{-2}.Hz^{-1}]$"); 

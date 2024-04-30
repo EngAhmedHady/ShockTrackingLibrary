@@ -12,6 +12,7 @@ import numpy as np
 from .. import SOA
 from datetime import datetime as dt
 from ..__preview import PreviewCVPlots
+from ..ShockOscillationAnalysis import CVColor
 from ..__linedrawingfunctions import InclinedLine
 from ..__inclined_shock_tracking.__inclined_tracking import inclinedShockTracking
 from .__list_generation_tools import genratingRandomNumberList, GenerateIndicesList
@@ -19,8 +20,12 @@ from .__list_generation_tools import genratingRandomNumberList, GenerateIndicesL
 
 class sliceListGenerator(SOA):
     def __init__(self, f, D=1, pixelScale = 1, Type='single pixel raw'):
-        super().__init__(f, D, pixelScale, Type)
+        # self.f = f # ----------------------- sampling rate (fps)
+        # self.D = D # ----------------------- refrence distance (mm)
+        # self.pixelScale = pixelScale # ----- initialize scale of the pixels
         self.inc_trac = inclinedShockTracking(f,D)
+        super().__init__(f, D, pixelScale)
+
     
     def IntersectionPoint(self, M , A, Ref):
         """
@@ -132,15 +137,15 @@ class sliceListGenerator(SOA):
                                                                 Ref_x0, scale_pixels, 
                                                                 Ref_y0, Ref_y1, slice_loc)
         print(f'Slice is located at: {Ref_y1}px')
-        if Ref_y1 > 0 and Ref_y1 != Ref_y0: cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), (0,0,255), 1)
+        if Ref_y1 > 0 and Ref_y1 != Ref_y0: cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), CVColor.RED, 1)
 
         if slice_thickness > 0: Ht = int(slice_thickness/2)  # Half Thickness
         else: Ht = 1; 
         
         upper_bounds =  Ref_y1 - Ht; 
         lower_bounds =  Ref_y1 + Ht if slice_thickness%2 == 0 else  Ref_y1 + Ht + 1
-        cv2.line(self.clone, (0,lower_bounds), (shp[1],lower_bounds), (0, 128, 255), 1)
-        cv2.line(self.clone, (0,upper_bounds), (shp[1],upper_bounds), (0, 128, 255), 1)
+        cv2.line(self.clone, (0,lower_bounds), (shp[1],lower_bounds), CVColor.ORANGE, 1)
+        cv2.line(self.clone, (0,upper_bounds), (shp[1],upper_bounds), CVColor.ORANGE, 1)
             
         avg_shock_angle = kwargs.get('avg_shock_angle', 90)
         avg_shock_loc = kwargs.get('avg_shock_loc', 0)
@@ -154,7 +159,7 @@ class sliceListGenerator(SOA):
                                                                                     preview_img = self.clone)
         elif len(inclination_est_info) > 2:
             P1,P2,m,a = InclinedLine(inclination_est_info[1],inclination_est_info[2],imgShape = shp)
-            cv2.line(self.clone, P1, P2, (0,255,0), 1)
+            cv2.line(self.clone, P1, P2, CVColor.GREEN, 1)
             self.Reference.append([P1, P2, m,a])
             Ref, nSlices, inclinationCheck = self.inc_trac.InclinedShockDomainSetup(inclination_est_info[0],
                                                                                     slice_thickness, [P1,P2,m,a], 

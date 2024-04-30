@@ -58,19 +58,12 @@ def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope
             p1 = (x_loc[i],column_y[i]); p2 = (x_loc[i-1],column_y[i-1]);
             _,_,m,_ = InclinedLine(p1,p2,imgShape = shp)
             xlen = np.cos(inflow_dir_rad[i]); ylen = np.sin(inflow_dir_rad[i])
-            # arw_head_s = -1/np.tan(inflow_dir_rad[i]); p_head = (p1[0]-10*xlen,p1[1]-10*ylen)
-            # arw_head_a = p_head[1]-arw_head_s*p_head[0]
-            # p_head1 = p1[0]-12*xlen; p_head2 = p_head1*arw_head_s+arw_head_a
-            # # p_head2 = [p1[0]+12*xlen]; p_head2.append(p_head2[-1]*arw_head_s+arw_head_a)
-            # ax.plot([p1[0],p_head1],[p1[1],p_head2],color = M1_color)
-            # # print(ylen)
             local_ang = AngleFromSlope(m)
             inflow_ang = local_ang + inflow_dir_deg[i]
             ax.text(p1[0]+40 ,p1[1]- 5 , f'${{{inflow_ang:0.2f}}}^\circ$',
                     size = M1_txt_size, color = M1_color);
             ax.plot([p1[0]-arw_len*xlen,p1[0]+60*xlen], [p1[1]-arw_len*ylen,p1[1]+60*ylen],color = M1_color, lw = 1)
             
-            # ax.plot([p1[0]-arw_len*xlen,p1[0]+60*xlen], [p1[1]-arw_len*ylen,p1[1]+60*ylen],color = M1_color, lw = 1)
             arc1 = Arc(p1,arc_dia, arc_dia, theta1=-local_ang, theta2=0+inflow_dir_deg[i], color = M1_color)
             ax.add_patch(arc1);
             M1 = 1/np.sin((inflow_ang)*np.pi/180)
@@ -81,11 +74,7 @@ def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope
                         color=M1_color, size = M1_txt_size,
                         xytext=(p1[0] - arw_len*xlen, p1[1] + arw_len*ylen),
                         horizontalalignment='right', verticalalignment='center')
-            # ax.annotate(f'M$_1 ={{{M1:0.2f}}}$', xy=p1, xycoords=arr,
-            #             color=M1_color, size = M1_txt_size,
-            #             xytext=(p1[0] - arw_len*xlen, p1[1] + arw_len*ylen), arrowprops=dict(headwidth = 5, color=M1_color, width=2),
-            #             horizontalalignment='right', verticalalignment='center')
-            # print(inflow_ang, p1[0] - arw_len*xlen, p1[1] - arw_len*ylen, p1[1] + arw_len*ylen)
+
 
 def PreviewCVPlots(img, Ref_x0 = [], Ref_y = [], 
                    tk = [], avg_shock_loc = [], **kwargs):

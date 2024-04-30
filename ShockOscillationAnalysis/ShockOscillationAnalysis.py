@@ -32,6 +32,7 @@ class CVColor:
     MAGENTA = (255, 0, 255)
     FUCHSIPINK = (255, 128, 255)
     GRAY = (128, 128, 128)
+    ORANGE = (0, 128, 255)
 
 class SOA:
     def __init__(self, f = 1, D = 1, pixelScale = 1):
@@ -45,8 +46,7 @@ class SOA:
         self.Reference = [] # -------------- initialize croping limits or line set
         self.line_coordinates = [] # ------- initialize Line coordinate
         self.outputPath = '' # ------------- Image output
-    
-    
+
     def screenMidLoc(self, shp):
         screen = screeninfo.get_monitors()[0]
         screen_width, screen_height = screen.width, screen.height
@@ -127,7 +127,7 @@ class SOA:
                 # storing the Horizontal line
                 elif parameters[2] == 'H':
                     avg = int((self.line_coordinates[0][1]+self.line_coordinates[1][1])/2)
-                    cv2.line(self.Temp, (0,avg), (parameters[1][1],avg), CVColor.YELLOW, 1)
+                    cv2.line(self.Temp, (0,avg), (parameters[1][1],avg), parameters[3], 1)
                     
                 elif parameters[2] == 'Inc':
                     P1,P2,m,a = InclinedLine(self.line_coordinates[0],self.line_coordinates[1],imgShape = parameters[1])
@@ -146,7 +146,7 @@ class SOA:
             self.Temp = self.clone.copy()
             cv2.imshow(parameters[0], self.Temp)
                
-    def LineDraw(self, img, lineType, LineNameInd, Intialize = False):
+    def LineDraw(self, img, lineType, LineNameInd, Intialize = False,**kwargs):
         """
         Drive the extract_coordinates function to draw lines.
 
@@ -191,7 +191,8 @@ class SOA:
         if   lineType == 'V':
             prams = [WindowHeader[LineNameInd],shp,lineType]
         elif lineType == 'H':
-            prams = [WindowHeader[LineNameInd],shp,lineType]
+            line_color = kwargs.get('line_color', CVColor.YELLOW)
+            prams = [WindowHeader[LineNameInd],shp,lineType, line_color]
         elif lineType == 'Inc':
             prams = [WindowHeader[LineNameInd],shp,lineType]
             
