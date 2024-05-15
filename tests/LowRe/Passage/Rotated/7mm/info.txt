@@ -1,6 +1,0 @@
-Cleaning:
-	- Average
-	- FFT => filterCenter = [(0, 465), (-10, 465), (10, 465), (0, 490)], D = 10, n = 5
-	- Brightness and Contrast => Brightness = 1.5, Contrast = 2, Sharpness = 1
-
-
