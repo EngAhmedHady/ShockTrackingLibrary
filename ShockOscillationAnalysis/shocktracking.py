@@ -98,7 +98,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
                 ha = 'right', va ='top', transform = ax.transAxes,
                 color = 'red', fontsize=14)
         if count > -1: ax.set_title(count)
-        print("\n The error is: ",e)
+        print(f"\n The error at {count} is: ",e)
     
     if Plot: 
         ax.plot([ShockRegion[0][0]+5,ShockRegion[0][-1]-5],
@@ -144,8 +144,8 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
             if Distance < MinDis: 
                 MinDis = Distance;  ShockRegion = SubLocalMinSet
             if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
-    elif n > 1 and LastShockLoc == -1: 
-        n = 1; 
+    elif n > 1 and LastShockLoc < 0: 
+        n = 1;
         certainLoc = False
         reason = 'First pexil slice, No shock location history'
     
@@ -171,23 +171,24 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
             handles, labels = plt.gca().get_legend_handles_labels()
             order = [0,1,2,3,6,5,4]
             ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], bbox_to_anchor=(1.9, 0.5), loc='right')
-            # if abs(LastShockLoc - minLoc) > 15:
-            #     arrow_props = dict(arrowstyle='<|-|>', fc='k', ec='k')
-            #     ax.annotate('', xy=(LastShockLoc, -13.5) , xytext=(minLoc, -13.5), arrowprops=arrow_props)
-            #     ax.textax.text((LastShockLoc+minLoc)/2, -10, f'{abs(LastShockLoc-minLoc):0.1f}px', ha='center', fontsize=14)
-            # else:
-            #     arrow_props = dict(arrowstyle='-|>', fc='k', ec='k')
-            #     if LastShockLoc > minLoc:
-            #         ax.annotate('', xy=(LastShockLoc, -13.5) , xytext=(LastShockLoc + 10, -13.5), arrowprops=arrow_props)
-            #         ax.annotate('', xy=(minLoc, -13.5) , xytext=(minLoc - 10, -13.5), arrowprops=arrow_props)
-            #     else:
-            #         ax.annotate('', xy=(LastShockLoc, -13.5) , xytext=(LastShockLoc-10, -13.5), arrowprops=arrow_props)
-            #         ax.annotate('', xy=(minLoc, -13.5) , xytext=(minLoc + 10, -13.5), arrowprops=arrow_props)
-            #     minX, maxX= ax.get_xlim()
-            #     if LastShockLoc + 20 < maxX:
-            #         ax.text((LastShockLoc+minLoc)/2 + 15, -10, f'{abs(LastShockLoc-minLoc):0.1f}px', ha='center', fontsize=14)
-            #     else:
-            #         ax.text((LastShockLoc+minLoc)/2 - 15, -10, f'{abs(LastShockLoc-minLoc):0.1f}px', ha='center', fontsize=14)
+            if abs(LastShockLoc - minLoc) > 15:
+                arrow_props = dict(arrowstyle='<|-|>', fc='k', ec='k')
+                ax.annotate('', xy=(LastShockLoc, -13.5) , xytext=(minLoc, -13.5), arrowprops=arrow_props)
+                ax.textax.text((LastShockLoc+minLoc)/2, -10, f'{abs(LastShockLoc-minLoc):0.1f}px', ha='center', fontsize=14)
+            else:
+                arrow_props = dict(arrowstyle='-|>', fc='k', ec='k')
+                if LastShockLoc > minLoc:
+                    ax.annotate('', xy=(LastShockLoc, -13.5) , xytext=(LastShockLoc + 10, -13.5), arrowprops=arrow_props)
+                    ax.annotate('', xy=(minLoc, -13.5) , xytext=(minLoc - 10, -13.5), arrowprops=arrow_props)
+                else:
+                    ax.annotate('', xy=(LastShockLoc, -13.5) , xytext=(LastShockLoc-10, -13.5), arrowprops=arrow_props)
+                    ax.annotate('', xy=(minLoc, -13.5) , xytext=(minLoc + 10, -13.5), arrowprops=arrow_props)
+                minX, maxX= ax.get_xlim()
+                if LastShockLoc + 20 < maxX:
+                    ax.text((LastShockLoc+minLoc)/2 + 15, -10, f'{abs(LastShockLoc-minLoc):0.1f}px', ha='center', fontsize=14)
+                else:
+                    ax.text((LastShockLoc+minLoc)/2 - 15, -10, f'{abs(LastShockLoc-minLoc):0.1f}px', ha='center', fontsize=14)
+                    
     for Area in AeraSet:
         Ra = Area/MinA
         if Ra > 0.6 and Ra < 1 and certainLoc:

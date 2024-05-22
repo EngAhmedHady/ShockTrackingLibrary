@@ -7,8 +7,8 @@ Created on Wed Feb 28 11:05:30 2024
 
 import cv2
 import numpy as np
-from .ShockOscillationAnalysis import CVColor
-from .__linedrawingfunctions import InclinedLine, AngleFromSlope
+# from .ShockOscillationAnalysis import CVColor
+from .linedrawingfunctions import InclinedLine, AngleFromSlope
 from matplotlib.patches import Arc, FancyArrowPatch
 
 

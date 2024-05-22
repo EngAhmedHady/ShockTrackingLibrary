@@ -5,8 +5,8 @@ Created on Tue Dec 20 09:32:30 2022
 @author: Ahmed H. Hanfy
 """
 from .ShockOscillationAnalysis import SOA
-from .__slice_list_generator.__slice_list_generator import sliceListGenerator
-from .__inclined_shock_tracking.__inclined_tracking import inclinedShockTracking
-from .__shocktracking import ShockTraking
-from .__linedrawingfunctions import InclinedLine
-from .__generateshocksignal import GenerateShockSignal, TimeCalculation
+from .slice_list_generator.slice_list_generator import SliceListGenerator
+from .inc_tracking.inc_tracking import InclinedShockTracking
+from .shocktracking import ShockTraking
+from .linedrawingfunctions import InclinedLine
+from .generateshocksignal import GenerateShockSignal, TimeCalculation

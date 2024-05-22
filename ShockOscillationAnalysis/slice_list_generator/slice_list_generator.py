@@ -9,25 +9,25 @@ import cv2
 import glob
 import math
 import numpy as np
-from .. import SOA
+from ..ShockOscillationAnalysis import SOA
 from datetime import datetime as dt
-from ..__preview import PreviewCVPlots
+from ..preview import PreviewCVPlots
 from ..ShockOscillationAnalysis import CVColor
-from ..__linedrawingfunctions import InclinedLine
-from ..__inclined_shock_tracking.__inclined_tracking import inclinedShockTracking
-from .__list_generation_tools import genratingRandomNumberList, GenerateIndicesList
+from ..linedrawingfunctions import InclinedLine
+from ..inc_tracking.inc_tracking import InclinedShockTracking
+from .list_generation_tools import genratingRandomNumberList, GenerateIndicesList
 
 
-class sliceListGenerator(SOA):
-    def __init__(self, f, D=1, pixelScale = 1, Type='single pixel raw'):
+class SliceListGenerator(SOA):
+    def __init__(self, f: int, D: float =1, pixelScale: float = 1):
         # self.f = f # ----------------------- sampling rate (fps)
         # self.D = D # ----------------------- refrence distance (mm)
         # self.pixelScale = pixelScale # ----- initialize scale of the pixels
-        self.inc_trac = inclinedShockTracking(f,D)
+        self.inc_trac = InclinedShockTracking(f,D)
         super().__init__(f, D, pixelScale)
 
     
-    def IntersectionPoint(self, M , A, Ref):
+    def IntersectionPoint(self, M: list[float] , A: list[float], Ref: list[tuple,tuple]):
         """
         Calculate the intersection point between two lines.
     
@@ -35,11 +35,11 @@ class sliceListGenerator(SOA):
         - M (list): List containing slopes of the two lines.
         - A (list): List containing y-intercepts of the two lines.
         - Ref (list): List containing reference points for each line.
-    
+
         Returns:
         tuple: A tuple containing:
         - Pint (tuple): Intersection point coordinates (x, y).
-    
+
         Example:
         >>> from __importImages import importSchlierenImages
         >>> instance = importSchlierenImages(f)
@@ -48,11 +48,10 @@ class sliceListGenerator(SOA):
         >>> references = [(0, 2), (0, 5)]
         >>> intersection, angles = instance.IntersectionPoint(slopes, intercepts, references)
         >>> print(intersection, angles)
-    
+
         Note:
         - The function calculates the intersection point and angles between two lines specified by their slopes and y-intercepts.
         - Returns the intersection point coordinates and angles of the lines in degrees.
-    
         """
         theta1 = math.degrees(np.arctan(M[0]))
         theta2 = math.degrees(np.arctan(M[1]))
@@ -74,50 +73,114 @@ class sliceListGenerator(SOA):
         Pint = (round(Xint), round(Yint))
         return Pint          
             
-    def ImportingFiles(self, pathlist, indices_list, n_images, imgs_shp, x_range, tk , M):
-        img_list=[]; n = 0;
-        slice_thickness =  tk[1]-tk[0]
+    def ImportingFiles(self, pathlist : list[str], indices_list: list[int], 
+                       n_images: int, imgs_shp: tuple[int], x_range: tuple[int], 
+                       tk: tuple[int] , M: np.ndarray[float]):
+        """
+        Import images from specified paths, and return a concatenated image list.
+        
+        Parameters:
+            pathlist (list): List of paths to image files.
+            indices_list (list): List of indices specifying which images to import from `pathlist`.
+            n_images (int): Total number of images to import.
+            imgs_shp (tuple): Tuple specifying the shape of the images to be resized to (height, width).
+            x_range (tuple): Tuple specifying the range of x-values to crop from the images (start, end).
+            tk (tuple): Tuple specifying the range of y-values to crop from the images (start, end).
+            M (numpy.ndarray): 2x3 transformation matrix for image rotation.
+        
+        Returns:
+            numpy.ndarray: Concatenated image list.
+            int: Number of imported images
+        
+        Notes:
+            - Requires the OpenCV (cv2) and NumPy libraries.
+            - Assumes the input images are RGB.
+        """
+        img_list=[]; # List to store processed images
+        n = 0; #       Counter for the number of processed images
+        slice_thickness =  tk[1]-tk[0]  # Calculate slice thickness from `tk`
+        
+        # Loop through indices to import and process images
         for i in indices_list:
-            img = cv2.imread(pathlist[i])
-            img = cv2.warpAffine(img, M, (imgs_shp[1],imgs_shp[0]))
-            cropped_image = np.zeros([1,x_range[1]-x_range[0],3])
+            img = cv2.imread(pathlist[i]) # Read image from specified path
+            img = cv2.warpAffine(img, M, (imgs_shp[1],imgs_shp[0])) # Rotate the image with M matrix
+            cropped_image = np.zeros([1,x_range[1]-x_range[0],3])   # cropped image to the region of interest
             
-            # cropped_image = np.sum(img[tk[0]-1:tk[1], x_range[0]:x_range[1]], axis=0) / slice_thickness
-            
+            # Average the cropped image to creeat one slice 
             for j in range(tk[0],tk[1]): 
                 cropped_image += img[j-1 : j,
                                       x_range[0]: x_range[1]]
             cropped_image /= slice_thickness
-            
             img_list.append(cropped_image.astype('float32'))
+            
+            # Increment counter and display progress
             n += 1
             sys.stdout.write('\r')
             sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n_images/20)), int(5*n/(n_images/20))))
         print('')
+
+        # Concatenate the list of processed images vertically
         img_list = cv2.vconcat(img_list)
         return img_list, n
         
-    def GenerateSlicesArray(self, path, scale_pixels = True, slice_loc = 0, full_img_width = False, preview = True,
-                            slice_thickness = 0, shock_angle_samples = 30, angle_samples_review = 10,
-                            OutputDirectory = '',comment='', inclination_est_info = [],**kwargs):
-        # This function is importing a seuqnce of image to perform single horizontal line shock wave analysis
-        # for efficient and optimizied analysis the function extract only one pixel slice from each image
-        # defined by the user and append one to another and finally generates a single image where each raw 
-        # represent a snap shoot
-        # Importing steps: 1- define the reference vertical boundaries which can be used for scaling as well
-        # ................ 2- define the reference horizontal line [the slice is shifted by HLP from the reference]
-        #................. 3- define the reference horizontal line [the slice is shifted by HLP from the reference]
-        # ................ 4- The function will import all files, slice them and store the generated slices list into image
-        # ...............................................................................................................
-        # Inputs: path        => image path for sequence 'Ex: "Directory/FileName*.img"' of any image extensions 
-        #....................... * referes to any
-        # ....... ScalePixels => wheater scale the pixels with vertical limits by refrence distance (D/pixel)
-        # ...................... in that case user should define D otherwise D will be 1 mm - (Default: True)
-        # ....... HLP         => Horizontal line shift from the reference horizontal line in [mm] if ScalePixels is true
-        # ...................... or pixels if ScalePixels is false (Default: 0)
-        # ....... OutputDirectory => output directory to store slices list as png image but if it is empaty quetes 
-        # .......................... slices list will not be stored  (Default: '')
-        # Outputs: openCV image slices list, number of slices, horizontal slice location on the image [pixels]
+    def GenerateSlicesArray(self, path: str, scale_pixels:bool = True , full_img_width: bool = False,   # Domain info.
+                            slice_loc:int = 0, slice_thickness: int = 0,                                # Slice properties
+                            shock_angle_samples = 30, inclination_est_info: list[int,tuple,tuple] = [], # Angle estimation
+                            preview: bool = True, angle_samples_review = 10,                            # preview options
+                            output_directory: str = '', comment: str ='',                               # Data store
+                            **kwargs):                                                                  # Other
+        """
+        Generate a sequence of image slices for single horizontal line shock wave analysis.
+        This function imports a sequence of images to perform an optimized analysis by extracting
+        a single pixel slice from each image as defined by the user, appending them together, and
+        generating a single image where each row represents a snapshot.
+    
+        Parameters:
+            path (str): Directory path containing the sequence of image files.
+            scale_pixels (bool): Whether to scale the pixels. Default is True.
+            full_img_width (bool): Whether to use the full image width for slicing. Default is False.
+            slice_loc (int): Location of the slice.
+            slice_thickness (int): Thickness of the slice.
+            shock_angle_samples (int): Number of samples to use for shock angle estimation. Default is 30.
+            inclination_est_info (list[int, tuple, tuple]): Information for inclination estimation. Default is an empty list.
+            preview (bool): Whether to display a preview of the investigation domain before rotating. Default is True.
+            angle_samples_review (int): Number of samples to review for angle estimation. Default is 10.
+            output_directory (str): Directory to store the output images. Default is an empty string.
+            comment (str): Comment to include in the output filename. Default is an empty string.
+            **kwargs: Additional arguments for fine-tuning/Automate the function.
+    
+        Returns:
+            tuple:
+                - numpy.ndarray: Concatenated image slices.
+                - int: Number of images imported.
+                - dict: Working range details.
+                - float: Pixel scale.
+    
+        Notes:
+            - Requires the OpenCV (cv2) and NumPy libraries.
+            - The function assumes the input images are in RGB format.
+            - The `kwargs` parameter can include:
+                - 'Ref_x0'(list[int, int]): Reference x boundaries.for scaling
+                - 'Ref_y0' (int): Reference y datum (zero y location)
+                  'Ref_y1' (int): slice location (The scanning line, y-center of rotation)
+                - 'avg_shock_angle' (float): Average shock angle.(if known, to skip average shock inc check)
+                - 'avg_shock_loc' (int): Average shock location.(if known, x-center of rotation)
+                - 'n_files' (int): Number of files to import
+                - 'within_range' (tuple(int, int)): Range of files to import (start, end)
+                - 'every_n_files' (int): Step for file import.
+    
+        Steps:
+            1. Define reference vertical boundaries (for scaling).
+            2. Define reference horizontal line (slice shifted by HLP from reference).
+            3. Optionally define the estimated line of shock.
+            4. Run shock tracking function within the selected slice to define the shock angle (if step 3 is valid).
+            5. Generate shock rotating matrix (if step 3 is valid).
+            6. Import files, slice them, and store the generated slices list into an image.
+    
+        Example:
+            img_list, n, working_range, pixel_scale = GenerateSlicesArray('/path/to/*.ext', slice_loc=10, slice_thickness=5)
+        """
+
         inclinationCheck = False
         # Find all files in the directory with the sequence and sorth them by name
         files = sorted(glob.glob(path))
@@ -206,7 +269,7 @@ class sliceListGenerator(SOA):
 
             avg_shock_angle, avg_shock_loc = self.inc_trac.InclinedShockTracking(samplesList, nSlices, Ref,
                                                                                             nReview = NSamplingReview, 
-                                                                                            OutputDirectory = OutputDirectory)
+                                                                                            output_directory = output_directory)
         print('Average inclination angle {:.2f} deg'.format(avg_shock_angle))
             
         M = cv2.getRotationMatrix2D((avg_shock_angle, Ref_y1), 90-avg_shock_angle, 1.0)
@@ -220,13 +283,13 @@ class sliceListGenerator(SOA):
             cv2.imshow('Final investigation domain', new_img)
             cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
             
-        if len(OutputDirectory) > 0:
+        if len(output_directory) > 0:
             if len(comment) > 0:
-                outputPath = f'{OutputDirectory}\\{self.f/1000:.1f}kHz_{slice_loc}mm_{self.pixelScale}mm-px_tk_{slice_thickness}px_{comment}'
+                outputPath = f'{output_directory}\\{self.f/1000:.1f}kHz_{slice_loc}mm_{self.pixelScale}mm-px_tk_{slice_thickness}px_{comment}'
             else:
                 now = dt.now()
                 now = now.strftime("%d%m%Y%H%M")
-                outputPath =f'{OutputDirectory}\\{self.f/1000:.1f}kHz_{slice_loc}mm_{self.pixelScale}mm-px_tk_{slice_thickness}px_{now}'
+                outputPath =f'{output_directory}\\{self.f/1000:.1f}kHz_{slice_loc}mm_{self.pixelScale}mm-px_tk_{slice_thickness}px_{now}'
             if avg_shock_angle != 90:
                 print('RotatedImage:', u"stored \u2713" if cv2.imwrite(outputPath+f'-RefD{round(avg_shock_angle,2)}deg.png', new_img) else "Failed !")
                 print('DomainImage:' , u"stored \u2713" if cv2.imwrite(outputPath+'-RefD.png', self.clone)   else "Failed !")
@@ -247,7 +310,7 @@ class sliceListGenerator(SOA):
         print(f'Importing {n_images} images ...')
         img_list, n = self.ImportingFiles(files, indices_list, n_images, shp, x_range, [upper_bounds,lower_bounds], M)
 
-        if len(OutputDirectory) > 0:
+        if len(output_directory) > 0:
             print('ImageList write:', f"File was stored: {outputPath}.png" if cv2.imwrite(f'{outputPath}.png', img_list) else "Failed !")
                 
         return img_list,n,working_range,self.pixelScale

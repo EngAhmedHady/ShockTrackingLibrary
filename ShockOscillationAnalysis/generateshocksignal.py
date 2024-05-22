@@ -10,7 +10,7 @@ import time
 import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
-from .__shocktracking import ShockTraking
+from .shocktracking import ShockTraking
 
 def TimeCalculation(timeInSec):
     """

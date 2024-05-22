@@ -10,14 +10,15 @@ import sys
 import screeninfo
 import numpy as np
 import matplotlib.pyplot as plt
-from .__imgcleaningfunctions import SliceListAverage, CleanIlluminationEffects, BrightnessAndContrast
-from .__linedrawingfunctions import InclinedLine
-from .__generateshocksignal import GenerateShockSignal
+from .imgcleaningfunctions import SliceListAverage, CleanIlluminationEffects, BrightnessAndContrast
+from .linedrawingfunctions import InclinedLine
+from .generateshocksignal import GenerateShockSignal
  
 px = 1/plt.rcParams['figure.dpi']
 plt.rcParams.update({'font.size': 25})
 plt.rcParams["text.usetex"] =  True
 plt.rcParams["font.family"] = "Times New Roman"
+plt.rcParams['figure.max_open_warning'] = 0
 
 class CVColor:
     # Define class variables for commonly used colors
@@ -137,7 +138,7 @@ class SOA:
                 self.Reference.append(avg)
                 self.clone = self.Temp.copy()
                 cv2.imshow(parameters[0], self.clone)
-                print('Stored line: {}'.format(avg))
+                print('registered line: {}'.format(avg))
                 
         # Delete draw line before storing    
         elif event == cv2.EVENT_RBUTTONDOWN:

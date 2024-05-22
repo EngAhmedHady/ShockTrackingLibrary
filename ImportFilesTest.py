@@ -8,10 +8,10 @@ Created on Fri Nov 10 16:29:02 2023
 import os
 import time
 
-from ShockOscillationAnalysis.__generateshocksignal import TimeCalculation
+# from ShockOscillationAnalysis.generateshocksignal import TimeCalculation
 # from .__importImages import importSchlierenImages as SOA
 # from ShockOscillationAnalysis.__import_images import importSchlierenImagesOld as SA
-from ShockOscillationAnalysis import sliceListGenerator as SOA_opt
+from ShockOscillationAnalysis import SliceListGenerator as SOA_opt
 
 
 f = 2000    # images sampling rate
@@ -19,10 +19,10 @@ D = 80      # distance in mm
 # HLP = 10     # Horizontal line position [slice location to a reference line]
 # imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # imgPath = '*.png'
-# imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
+imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 # imgPath = 'D:\\TFAST\\TEAMAero experiments\\Inlet valve (Second campaign)\\Half Open\\2022_11_24 - half opend without 3rd plate - NoSuction\\2.5kHz\\*.png'
 # imgPath = 'D:\\TFAST\TEAMAero experiments\\2023_05_10\\Smooth-2kHz-5sec (test 5)\\*.png'
-imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
+# imgPath = 'D:\\PhD\\TEAMAero\\2023_05_25\\2kHz_smooth P1 (Test 5)\\*.png'
 
 Folders = imgPath.split("\\")
 FileDirectory = ''
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     # timeInSec =  time.time() - start_time
     # TimeCalculation(timeInSec)
 
-    start_time = time.time()
+    # start_time = time.time()
     SA_opt = SOA_opt(f,D)
     ShockwaveRegion ,n ,WR, Scale = SA_opt.GenerateSlicesArray(imgPath,
                                                                 n_files = 500,
@@ -62,7 +62,7 @@ if __name__ == '__main__':
                                                                 slice_thickness = 130, 
                                                                 shock_angle_samples = 60, 
                                                                 angle_samples_review = 10,
-                                                                OutputDirectory = NewFileDirectory,
+                                                                output_directory = NewFileDirectory,
                                                                 comment='-opt', 
                                                                 # inclination_est_info =  110,
                                                                 inclination_est_info =  [110, (474, 591),(463, 482)],
@@ -70,5 +70,5 @@ if __name__ == '__main__':
                                                                 # avg_shock_angle = 88, avg_shock_loc = 467,
                                                                 preview =  True)
 
-    timeInSec =  time.time() - start_time
-    TimeCalculation(timeInSec)
+    # timeInSec =  time.time() - start_time
+    # TimeCalculation(timeInSec)

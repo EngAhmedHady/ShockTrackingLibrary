@@ -8,29 +8,30 @@ import cv2
 import sys
 import glob
 import screeninfo # ............................... To find the  monitor resolution
-from .. import SOA
+from ..ShockOscillationAnalysis import SOA
 import numpy as np
 import matplotlib.pyplot as plt
-from ..__preview import plot_review
-from ..__shocktracking import ShockTraking
+from ..preview import plot_review
+from ..shocktracking import ShockTraking
 from ..ShockOscillationAnalysis import CVColor
-from ..__linedrawingfunctions import InclinedLine, AngleFromSlope
-# from ..__imgcleaningfunctions import ImgListAverage
-from ..__slice_list_generator.__list_generation_tools import GenerateIndicesList
+from ..linedrawingfunctions import InclinedLine, AngleFromSlope
+# from ..imgcleaningfunctions import ImgListAverage
+from ..slice_list_generator.list_generation_tools import GenerateIndicesList
 
 px = 1/plt.rcParams['figure.dpi']
 plt.rcParams.update({'font.size': 25})
 plt.rcParams["text.usetex"] =  True
 plt.rcParams["font.family"] = "Times New Roman"
 
-class inclinedShockTracking(SOA):
-    def __init__(self, f = 1, D = 1, pixelScale = 1):
+class InclinedShockTracking(SOA):
+    def __init__(self, f: int = 1, D: float = 1, pixelScale: float = 1):
         self.f = f # ----------------------- sampling rate (fps)
-        self.D = D # ----------------------- refrence distance (mm)
+        self.D = D # ----------------------- refrence length for scaling (mm)
         self.pixelScale = pixelScale # ----- initialize scale of the pixels
         super().__init__(f, D, pixelScale)
         
-    def shockDomain(self, Loc, P1, HalfSliceWidth, LineSlope, imgShape, preview_img = None):
+    def shockDomain(self, Loc: str, P1: tuple[int], HalfSliceWidth: int, LineSlope: float, 
+                    imgShape: tuple[int], preview_img = None) -> float:
         """
         Generate and visualize a shock domain based on the slice width and 
         the drawn line parameters (one point and slope).
@@ -41,6 +42,7 @@ class inclinedShockTracking(SOA):
         - HalfSliceWidth (int): Half the width of the slice.
         - LineSlope (float): Slope of the inclined line.
         - imgShape (tuple): Image size (y-length, x-length).
+        - preview_img (optional): Image for previewing the shock domain. Default is None.
     
         Returns:
         float: The y-intercept of the inclined line.
@@ -63,23 +65,66 @@ class inclinedShockTracking(SOA):
         if preview_img is not None: cv2.line(preview_img, P1new, P2new, CVColor.RED, 1)
         return anew 
 
-    def anglesInterpolation(self, pnts_y_list, input_locs, angles_list):
-        new_ang_value = []; 
-        # if min(input_locs) > min(pnts_y_list) or max(input_locs) < max(pnts_y_list): 
+    def anglesInterpolation(self, pnts_y_list: list[int], angles_list: list[float]):
+        """
+        Interpolate angles based on given y-coordinates and corresponding angles.
+    
+        Parameters:
+            pnts_y_list (list): List of y-coordinates to interpolate angles for.
+            input_locs (list): List of y-coordinates where the angles are known.
+            angles_list (list): List of angles corresponding to the y-coordinates in `input_locs`.
+    
+        Returns:
+            list: Interpolated angles for each y-coordinate in `pnts_y_list`. If the y-domain is out of valid range, returns an empty list.
+    
+        Example:
+            >>> instance = YourClass()
+            >>> pnts_y = [5, 15, 25]
+            >>> input_locs = [0, 10, 20, 30]
+            >>> angles = [0, 10, 20, 30]
+            >>> interpolated_angles = instance.anglesInterpolation(pnts_y, input_locs, angles)
+            >>> print(interpolated_angles)
+    
+        Notes:
+            - The function performs linear interpolation to determine the angles at specified y-coordinates.
+            - If a y-coordinate in `pnts_y_list` is out of the range defined by `input_locs`, the function will abort and return an empty list.
+        """
+        if not angles_list or not pnts_y_list:
+            print('provided y-domain is empty \n aborting input angle consideration ...')
+            return []
+        # Unzip the angles_list into separate locs and angles lists
+        locs, angles = zip(*angles_list)
+        
+        # if min(locs) > min(pnts_y_list) or max(locs) < max(pnts_y_list):
         #     print('provided y-domain is out of valid range')
-        #     # print('aborting input angle consideration ... ')
+        #     print('aborting input angle consideration ... ')
         #     return []
+        
+        new_ang_value = [];
         for yi in pnts_y_list:
-            r = len(angles_list)-1; l = 0
+            # Perform binary search to find the correct interval for yi
+            l, r = 0, len(angles)-1;
             while r > l and r-l > 1:
                 mid = (r + l) // 2
-                if input_locs[mid] <= yi: r = mid
-                elif input_locs[mid] > yi: l = mid
-            if input_locs[r] >= yi: ang_value = angles_list[input_locs.index(min(input_locs))]
-            elif input_locs[l] <= yi: ang_value = angles_list[input_locs.index(max(input_locs))]
-            else:
-                ang_value = angles_list[r]+(yi-input_locs[r])*(angles_list[l]-angles_list[r])/(input_locs[l]-input_locs[r])
+                if locs[mid] <= yi: r = mid
+                elif locs[mid] > yi: l = mid
+
+                
+            # if locs[r] >= yi: ang_value = angles[locs.index(min(locs))]
+            # elif locs[l] <= yi: ang_value = angles[locs.index(max(locs))]
+            # if l == 0:           ang_value = angles[0]
+            # elif l == len(locs): ang_value = angles[-1]
+            # else:
+                # Interpolate between locs[l-1] and locs[l]
+                # x0, y0 = locs[l - 1], angles[l - 1]
+                # x1, y1 = locs[l], angles[l]
+                # ang_value = y0 + (yi - x0) * (y1 - y0) / (x1 - x0)
+            ang_value = angles[r]+(yi-locs[r])*(angles[l]-angles[r])/(locs[l]-locs[r])
             new_ang_value.append(ang_value)
+        fig, ax = plt.subplots(figsize=(10,20))
+        ax.plot(angles, locs, '-o', ms = 5)
+        print(new_ang_value,'\n', pnts_y_list)
+        ax.plot(new_ang_value, pnts_y_list, 'x', ms = 10)
         return new_ang_value
 
 
@@ -165,7 +210,7 @@ class inclinedShockTracking(SOA):
         return slices_info, nPnts, inclinationCheck
 
     def InclinedShockTracking(self, imgSet, nSlices, Ref, nReview = 0, slice_thickness = 1, 
-                              OutputDirectory = '', **kwargs):
+                              output_directory = '', **kwargs):
         
         avg_ang_glob= 0;   count = 0; midLocs =[] ; xLocs = [];
         avg_slope = 0; AvgMidLoc = 0; columnY = []; m = []
@@ -209,9 +254,8 @@ class inclinedShockTracking(SOA):
                 Slice = np.sum(img[upper_bounds[i]-1:lower_bounds[i], x_i1:x_i2], axis=0) / slice_thickness
 
                 LastShockLoc = xLocOld[i]-Ref[0][i]
-                
-                # ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count, Plot = slice_ploting_array[count])
-                ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count)
+                ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count, Plot = slice_ploting_array[count])
+                # ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count)
                 xLoc.append(ShockLoc + Ref[0][i])
                 if not certainLoc: uncertain.append(xLoc[-1]); uncertainY.append(Ref[2][i])
 
@@ -247,11 +291,15 @@ class inclinedShockTracking(SOA):
                 plot_review(ax, imgSet[i], shp, xLocs[i], columnY, 
                             uncertain_list[i], uncertainY_list[i], 
                             avg_slope[i], avg_ang[i], avg_midLoc[i] , y, **kwargs)
-                if len(OutputDirectory)> 0: 
-                    fig.savefig(fr'{OutputDirectory}\ShockAngleReview_{i:04d}_Ang{avg_ang_glob:.2f}.png', bbox_inches='tight', pad_inches=0.1)
+                if len(output_directory) > 0: 
+                    fig.savefig(fr'{output_directory}\ShockAngleReview_{i:04d}_Ang{avg_ang_glob:.2f}.png', bbox_inches='tight', pad_inches=0.1)
 
                 if i > 18:
-                    if len(OutputDirectory) == 0: plt.close(fig); break
+                    if len(output_directory) == 0: 
+                        plt.close(fig); i = nReview
+                        sys.stdout.write('\r')
+                        sys.stdout.write("[%-20s] %d%%" % ('='*int((i+1)/(nReview/20)), int(5*(i+1)/(nReview/20))))
+                        break;
                     else: plt.close(fig)
 
                 sys.stdout.write('\r')
@@ -296,7 +344,7 @@ class inclinedShockTracking(SOA):
         return original_img_list, img_list
     
     def ShockPointsTracking(self, path, tracking_V_range = [0,0],inclination_info = 0, nPnts = 0, scale_pixels = True, 
-                            preview = True, OutputDirectory = '',comment='', **kwargs):
+                            preview = True, output_directory = '',comment='', **kwargs):
         
         files = sorted(glob.glob(path))
         n1 = len(files)
@@ -395,11 +443,11 @@ class inclinedShockTracking(SOA):
 
         pnts_y_list = []; inflow_dir_deg = []
         for i in range(nSlices): pnts_y_list.append((Ref_y0-Ref[2][i])*self.pixelScale)
-        input_locs = kwargs.get('input_locs', [])
+        # input_locs = kwargs.get('input_locs', [])
         angles_list = kwargs.get('angles_list', [])
         Mach_ang_mode = kwargs.get('Mach_ang_mode', None)
         if len(angles_list) > 0 and Mach_ang_mode != None:
-            inflow_dir_deg = self.anglesInterpolation(pnts_y_list, input_locs, angles_list)
+            inflow_dir_deg = self.anglesInterpolation(pnts_y_list, angles_list)
             inflow_dir_rad = np.array(inflow_dir_deg)*np.pi/180
         if len(inflow_dir_deg) > 0 and Mach_ang_mode != None:
             kwargs['inflow_dir_deg'] = inflow_dir_deg
@@ -409,7 +457,7 @@ class inclinedShockTracking(SOA):
             cv2.imshow('investigation domain before rotating', self.clone)
             cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
             
-            cv2.imwrite(fr'{OutputDirectory}\AnalysisDomain-Points.jpg', self.clone)
+            cv2.imwrite(fr'{output_directory}\AnalysisDomain-Points.jpg', self.clone)
 
         import_n_files = kwargs.get('n_files', 0);
         if import_n_files == 0: import_n_files = kwargs.get('within_range', [0,0])
@@ -423,7 +471,7 @@ class inclinedShockTracking(SOA):
         avg_shock_angle, avg_shock_loc = self.InclinedShockTracking(img_list, 
                                                                     nSlices, Ref,  
                                                                     nReview = n_images,
-                                                                    OutputDirectory = OutputDirectory,
+                                                                    output_directory = output_directory,
                                                                     **kwargs)
         print('Average inclination angle {:.2f} deg'.format(avg_shock_angle))
         
