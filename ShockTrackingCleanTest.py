@@ -10,7 +10,7 @@ import sys
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from ShockOscillationAnalysis import SOA, sliceListGenerator
+from ShockOscillationAnalysis import SOA, SliceListGenerator
 
 
 from scipy import signal
@@ -63,7 +63,7 @@ NewFileDirectory = os.path.join(FileDirectory, "Opt-code-with_rotation")
 if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
 
 SA = SOA(f, D)
-ImpImg = sliceListGenerator(f,D)
+ImpImg = SliceListGenerator(f,D)
 
 ShockwaveRegion ,n ,WR, Scale = ImpImg.GenerateSlicesArray(imgPath,
                                                         # n_files = 500,
@@ -82,7 +82,7 @@ ShockwaveRegion ,n ,WR, Scale = ImpImg.GenerateSlicesArray(imgPath,
                                                         slice_thickness = SliceThickness, 
                                                         shock_angle_samples  = 2400, 
                                                         angle_samples_review = 10,
-                                                        inclination_est_info = 110,
+                                                        # inclination_est_info = 110,
                                                         # inclination_est_info =  [110, (474, 591),(463, 482)],
                                                         # inclination_est_info = [93,(87, 296),(124, 210)], #MidRe-Test 8-leading edge
                                                         # inclination_est_info = [147,(423, 292),(416, 217)], #MidRe-Test 8

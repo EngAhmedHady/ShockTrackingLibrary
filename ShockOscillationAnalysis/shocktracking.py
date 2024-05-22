@@ -43,11 +43,11 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
         fig, ax = plt.subplots(figsize=(10,5))
         #Plot light intensity; Plot the average line
         ax.plot(SnapshotSlice, label = 'Light intensity at certain snapshot'); ax.axhline(avg,linestyle = ':',color = 'tab:green', label = 'Light intensity average line');
-        ax.set_ylim([0,255]);  ax.set_yticks(np.arange(0, 260, 51))
+        # ax.set_ylim([0,255]);  ax.set_yticks(np.arange(0, 260, 51))
         # ax.plot(np.where(SnapshotSlice == MinimumPoint),MinimumPoint,'xr', label = 'Minimum point of local minimum');
         ax.axhline(MinimumPoint,linestyle = '--',color = 'k');
-        # ax.set_ylim([-20,255]);  ax.set_yticks(np.arange(0, 260, 51))
-        # ax.axhline(0,linestyle = ':', color = 'k', alpha = 0.2); ax.axhline(255,linestyle = ':', color = 'k', alpha = 0.2);
+        ax.set_ylim([-20,255]);  ax.set_yticks(np.arange(0, 260, 51))
+        ax.axhline(0,linestyle = ':', color = 'k', alpha = 0.2); ax.axhline(255,linestyle = ':', color = 'k', alpha = 0.2);
         # ax.plot(AvgLocation,AvgIllumination,linestyle = '-.');
     
     # Initiating Variables 
@@ -174,7 +174,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
             if abs(LastShockLoc - minLoc) > 15:
                 arrow_props = dict(arrowstyle='<|-|>', fc='k', ec='k')
                 ax.annotate('', xy=(LastShockLoc, -13.5) , xytext=(minLoc, -13.5), arrowprops=arrow_props)
-                ax.textax.text((LastShockLoc+minLoc)/2, -10, f'{abs(LastShockLoc-minLoc):0.1f}px', ha='center', fontsize=14)
+                ax.text((LastShockLoc+minLoc)/2, -10, f'{abs(LastShockLoc-minLoc):0.1f}px', ha='center', fontsize=14)
             else:
                 arrow_props = dict(arrowstyle='-|>', fc='k', ec='k')
                 if LastShockLoc > minLoc:
