@@ -65,14 +65,15 @@ class InclinedShockTracking(SOA):
         if preview_img is not None: cv2.line(preview_img, P1new, P2new, CVColor.RED, 1)
         return anew 
 
-    def anglesInterpolation(self, pnts_y_list: list[int], angles_list: list[float]):
+    def anglesInterpolation(self, pnts_y_list: list[int], 
+                            flow_dir: list[float] = [], flow_Vxy:list[tuple] = [], 
+                            **kwargs) -> list[float]:
         """
         Interpolate angles based on given y-coordinates and corresponding angles.
     
         Parameters:
             pnts_y_list (list): List of y-coordinates to interpolate angles for.
-            input_locs (list): List of y-coordinates where the angles are known.
-            angles_list (list): List of angles corresponding to the y-coordinates in `input_locs`.
+            angles_list (list): List of tubles contains the measured y-coordinates and the corresponding angles [(y_loc, angle),...].
     
         Returns:
             list: Interpolated angles for each y-coordinate in `pnts_y_list`. If the y-domain is out of valid range, returns an empty list.
@@ -80,27 +81,27 @@ class InclinedShockTracking(SOA):
         Example:
             >>> instance = YourClass()
             >>> pnts_y = [5, 15, 25]
-            >>> input_locs = [0, 10, 20, 30]
-            >>> angles = [0, 10, 20, 30]
-            >>> interpolated_angles = instance.anglesInterpolation(pnts_y, input_locs, angles)
+            >>> flow_dir = [0, 10, 20, 30]
+            >>> interpolated_angles = instance.anglesInterpolation(pnts_y, flow_dir)
             >>> print(interpolated_angles)
     
         Notes:
             - The function performs linear interpolation to determine the angles at specified y-coordinates.
             - If a y-coordinate in `pnts_y_list` is out of the range defined by `input_locs`, the function will abort and return an empty list.
         """
-        if not angles_list or not pnts_y_list:
-            print('provided y-domain is empty \n aborting input angle consideration ...')
-            return []
-        # Unzip the angles_list into separate locs and angles lists
-        locs, angles = zip(*angles_list)
         
-        # if min(locs) > min(pnts_y_list) or max(locs) < max(pnts_y_list):
-        #     print('provided y-domain is out of valid range')
-        #     print('aborting input angle consideration ... ')
-        #     return []
+        if len(flow_dir) > 0:
+            # Unzip the angles_list into separate locs and angles lists
+            locs, angles = zip(*flow_dir)
+        elif len(flow_Vxy):
+            # Unzip the Vxy into separate locs, Vx, Vy lists
+            locs, Vx, Vy = zip(*flow_Vxy)
+            angles = np.arctan(np.array(Vy)/np.array(Vx))*180/np.pi
         
-        new_ang_value = [];
+        if min(locs) > min(pnts_y_list) or max(locs) < max(pnts_y_list):
+            print('provided y-domain is out of valid range, only boundary angles will considered ...')
+        
+        intr_flow_dir = [];
         for yi in pnts_y_list:
             # Perform binary search to find the correct interval for yi
             l, r = 0, len(angles)-1;
@@ -108,24 +109,16 @@ class InclinedShockTracking(SOA):
                 mid = (r + l) // 2
                 if locs[mid] <= yi: r = mid
                 elif locs[mid] > yi: l = mid
-
-                
-            # if locs[r] >= yi: ang_value = angles[locs.index(min(locs))]
-            # elif locs[l] <= yi: ang_value = angles[locs.index(max(locs))]
-            # if l == 0:           ang_value = angles[0]
-            # elif l == len(locs): ang_value = angles[-1]
-            # else:
-                # Interpolate between locs[l-1] and locs[l]
-                # x0, y0 = locs[l - 1], angles[l - 1]
-                # x1, y1 = locs[l], angles[l]
-                # ang_value = y0 + (yi - x0) * (y1 - y0) / (x1 - x0)
-            ang_value = angles[r]+(yi-locs[r])*(angles[l]-angles[r])/(locs[l]-locs[r])
-            new_ang_value.append(ang_value)
-        fig, ax = plt.subplots(figsize=(10,20))
-        ax.plot(angles, locs, '-o', ms = 5)
-        print(new_ang_value,'\n', pnts_y_list)
-        ax.plot(new_ang_value, pnts_y_list, 'x', ms = 10)
-        return new_ang_value
+            if locs[r] >= yi: intr_flow_dir.append(angles[locs.index(min(locs))])
+            elif locs[l] <= yi: intr_flow_dir.append(angles[locs.index(max(locs))])
+            else:
+                intr_flow_dir.append(angles[r]+(yi-locs[r])*(angles[l]-angles[r])/(locs[l]-locs[r]))
+        preview_angle_interpolation = kwargs.get('preview_angle_interpolation', False)
+        if preview_angle_interpolation:
+            fig, ax = plt.subplots(figsize=(10,20))
+            ax.plot(angles, locs, '-o', ms = 5)
+            ax.plot(intr_flow_dir, pnts_y_list, 'x', ms = 10)
+        return intr_flow_dir
 
 
     def InclinedShockDomainSetup(self, CheckingWidth, CheckingHieght, inclined_ref_line, imgShape,
@@ -406,7 +399,7 @@ class InclinedShockTracking(SOA):
             cv2.line(self.clone, (0,Ref_y2), (shp[1],Ref_y2), CVColor.ORANGE, 1)
             
         print(f'Vertical range of tracking points starts from {tracking_V_range[0]:0.2f}mm to {tracking_V_range[1]:0.2f}mm')
-        print(f'But In pixels from {Ref_y1}px to {Ref_y2}px')
+        print(f'in pixels from {Ref_y1}px to {Ref_y2}px')
         
         # estemat shock domain
         if not hasattr(inclination_info, "__len__"):
@@ -440,18 +433,20 @@ class InclinedShockTracking(SOA):
                                                                        shp, nPnts = nPnts,
                                                                        preview_img = self.clone)
         
-
-        pnts_y_list = []; inflow_dir_deg = []
+        pnts_y_list = []; 
         for i in range(nSlices): pnts_y_list.append((Ref_y0-Ref[2][i])*self.pixelScale)
         # input_locs = kwargs.get('input_locs', [])
-        angles_list = kwargs.get('angles_list', [])
+        flow_dir = kwargs.get('flow_dir', [])
+        flow_Vxy = kwargs.get('flow_Vxy', [])
         Mach_ang_mode = kwargs.get('Mach_ang_mode', None)
-        if len(angles_list) > 0 and Mach_ang_mode != None:
-            inflow_dir_deg = self.anglesInterpolation(pnts_y_list, angles_list)
-            inflow_dir_rad = np.array(inflow_dir_deg)*np.pi/180
-        if len(inflow_dir_deg) > 0 and Mach_ang_mode != None:
-            kwargs['inflow_dir_deg'] = inflow_dir_deg
-            kwargs['inflow_dir_rad'] = inflow_dir_rad
+        if (len(flow_dir) > 0 or len(flow_Vxy) > 0) and Mach_ang_mode != None:
+            kwargs['inflow_dir_deg'] = self.anglesInterpolation(pnts_y_list, **kwargs)
+            kwargs['inflow_dir_rad'] = np.array(kwargs['inflow_dir_deg'])*np.pi/180
+
+            
+        # if len(inflow_dir_deg) > 0 and Mach_ang_mode != None:
+        #      = inflow_dir_deg
+        #      = inflow_dir_rad
 
         if preview:
             cv2.imshow('investigation domain before rotating', self.clone)

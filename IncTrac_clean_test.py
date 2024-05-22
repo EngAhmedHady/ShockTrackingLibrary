@@ -33,11 +33,15 @@ if __name__ == '__main__':
     NewFileDirectory = os.path.join(FileDirectory, "IncTrac_test2")
     if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
     
-    DfEXPRe = pd.read_csv(inflow_path)
-    DfEXPRe['alpha'] = np.arctan(DfEXPRe['Vy']/DfEXPRe['Vx'])*180/np.pi
-    inflow_dir = []
-    for i in range(len(DfEXPRe)):
-        inflow_dir.append([DfEXPRe['y'].iloc[i], DfEXPRe['alpha'].iloc[i]])
+    # DfEXPRe = pd.read_csv(inflow_path)
+    # Vxy = list(DfEXPRe.itertuples(index=False, name=None))
+    
+    Vxy = np.genfromtxt(inflow_path, delimiter=',')
+    
+    # DfEXPRe['alpha'] = np.arctan(DfEXPRe['Vy']/DfEXPRe['Vx'])*180/np.pi
+    # inflow_dir = []
+    # for i in range(len(DfEXPRe)):
+    #     inflow_dir.append([DfEXPRe['y'].iloc[i], DfEXPRe['alpha'].iloc[i]])
     # print(DfEXPRe)
     
     IncTrac = IncTrac(D = D)
@@ -52,7 +56,7 @@ if __name__ == '__main__':
                                 # tracking_V_range = [8, 134],# fully open without 3rd plate
                                 # tracking_V_range = [31, 148], # fully open with 3rd plate
                                 # tracking_V_range = [10, 60],
-                                tracking_V_range = [5, 29.7],
+                                tracking_V_range = [20.3, 29.7],
                                 nPnts = 5,
                                 inclination_info = [50, (1024, 22), (87, 856)],
                                 # inclination_info = [110,(333, 0), (0, 735)],
@@ -81,7 +85,8 @@ if __name__ == '__main__':
                                 # M1_txt_size = 26,
                                 arc_dia = 50,
                                 # input_locs = DfEXPRe['y'].tolist(),
-                                angles_list = inflow_dir,
+                                flow_Vxy= Vxy,
                                 # output_directory = NewFileDirectory,
-                                preview = True
+                                preview = True,
+                                preview_angle_interpolation = True,
                                 )
