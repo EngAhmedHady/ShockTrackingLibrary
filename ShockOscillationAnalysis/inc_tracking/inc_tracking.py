@@ -8,12 +8,14 @@ import cv2
 import sys
 import glob
 import screeninfo # ............................... To find the  monitor resolution
-from ..ShockOscillationAnalysis import SOA
 import numpy as np
 import matplotlib.pyplot as plt
 from ..preview import plot_review
+# from scipy.optimize import least_squares
 from ..shocktracking import ShockTraking
+from ..ShockOscillationAnalysis import SOA
 from ..ShockOscillationAnalysis import CVColor
+from ..ShockOscillationAnalysis import BCOLOR
 from ..linedrawingfunctions import InclinedLine, AngleFromSlope
 # from ..imgcleaningfunctions import ImgListAverage
 from ..slice_list_generator.list_generation_tools import GenerateIndicesList
@@ -31,7 +33,7 @@ class InclinedShockTracking(SOA):
         super().__init__(f, D, pixelScale)
         
     def shockDomain(self, Loc: str, P1: tuple[int], HalfSliceWidth: int, LineSlope: float, 
-                    imgShape: tuple[int], preview_img = None) -> float:
+                    imgShape: tuple[int], preview_img: np.ndarray = None) -> float:
         """
         Generate and visualize a shock domain based on the slice width and 
         the drawn line parameters (one point and slope).
@@ -65,9 +67,9 @@ class InclinedShockTracking(SOA):
         if preview_img is not None: cv2.line(preview_img, P1new, P2new, CVColor.RED, 1)
         return anew 
 
-    def anglesInterpolation(self, pnts_y_list: list[int], 
-                            flow_dir: list[float] = None, flow_Vxy:list[tuple] = None, 
-                            **kwargs) -> list[float]:
+    def anglesInterpolation(self, pnts_y_list: list[int],                              # Generated points by class
+                            flow_dir: list[float] = None, flow_Vxy:list[tuple] = None, # measured data (LDA, CFD, ... )
+                            **kwargs) -> list[float]:                                  # other parameters
         """
         Interpolate angles based on given y-coordinates and corresponding angles or velocity components.
         
@@ -116,6 +118,7 @@ class InclinedShockTracking(SOA):
             if locs[r] >= yi: intr_flow_dir.append(angles[locs.index(min(locs))])
             elif locs[l] <= yi: intr_flow_dir.append(angles[locs.index(max(locs))])
             else:
+                # linear interpolation: y = y0+(x-x0)*((y1-y0)/(x1-x0))
                 intr_flow_dir.append(angles[r]+(yi-locs[r])*(angles[l]-angles[r])/(locs[l]-locs[r]))
         preview_angle_interpolation = kwargs.get('preview_angle_interpolation', False)
         if preview_angle_interpolation:
@@ -124,49 +127,53 @@ class InclinedShockTracking(SOA):
             ax.plot(intr_flow_dir, pnts_y_list, 'x', ms = 10)
         return intr_flow_dir
 
-
-    def InclinedShockDomainSetup(self, CheckingWidth, CheckingHieght, inclined_ref_line, imgShape,
-                                 VMidPnt = 0, nPnts = 0, preview_img = None):
+    def InclinedShockDomainSetup(self, CheckingWidth: int, CheckingHieght: int|list, inclined_ref_line: int|list[int,tuple,tuple], # define the calculation domain
+                                 imgShape: tuple,                                              # define the whole image parameters
+                                 VMidPnt: int = 0, nPnts: int = 0,                             # define the slices parameters
+                                 preview_img: np.ndarray = None) -> tuple[list, int, int]:     # preview parameters
         """
-        Set up shock inclination test using inclined shock lines.
-
+        Setup shock inclination test, provids the test slices info. with aid of the estimated inclined shock line.
+     
         Parameters:
         - CheckingWidth (int): Width for shock domain checking (sliceWidth).
-        - CheckingHeight (int or list): Height for shock domain checking. If a list is provided,
-          it represents a range of heights for generating points.
+        - CheckingHeight (int or list): Height for shock domain checking in px. If a list is provided,
+                                        it represents a range of heights for generating points [upper limit, lower limit].
         - imgShape (tuple): Shape of the image (y-length, x-length).
         - VMidPnt (int, optional): Vertical midpoint. Default is 0.
         - nPnts (int, optional): Number of points to generate for inclined shock lines. Default is 0.
-
+        - preview_img (np.ndarray, optional): Image for preview as background. Default is None.
+     
         Returns:
         tuple: A tuple containing:
         - SlicesInfo (list): List of shock domain slices, [[x-domainStrt,x-domainEnd],y-sliceLoc].
         - nPnts (int): Number of slices generated for inclined shock.
         - inclinationCheck (bool): Boolean indicating whether the shock inclination test is applicable.
-
+     
         Example:
-        >>> from __importImages import importSchlierenImages
-        >>> instance = importSchlierenImages(f)
+        >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
+        >>> instance = IncTrac(f)
         >>> width = 20
         >>> height = [10, 20]
         >>> shape = (100, 200)
         >>> points = 5
         >>> slices, nPnts, success = instance.InclinedShockDomainSetup(width, height, shape, nPnts=points)
         >>> print(slices, nPnts, success)
-
+     
         Note:
-       - The function sets up shock inclination testing by visualizing the shock domain.
-       - It returns a list of Slices location and range, the number of slices, and the inclination applicability.
-
+        - The function sets up shock inclination testing by visualizing the shock domain.
+        - It returns a list of slices location and range, the number of slices, and the inclination applicability.
+     
         """
         print('Shock inclination test and setup ...', end=" ")
         slices_info = []; inclinationCheck = True
         
-        # generat the points
+        # Generate the points
         if hasattr(CheckingHieght, "__len__"):
+            # If CheckingHeight is a list, generate nPnts points within the height range
             Pnts = np.linspace(0, abs(CheckingHieght[1]- CheckingHieght[0]), nPnts)
             DatumY = CheckingHieght[0]
         else:
+            # If CheckingHeight is a single value, create points based on slice thickness
             Ht = int(CheckingHieght/2)
             DatumY = VMidPnt-Ht
             if CheckingHieght > 10:             Pnts = np.linspace(0, CheckingHieght, 10); nPnts = 10
@@ -183,27 +190,33 @@ class InclinedShockTracking(SOA):
         P1 = (round(inclined_ref_line[0][0]), round(inclined_ref_line[0][1]))            
         LineSlope = inclined_ref_line[2]
         
+        # Calculate the y-intercepts of the upper and lower inclined lines
         aUp = self.shockDomain('up', P1, HalfSliceWidth, LineSlope, imgShape, preview_img)
         aDown = self.shockDomain('down', P1, HalfSliceWidth, LineSlope, imgShape, preview_img)
         
+        # Calculate y-coordinates of the points
         y_i = np.array(Pnts + DatumY).astype(int)
         if LineSlope != 0 and LineSlope != np.inf:
+            # Calculate x-coordinates based on the slope
             x_i1 = np.array((y_i - aUp) / LineSlope).astype(int)
             x_i2 =  np.array((y_i - aDown) / LineSlope).astype(int)
         elif LineSlope == np.inf:
+            # Handle the case of vertical lines
             x_i1 = np.full(nPnts, P1[0] - HalfSliceWidth)
             x_i2 = np.full(nPnts, P1[0] + HalfSliceWidth)
         elif LineSlope == 0:
+            # if the line is horizontal
+            print(u'\u2717')
             print('Software is not supporting horizontal shock waves, aborting...')
             sys.exit()
-            
+         
+        # Optionally, preview the shock domain on the image    
         if preview_img is not None:
             for pnt in range(len(Pnts)):
                 cv2.circle(preview_img, (x_i1[pnt],y_i[pnt]), radius=3, color=CVColor.RED, thickness=-1)
                 cv2.circle(preview_img, (x_i2[pnt],y_i[pnt]), radius=3, color=CVColor.RED, thickness=-1)
         slices_info = x_i1,x_i2,y_i
         print(u'\u2713')
-        # print(slices_info)
         return slices_info, nPnts, inclinationCheck
     
     def v_least_squares(self, xLoc: list[float], columnY:list[float], nSlices: int) -> list[float]:
@@ -255,6 +268,7 @@ class InclinedShockTracking(SOA):
             **kwargs: Additional keyword arguments:
                 - avg_preview_mode (str): Mode for previewing average angle.
                 - review_inc_slice_tracking (list or int): Slices to review for tracking.
+                - tracking_std (bool): to calculate the standard deviation of the tracked points
         
         Returns:
             tuple: Average global angle (float) and average midpoint location (float).
@@ -276,17 +290,18 @@ class InclinedShockTracking(SOA):
         count = 0                # Image counter
         midLocs =[]              # List to store mid-locations
         xLocs = []               # List to store all x-location lists of shocks
-        avg_slope = 0            # Average slope of #
+        avg_slope = 0            # visual average slope [float or list[float]]
         AvgMidLoc = 0            # Average mid-location
         columnY = []             # List to store y-coordinates of the slices
         uncertain_list = []      # List to store uncertain x-locations
         uncertainY_list = []     # List to store y-coordinates of uncertain x-locations
         shp = imgSet[0].shape    # Shape of images in the image set from the first image
-        m = []
+        m = []                   # list of slops from least square calculation
         
         # Optional keyword arguments
         avg_preview_mode = kwargs.get('avg_preview_mode', None)
         review_inc_slice_tracking = kwargs.get('review_inc_slice_tracking', -1)
+        tracking_std = kwargs.get('tracking_std', False)
         
         # Array to review the tracked slices within the iamge set
         slice_ploting_array = np.zeros(len(imgSet))
@@ -328,11 +343,11 @@ class InclinedShockTracking(SOA):
             for i in range(nSlices):
                 x_i1, x_i2 = Ref[0][i], Ref[1][i]
                 Slice = np.sum(img[upper_bounds[i]-1:lower_bounds[i], x_i1:x_i2], axis=0) / slice_thickness
-
+                
                 LastShockLoc = xLocOld[i]-Ref[0][i]
                 ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count, Plot = slice_ploting_array[count])
                 # ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count)
-                xLoc.append(ShockLoc + Ref[0][i])
+                xLoc.append(ShockLoc + Ref[0][i])                
                 if not certainLoc: uncertain.append(xLoc[-1]); uncertainY.append(Ref[2][i])
 
             # finding the middle point
@@ -340,10 +355,8 @@ class InclinedShockTracking(SOA):
             
             # Calculate the slope using least squares method
             m.append(self.v_least_squares(xLoc, columnY, nSlices))
-            
-            
             AngReg.append(AngleFromSlope(m[-1]))
-            xLocs.append(xLoc)
+            xLocs.append(xLoc); 
             uncertain_list.append(uncertain); uncertainY_list.append(uncertainY)
             
         AvgMidLoc= np.mean(midLocs);  avg_ang_glob = np.mean(AngReg);
@@ -353,11 +366,23 @@ class InclinedShockTracking(SOA):
             avg_ang = avg_ang_glob*np.ones(nReview)
         else:
             avg_slope = m; avg_midLoc = midLocs; avg_ang = AngReg
-
+          
+        if tracking_std:   
+            avg_xloc = np.array(xLocs).mean(axis=0)
+            xLoc_std = np.sqrt(np.square(xLocs).mean(axis=0))
+            std_m = self.v_least_squares(xLoc_std, columnY, nSlices)
+            x_min = shp[1]; x_max = 0;
+            for j in range(nSlices): 
+                x_i1, x_i2 = Ref[0][j], Ref[1][j]
+                if x_min > min([x_i1, x_i2]): x_min = min([x_i1, x_i2])
+                if x_max < max([x_i1, x_i2]): x_max = max([x_i1, x_i2])
+            print(np.mean(xLoc_std),np.mean(avg_xloc))
+            kwargs['std_line_info'] = (std_m, np.mean(avg_xloc), xLoc_std, (columnY[-1]-columnY[0], x_max - x_min))
+        
         print('Plotting tracked data ...')
         if nReview > 0:
             if nReview > 20: 
-                print('For memory reasons, only 20 imgs will be displayed.')
+                print(f'{BCOLOR.OKGREEN}For memory reasons,{BCOLOR.ENDC} only 20 imgs will be displayed.')
                 print('note: this will not be applied on imgs storing')
             for i in range(nReview):
                 fig, ax = plt.subplots(figsize=(int(shp[1]*1.75*px), int(shp[0]*1.75*px)))
@@ -366,7 +391,7 @@ class InclinedShockTracking(SOA):
                             uncertain_list[i], uncertainY_list[i], 
                             avg_slope[i], avg_ang[i], avg_midLoc[i] , y, **kwargs)
                 if len(output_directory) > 0: 
-                    fig.savefig(fr'{output_directory}\ShockAngleReview_{i:04d}_Ang{avg_ang_glob:.2f}.png', bbox_inches='tight', pad_inches=0.1)
+                    fig.savefig(fr'{output_directory}\ShockAngleReview_Ang{avg_ang_glob:.2f}_{i:04d}.png', bbox_inches='tight', pad_inches=0.1)
 
                 if i > 18:
                     if len(output_directory) == 0: 

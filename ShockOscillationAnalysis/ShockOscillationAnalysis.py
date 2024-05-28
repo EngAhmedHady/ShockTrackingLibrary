@@ -35,6 +35,19 @@ class CVColor:
     GRAY = (128, 128, 128)
     ORANGE = (0, 128, 255)
 
+class BCOLOR:  # For coloring the text in terminal
+    HEADER = '\033[95m'
+    BGOKBLUE = '\033[44m'
+    BGOKCYAN = '\033[46m'
+    OKCYAN = '\033[36m'
+    BGOKGREEN = '\033[42m'
+    OKGREEN = '\033[32m'
+    WARNING = '\033[43m'
+    FAIL = '\033[33m'
+    ENDC = '\033[0m'
+    ITALIC = '\033[3m'
+    UNDERLINE = '\033[4m'
+
 class SOA:
     def __init__(self, f = 1, D = 1, pixelScale = 1):
         self.f = f # ----------------------- sampling rate (fps)
@@ -212,7 +225,8 @@ class SOA:
             self.LineDraw(img, 'V', 0,  Intialize = True)
             self.LineDraw(self.clone, 'V', 1)
             Ref_x0 = self.Reference
-            if len(Ref_x0) < 2: print('Reference lines are not sufficient!'); sys.exit()
+            if len(Ref_x0) < 2: 
+                print(f'{BCOLOR.FAIL}Reference lines are not sufficient!{BCOLOR.ENDC}'); sys.exit()
             
         else:
             self.clone = img.copy(); 

@@ -13,23 +13,26 @@ from matplotlib.patches import Arc, FancyArrowPatch
 
 
 
-def AvgAnglePlot(ax, img_shp, P, slope, angle , **kwargs):
-    avg_ang_Yloc = kwargs.get('avg_ang_Yloc', img_shp[0]-100)
+def AvgAnglePlot(ax, img_shp, P, slope, angle, **kwargs):
     avg_lin_color = kwargs.get('avg_lin_color', 'w')
     avg_lin_opacity = kwargs.get('avg_lin_opacity', 1)
+    avg_show_txt = kwargs.get('avg_show_txt', True)
+    avg_txt_Yloc = kwargs.get('avg_txt_Yloc', img_shp[0]-100)
     avg_txt_size = kwargs.get('avg_txt_size', 26)
     
     P1,P2,avg_slope,a = InclinedLine(P,slope = slope ,imgShape = img_shp)
-    X = int((avg_ang_Yloc-a)/slope) if slope != 0 else avg_ang_Yloc
-
-    avg_ang_arc = Arc((X, avg_ang_Yloc),80, 80, theta1= -angle , theta2 = 0, color = avg_lin_color)
-    ax.add_patch(avg_ang_arc);
+    X = int((avg_txt_Yloc-a)/slope) if slope != 0 else avg_txt_Yloc
     ax.plot([P1[0],P2[0]], [P1[1],P2[1]], lw = 2,
             color= avg_lin_color, linestyle = (0, (20, 3, 5, 3)), alpha = avg_lin_opacity)
-    ax.text(X + 40 ,avg_ang_Yloc-10 , f'${{{angle:0.2f}}}^\circ$', 
-            color = avg_lin_color, fontsize = avg_txt_size);
-    ax.plot([X-10,X+100], [avg_ang_Yloc,avg_ang_Yloc], lw = 1, 
-            color = avg_lin_color, alpha = avg_lin_opacity)
+
+    if avg_show_txt:
+        avg_ang_arc = Arc((X, avg_txt_Yloc),80, 80, theta1= -angle , theta2 = 0, color = avg_lin_color)
+        ax.add_patch(avg_ang_arc);
+       
+        ax.text(X + 40 ,avg_txt_Yloc-10 , f'${{{angle:0.2f}}}^\circ$', 
+                color = avg_lin_color, fontsize = avg_txt_size);
+        ax.plot([X-10,X+100], [avg_txt_Yloc,avg_txt_Yloc], lw = 1, 
+                color = avg_lin_color, alpha = avg_lin_opacity)
 
 
 def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope, avg_ang,
@@ -37,6 +40,7 @@ def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope
     points_color = kwargs.get('points_color', 'yellow')
     points_opacity = kwargs.get('points_opacity', 1)
     uncertain_point_color = kwargs.get('uncertain_point_color', 'red')
+    tracking_std = kwargs.get('tracking_std', False)
     
     ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.uint8))
     ax.plot(x_loc, column_y, '-o', color=points_color, ms=12, alpha = points_opacity)
@@ -46,6 +50,14 @@ def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope
     # if mid_loc > 0 and y > 0: ax.plot(mid_loc, y, '*', color='g', ms=10)
     if avg_preview_mode != None:
         AvgAnglePlot(ax, shp, (mid_loc,y), avg_slope, avg_ang, **kwargs)
+    
+    if tracking_std:
+        # pass
+        std_m, avg_loc, std_x_shift, box_shp = kwargs.get('std_line_info', np.zeros(len(column_y)))
+        midloc = std_x_shift -  avg_loc
+        AvgAnglePlot(ax, shp, (np.mean(std_x_shift),y), std_m, avg_ang, avg_lin_color = 'r', **kwargs)
+        ax.plot(std_x_shift, column_y,'x-' ,ms = 10, lw = 2, color= 'tab:orange')
+        # AvgAnglePlot(ax, shp, (avg_loc - std_x_shift,y), std_m, avg_ang, avg_lin_color = 'r', **kwargs)
 
     if Mach_ang_mode =='Mach_num':
         inflow_dir_deg = kwargs.get('inflow_dir_deg', np.zeros(len(column_y)))
