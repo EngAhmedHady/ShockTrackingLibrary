@@ -59,11 +59,12 @@ for i in range(len(Folders)-1): FileDirectory += (f'{Folders[i]}\\')
 # NewFileDirectory = os.path.join(FileDirectory, "7mm-NotRotated-tk60")
 # NewFileDirectory = os.path.join(FileDirectory, "7mm")
 # NewFileDirectory = FileDirectory
-NewFileDirectory = os.path.join(FileDirectory, "Opt-code-with_rotation")
+NewFileDirectory = os.path.join(FileDirectory, "Opt-code-with_rotation2")
 if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
 
 SA = SOA(f, D)
 ImpImg = SliceListGenerator(f,D)
+
 
 ShockwaveRegion ,n ,WR, Scale = ImpImg.GenerateSlicesArray(imgPath,
                                                         # n_files = 500,
@@ -82,7 +83,8 @@ ShockwaveRegion ,n ,WR, Scale = ImpImg.GenerateSlicesArray(imgPath,
                                                         slice_thickness = SliceThickness, 
                                                         shock_angle_samples  = 2400, 
                                                         angle_samples_review = 10,
-                                                        # inclination_est_info = 110,
+                                                        # n_files = 300,
+                                                        inclination_est_info = 110,
                                                         # inclination_est_info =  [110, (474, 591),(463, 482)],
                                                         # inclination_est_info = [93,(87, 296),(124, 210)], #MidRe-Test 8-leading edge
                                                         # inclination_est_info = [147,(423, 292),(416, 217)], #MidRe-Test 8
@@ -94,7 +96,7 @@ ShockwaveRegion ,n ,WR, Scale = ImpImg.GenerateSlicesArray(imgPath,
                                                         # inclination_est_info = [90,(479,99 ),(478, 46)], #P1-6kHz  
                                                         # inclination_est_info = [90,(470, 129),(459, 5)], #P1-10kHz
                                                         # avg_shock_angle = 88, avg_shock_loc = 467,
-                                                        OutputDirectory = NewFileDirectory,
+                                                        output_directory = NewFileDirectory,
                                                         comment= f'{CaseName}',
                                                         preview =  True)
 
@@ -105,14 +107,14 @@ File = f"{f/1000}kHz_{slice_loc}mm_{Scale}mm-px_tk_{SliceThickness}px_{CaseName}
 print(NewFileDirectory+'\\'+File)
 if os.path.exists(fr"{NewFileDirectory}\{File}"): ImgList = cv2.imread(fr"{NewFileDirectory}\{File}")
 else: 
-    print('File is not exist!!')
+    print(f'{NewFileDirectory}\{File} is not exist!!')
     sys.exit()
 
 # spacify the shock region
 # (Draw 2 vertical lines)
-# NewRef = SA.LineDraw(ImgList, 'V', 0, 1)
-# NewRef = SA.LineDraw(SA.clone, 'V', 1)
-# NewRef.sort()
+NewRef = SA.LineDraw(ImgList, 'V', 0, 1)
+NewRef = SA.LineDraw(SA.clone, 'V', 1)
+NewRef.sort()
        
 # or (Spacify x location of 2 vertical lines)
 # NewRef = [294, 442] # 2kHz-P3
@@ -129,7 +131,7 @@ else:
 # NewRef = [47, 140] #MidRe-Test 8-leading edge (7mm)
 # NewRef = [90, 166] #MidRe-Test 8-leading edge (15mm)
 
-NewRef = [372, 538] #P5-2kHz-suc study
+# NewRef = [372, 538] #P5-2kHz-suc study
 ShockwaveRegion = ImgList[:,NewRef[0]:NewRef[1]]
 xPixls = (NewRef[1]-NewRef[0])
 ShockResionScale = xPixls*Scale
@@ -146,8 +148,8 @@ print('Shock Regions:',NewRef,'\t Represents:' ,xPixls, 'px \t Shock Regions in 
 #                                     ShowIm = False)
 
 ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
-                                    'SL_Average',
-                                    'SL_FFT',
+                                    'Average',
+                                    'FFT',
                                     # 'SL_Brightness/Contrast',
                                     # 'FFT',
                                     # filterCenter = [(0, 233)], D = 20, n = 5,
@@ -155,7 +157,7 @@ ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
                                     # filterCenter = [(0, 465), (-10, 465), (10, 465), (0, 495)], D = 25, n = 5,
                                     # Brightness = 0.5, Contrast = 2, Sharpness = 1.5,
                                     # Brightness = 1.15, Contrast = 2, Sharpness = 1,
-                                    ShowIm = True)
+                                    ShowIm = False)
 
 # Find shock location
 # function inputs: 1- the oscillation domain image where the shock will be tarcked
@@ -166,8 +168,9 @@ ShockwaveRegion = SA.CleanSnapshots(ShockwaveRegion,
 
 ShockLocation, Uncer = SA.ShockTrakingAutomation(ShockwaveRegion, 
                                                   # method = 'darkest_spot',
-                                                  # method = 'maxGrad',
-                                                  method = 'integral',
+                                                  method = 'maxGrad',
+                                                  
+                                                  # method = 'integral',
                                                   # review_slice_tracking = [10,15],
                                                   # review_slice_tracking = [1780,1790], 
                                                   Signalfilter = 'med-Wiener')
@@ -181,7 +184,8 @@ uncertain = []; Loc = []
 for i in Uncer:
     uncertain.append(i[1]*Scale)
     Loc.append(i[0])
-    
+
+print(len(ShockwaveRegion))
 A = Scale * np.array(ShockLocation)   
 avg = np.average(A)
 ShockLocation = A - avg

@@ -13,6 +13,7 @@ from ..ShockOscillationAnalysis import SOA
 from datetime import datetime as dt
 from ..preview import PreviewCVPlots
 from ..ShockOscillationAnalysis import CVColor
+from ..ShockOscillationAnalysis import BCOLOR
 from ..linedrawingfunctions import InclinedLine
 from ..inc_tracking.inc_tracking import InclinedShockTracking
 from .list_generation_tools import genratingRandomNumberList, GenerateIndicesList
@@ -68,7 +69,7 @@ class SliceListGenerator(SOA):
             Xint = Ref[1][0]
             Yint = M[0] * Xint + A[0]
         else:
-            print('Lines are parallel')
+            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC}Lines are parallel{BCOLOR.ENDC}')
          
         Pint = (round(Xint), round(Yint))
         return Pint          
@@ -128,7 +129,7 @@ class SliceListGenerator(SOA):
                             shock_angle_samples = 30, inclination_est_info: list[int,tuple,tuple] = [], # Angle estimation
                             preview: bool = True, angle_samples_review = 10,                            # preview options
                             output_directory: str = '', comment: str ='',                               # Data store
-                            **kwargs):                                                                  # Other
+                            **kwargs) -> tuple[np.ndarray[int], int, dict, float]:                                                                  # Other
         """
         Generate a sequence of image slices for single horizontal line shock wave analysis.
         This function imports a sequence of images to perform an optimized analysis by extracting
@@ -187,7 +188,7 @@ class SliceListGenerator(SOA):
         n1 = len(files)
         
         # In case no file found end the progress and eleminate the program
-        if n1 < 1: print('No files found!'); sys.exit();
+        if n1 < 1: print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}No files found!{BCOLOR.ENDC}'); sys.exit();
         
         # Open first file and set the limits and scale
         img = cv2.imread(files[0])
@@ -214,7 +215,7 @@ class SliceListGenerator(SOA):
         avg_shock_loc = kwargs.get('avg_shock_loc', 0)
         if not hasattr(inclination_est_info, "__len__"):
             self.LineDraw(self.clone, 'Inc', 3)
-            if len(self.Reference) < 4: print('Reference lines are not sufficient!'); sys.exit()
+            if len(self.Reference) < 4: print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference lines are not sufficient!{BCOLOR.ENDC}'); sys.exit()
             P1,P2,m,a = self.Reference[3]
             Ref, nSlices, inclinationCheck = self.inc_trac.InclinedShockDomainSetup(inclination_est_info,
                                                                                     slice_thickness, [P1,P2,m,a], 
@@ -229,7 +230,7 @@ class SliceListGenerator(SOA):
                                                                                     shp, VMidPnt = Ref_y1, 
                                                                                     preview_img = self.clone)
         elif avg_shock_angle != 90 and avg_shock_loc == 0: # in case the rotation angle only is provieded in working _range
-            print('Please, provide the rotation center...')
+            print(f'{BCOLOR.BGOKGREEN}Request: {BCOLOR.ENDC}{BCOLOR.ITALIC}Please, provide the rotation center...{BCOLOR.ENDC}')
             self.LineDraw(self.clone, 'Inc', 3)
             # find the rotation center
             avg_shock_loc = self.IntersectionPoint([0,         self.Reference[-1][2]], 
@@ -265,7 +266,7 @@ class SliceListGenerator(SOA):
             if angle_samples_review < shock_angle_samples: NSamplingReview = angle_samples_review
             else:
                 NSamplingReview = shock_angle_samples
-                print('Warning: Number of samples is larger than requested to review!, all samples will be reviewed')
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Number of samples is larger than requested to review!, all samples will be reviewed{BCOLOR.ENDC}')
 
             avg_shock_angle, avg_shock_loc = self.inc_trac.InclinedShockTracking(samplesList, nSlices, Ref,
                                                                                             nReview = NSamplingReview, 
@@ -291,9 +292,9 @@ class SliceListGenerator(SOA):
                 now = now.strftime("%d%m%Y%H%M")
                 outputPath =f'{output_directory}\\{self.f/1000:.1f}kHz_{slice_loc}mm_{self.pixelScale}mm-px_tk_{slice_thickness}px_{now}'
             if avg_shock_angle != 90:
-                print('RotatedImage:', u"stored \u2713" if cv2.imwrite(outputPath+f'-RefD{round(avg_shock_angle,2)}deg.png', new_img) else "Failed !")
-                print('DomainImage:' , u"stored \u2713" if cv2.imwrite(outputPath+'-RefD.png', self.clone)   else "Failed !")
-            else: print('DomainImage:',u"stored \u2713" if cv2.imwrite(outputPath+'-RefD.png', self.clone)   else "Failed !") 
+                print('RotatedImage:', u"stored \u2713" if cv2.imwrite(outputPath+f'-RefD{round(avg_shock_angle,2)}deg.png', new_img) else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}')
+                print('DomainImage:' , u"stored \u2713" if cv2.imwrite(outputPath+'-RefD.png', self.clone)   else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}')
+            else: print('DomainImage:',u"stored \u2713" if cv2.imwrite(outputPath+'-RefD.png', self.clone)   else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}') 
                 
         if full_img_width:
             x_range = [0, shp[1]]
@@ -311,6 +312,6 @@ class SliceListGenerator(SOA):
         img_list, n = self.ImportingFiles(files, indices_list, n_images, shp, x_range, [upper_bounds,lower_bounds], M)
 
         if len(output_directory) > 0:
-            print('ImageList write:', f"File was stored: {outputPath}.png" if cv2.imwrite(f'{outputPath}.png', img_list) else "Failed !")
+            print('ImageList write:', f"File was stored: {outputPath}.png" if cv2.imwrite(f'{outputPath}.png', img_list) else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}')
                 
         return img_list,n,working_range,self.pixelScale

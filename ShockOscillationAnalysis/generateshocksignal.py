@@ -2,48 +2,37 @@
 """
 Created on Sun Dec 10 02:41:58 2023
 
-@author: super
+@author: Ahmed H. Hanfy
 """
 import cv2
 import sys
-import time
 import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
 from .shocktracking import ShockTraking
-
-def TimeCalculation(timeInSec):
+from .decorators import calculate_running_time
+        
+def GradientGenerator(img:np.ndarray[int], KernalDim: int = 3)-> np.ndarray[int]:
     """
-    Convert the given time in seconds into a formatted string representation.
+    Generate the gradient magnitude of an image using Sobel operators.
 
     Parameters:
-    - timeInSec (float): The time duration in seconds.
+    - img (numpy.ndarray): Input image (grayscale).
+    - KernalDim (int): Dimension of the Sobel kernel. Default is 3.
 
     Returns:
-    None
+    numpy.ndarray: Gradient magnitude of the input image.
 
     Example:
-    >>> instance = SOA()
-    >>> instance.TimeCalculation(3665)
+    >>> gradient = GradientGenerator(image, KernalDim=3)
+
+    This function applies Sobel operators to compute the gradient magnitude of the input image.
+    The `KernalDim` parameter specifies the dimension of the Sobel kernel used for gradient calculation.
 
     Note:
-    - The function converts the time duration into hours, minutes, and seconds.
-    - It prints the total run time in a human-readable format.
-
+    - The input image should be in grayscale.
+    - The function returns the gradient magnitude of the input image.
     """
-    if timeInSec > 3600:
-        timeInHr = timeInSec // 3600
-        timeInMin = (timeInSec % 3600) // 60
-        sec = (timeInSec % 3600) % 60
-        print("Processing time: %s Hr, %s Min, %s Sec" % (round(timeInHr), round(timeInMin), round(sec)))
-    elif timeInSec > 60:
-        timeInMin = timeInSec // 60
-        sec = timeInSec % 60
-        print("Processing time: %s Min, %s Sec" % (round(timeInMin), round(sec)))
-    else:
-        print("Processing time: %s Sec" % round(timeInSec))
-        
-def GradientGenerator(img, KernalDim = 3):
     ddepth = cv2.CV_16S
 
     grad_x = cv2.Sobel(img, ddepth, 1, 0, ksize=KernalDim, scale=1, delta=0, borderType=cv2.BORDER_DEFAULT)
@@ -55,8 +44,29 @@ def GradientGenerator(img, KernalDim = 3):
     grad = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
     return grad
 
-def IntegralShocktracking(SnapshotSlice,Plot,count,ShockLocation, uncertain):
+def IntegralShocktracking(SnapshotSlice: list[int], Plot: bool, count: int, 
+                          ShockLocation: float, uncertain: bool) -> tuple[float, bool]:
+    """
+    Perform shock tracking based on integral method discriped in https://dx.doi.org/10.2139/ssrn.4797840.
 
+    Parameters:
+    - SnapshotSlice (list): snapshot slice in grayscale where shock is tracked.
+    - Plot (bool): Whether to plot the slice tracking process info.
+    - count (int): Current snapshot/image number.
+    - ShockLocation (float): Location of the shock from the previous iteration.
+    - uncertain (bool): Flag indicating uncertainty.
+
+    Returns:
+    tuple: A tuple containing:
+    - float: Updated shock location.
+    - bool: Flag indicating uncertainty.
+
+    Example:
+    >>> shock_loc, is_uncertain = IntegralShocktracking(slice_values, Plot=True, count=10, ShockLocation=0, uncertain=False)
+
+    It updates the shock location and determines if there's uncertainty in the tracking process.
+    """
+    
     LastShockLocation = ShockLocation[-1] if ShockLocation else -1
     
     minLoc, certain, reason = ShockTraking(SnapshotSlice, 
@@ -68,6 +78,27 @@ def IntegralShocktracking(SnapshotSlice,Plot,count,ShockLocation, uncertain):
     return ShockLocation, uncertain
     
 def GradShocktracking(GradSlice,Plot,count,ShockLocation, uncertain):
+    """
+    Perform shock tracking based on gradient values.
+    
+    Parameters:
+    - GradSlice (numpy.ndarray): Array containing gradient values for shock tracking.
+    - Plot (bool): Flag indicating whether to generate plots of the results.
+    - count (int): Current iteration count.
+    - ShockLocation (list): List containing the shock location from previous iterations.
+    - uncertain (bool): Flag indicating uncertainty in the shock tracking process.
+    
+    Returns:
+    tuple: A tuple containing:
+    - list: Updated shock location.
+    - bool: Flag indicating uncertainty.
+    
+    Example:
+    >>> shock_loc, is_uncertain = GradShocktracking(grad_values, Plot=True, count=10, ShockLocation=[0], uncertain=False)
+    
+    This function performs shock tracking based on gradient values extracted from a slice of data. It updates the shock location and determines if there's uncertainty in the tracking process.
+    
+    """
     ShockLocation.append(np.argmax(GradSlice))
     return ShockLocation, uncertain
 
@@ -75,6 +106,7 @@ def DarkestSpotShocktracking(SnapshotSlice,Plot,count,ShockLocation, uncertain):
     ShockLocation.append(np.argmin(SnapshotSlice))
     return ShockLocation, uncertain
 
+@calculate_running_time
 def GenerateShockSignal(img, method = 'integral', 
                         signalfilter=None, review_slice_tracking = -1,
                         CheckSolutionTime = True, **kwargs):
@@ -104,7 +136,6 @@ def GenerateShockSignal(img, method = 'integral',
     - Ensure that 'ShockTrackingModule' is properly defined and imported.
 
     """
-    if CheckSolutionTime: start_time = time.time()
     # Initiating Variables
     ShockLocation = [] # ........................... set of shock locations
     uncertain = [] # set of uncertain shock locations [snapshot value, uncertain location]
@@ -157,10 +188,5 @@ def GenerateShockSignal(img, method = 'integral',
     elif signalfilter == 'med-Wiener':
         ShockLocation = signal.medfilt(ShockLocation)
         ShockLocation = signal.wiener(ShockLocation.astype('float64'))
-    
-    # Shock tracking time
-    if CheckSolutionTime:
-        timeInSec =  time.time() - start_time
-        TimeCalculation(timeInSec)
-        
+           
     return ShockLocation, uncertain

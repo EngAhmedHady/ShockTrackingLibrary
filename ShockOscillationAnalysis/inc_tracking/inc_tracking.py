@@ -105,7 +105,7 @@ class InclinedShockTracking(SOA):
             angles = np.arctan(np.array(Vy)/np.array(Vx))*180/np.pi
         
         if min(locs) > min(pnts_y_list) or max(locs) < max(pnts_y_list):
-            print('provided y-domain is out of valid range, only boundary angles will considered ...')
+            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} provided y-domain is out of valid range, only boundary angles will considered ...{BCOLOR.ENDC}')
         
         intr_flow_dir = [];
         for yi in pnts_y_list:
@@ -180,7 +180,7 @@ class InclinedShockTracking(SOA):
             elif CheckingHieght > 2 and CheckingHieght <= 10: Pnts = range(CheckingHieght); nPnts = CheckingHieght
             else:
                 print(u'\u2717')
-                print('Escaping the shock angle checking... \nSlice thickness is not sufficient for check the shock angle')
+                print(f'{BCOLOR.BGOKCYAN}info.:{BCOLOR.ENDC}{BCOLOR.ITALIC}Escaping the shock angle checking... \nSlice thickness is not sufficient for check the shock angle{BCOLOR.ENDC}')
                 return slices_info, 0, False
         
         # IncInfoIndx = len(self.Reference) - 1
@@ -207,7 +207,7 @@ class InclinedShockTracking(SOA):
         elif LineSlope == 0:
             # if the line is horizontal
             print(u'\u2717')
-            print('Software is not supporting horizontal shock waves, aborting...')
+            print(f'{BCOLOR.FAIL}Error:{BCOLOR.ENDC}{BCOLOR.ITALIC} Software is not supporting horizontal shock waves, aborting...{BCOLOR.ENDC}')
             sys.exit()
          
         # Optionally, preview the shock domain on the image    
@@ -232,7 +232,8 @@ class InclinedShockTracking(SOA):
             list[float]: List containing the slope of the best-fit line.
     
         Example:
-            >>> instance = YourClass()
+            >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
+            >>> instance = IncTrac(f)
             >>> xLoc = [1, 2, 3, 4, 5]
             >>> columnY = [2, 4, 6, 8, 10]
             >>> nSlices = 5
@@ -274,7 +275,8 @@ class InclinedShockTracking(SOA):
             tuple: Average global angle (float) and average midpoint location (float).
         
         Example:
-            >>> instance = YourClass()
+            >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
+            >>> instance = IncTrac(f)
             >>> img_set = [img1, img2, img3]
             >>> ref = [[10, 20], [30, 40], [50, 60]]
             >>> avg_angle, avg_mid_loc = instance.InclinedShockTracking(img_set, 2, ref, nReview=5)
@@ -310,7 +312,7 @@ class InclinedShockTracking(SOA):
             try:
                 for i in range(start, end): slice_ploting_array[i] = 1
             except Exception:
-                print('slices to review is out of the image set, only within the range are considered')
+                print(f'{BCOLOR.WARNING}Warning: {BCOLOR.ENDC}{BCOLOR.ITALIC}Slices to review is out of the image set, only within the range are considered{BCOLOR.ENDC}')
                 pass
 
         elif not hasattr(review_inc_slice_tracking, "__len__") and review_inc_slice_tracking > -1:
@@ -382,8 +384,8 @@ class InclinedShockTracking(SOA):
         print('Plotting tracked data ...')
         if nReview > 0:
             if nReview > 20: 
-                print(f'{BCOLOR.OKGREEN}For memory reasons,{BCOLOR.ENDC} only 20 imgs will be displayed.')
-                print('note: this will not be applied on imgs storing')
+                print(f'{BCOLOR.BGOKCYAN}info.:{BCOLOR.ENDC}{BCOLOR.ITALIC} For memory reasons, only 20 images will be displayed.')
+                print(f'note: this will not be applied on images storing{BCOLOR.ENDC}')
             for i in range(nReview):
                 fig, ax = plt.subplots(figsize=(int(shp[1]*1.75*px), int(shp[0]*1.75*px)))
                 ax.set_ylim([shp[0],0]); ax.set_xlim([0,shp[1]])
@@ -408,20 +410,63 @@ class InclinedShockTracking(SOA):
         print(f'Angle range variation: [{min(AngReg):0.2f},{max(AngReg):0.2f}], \u03C3 = {np.std(AngReg):0.2f}')
         return avg_ang_glob, AvgMidLoc
     
-    def ImportingFiles(self, pathlist, indices_list, n_images, imgs_shp, **kwargs):
+    def ImportingFiles(self, pathlist: list[str], indices_list: list[int], n_images: int, # Importing info.
+                       imgs_shp: tuple[int],                                              # Images info.
+                       **kwargs) -> tuple[list[np.ndarray], list[np.ndarray]]:            # Other parameters 
+        """
+        Import images from the specified paths, optionally resize them, and remove the background if provided.
+    
+        Parameters:
+        - pathlist (list[str]): List of paths to the images.
+        - indices_list (list[int]): List of indices specifying which images to import from the pathlist.
+        - n_images (int): Number of images to import.
+        - imgs_shp (tuple[int]): Shape of the images (height, width).
+        - kwargs (dict, optional): Additional parameters.
+            - BG_path (str): Path to the background image to be subtracted. Default is ''.
+            - resize_img (tuple[int]): Tuple specifying the dimensions to resize the images to (width, height). Default is the original image shape.
+    
+        Returns:
+        tuple: A tuple containing:
+        - original_img_list (list[np.ndarray]): List of original images (resized if specified).
+        - img_list (list[np.ndarray]): List of grayscale images with the background removed if provided.
+    
+        Example:
+        >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
+        >>> instance = IncTrac(f)
+        >>> pathlist = ['path/to/image1.jpg', 'path/to/image2.jpg']
+        >>> indices = [0, 1]
+        >>> n_images = 2
+        >>> shape = (100, 200)
+        >>> original_imgs, processed_imgs = instance.ImportingFiles(pathlist, indices, n_images, shape)
+        >>> print(original_imgs, processed_imgs)
+    
+        Note:
+        - The function reads images from the specified paths, converts them to grayscale, and optionally removes a background image.
+        - The images can be resized if the `resize_img` parameter is provided in kwargs.
+    
+        """
         print(f'Importing {n_images} images ...')
         img_list=[]; n = 0; original_img_list=[]
+        
+        # Get additional parameters from kwargs
         BG_path = kwargs.get('BG_path', '')
         resize_img = kwargs.get('resize_img', (imgs_shp[1],imgs_shp[0]))
+        
+        # Import images
         for i in indices_list:
             img = cv2.imread(pathlist[i])
             # original_img_list.append(cv2.resize(img.astype('float32'), resize_img))
+            
+            # Resize and store the original image if needed, and Convert image to grayscale
             img_list.append(cv2.cvtColor(cv2.resize(img.astype('float32'), resize_img), cv2.COLOR_BGR2GRAY))
+            
+            # Print progress
             n += 1
             sys.stdout.write('\r')
             sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n_images/20)), int(5*n/(n_images/20))))
         print('')
         
+        # Remove background if path is provided
         if len(BG_path) > 0:
             print('Removing background image ...', end=" ")
             BG = cv2.imread(BG_path)
@@ -430,6 +475,7 @@ class InclinedShockTracking(SOA):
             BG_len , BG_Wid  = BG.shape
             img_len, img_wid = imgs_shp
             
+            # Adjust background size if resizing is specified
             if resize_img != imgs_shp: 
                 BG_len = resize_img[0]; r = BG_Wid / BG_len
                 BG = BG[0:BG_len,0:r*BG_len]
@@ -437,18 +483,20 @@ class InclinedShockTracking(SOA):
             if BG_len < img_len: img_len = BG_len; img_wid = BG_Wid
             else: BG = BG[0:img_len,0:img_wid]
             
+            # Subtract the background from each image in the list
             for img in img_list:
                 img = cv2.subtract(img[0:img_len,0:img_wid],BG)
             print(u'\u2713')
         return original_img_list, img_list
     
-    def ShockPointsTracking(self, path, tracking_V_range = [0,0],inclination_info = 0, nPnts = 0, scale_pixels = True, 
+    def ShockPointsTracking(self, path: str, 
+                            tracking_V_range:list[int,float] = [0,0], inclination_info: int|list[int,tuple,tuple] = 0, nPnts: int = 0, scale_pixels = True, 
                             preview = True, output_directory = '',comment='', **kwargs):
         
         files = sorted(glob.glob(path))
         n1 = len(files)
         # In case no file found end the progress and eleminate the program
-        if n1 < 1: print('No files found!'); sys.exit();
+        if n1 < 1: print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}No files found!{BCOLOR.ENDC}'); sys.exit();
         # Open first file and set the limits and scale
         Refimg = cv2.imread(files[0])
         Refimg = cv2.cvtColor(Refimg, cv2.COLOR_BGR2GRAY)
@@ -485,16 +533,16 @@ class InclinedShockTracking(SOA):
                 Ref_y1 = self.LineDraw(self.clone, 'H', 2, line_color = CVColor.ORANGE)[-1]
             except Exception:
                 Ref_y1 = Ref_y0;
-                print(f'Nothing was drawn! Ref_y1 value is {Ref_y1}')
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Nothing was drawn!{BCOLOR.ENDC} Ref_y1 value is {Ref_y1}')
             tracking_V_range.append((Ref_y0 - Ref_y1)* self.pixelScale)
             try:
                 Ref_y2 = self.LineDraw(self.clone, 'H', 2, line_color = CVColor.ORANGE)[-1]
             except Exception:
                 Ref_y2 = Ref_y1;
-                print(f'Nothing was drawn! Ref_y1 value is {Ref_y2}')
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC}Nothing was drawn!{BCOLOR.ENDC} Ref_y1 value is {Ref_y2}')
                 
             tracking_V_range.append((Ref_y0 - Ref_y2)* self.pixelScale)
-            if Ref_y1 == Ref_y2: print('Vertical range of tracking is not sufficient!'); sys.exit()
+            if Ref_y1 == Ref_y2: print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Vertical range of tracking is not sufficient!{BCOLOR.ENDC}'); sys.exit()
             tracking_V_range.sort()
             if Ref_y1 > Ref_y2: Ref_y11 = Ref_y2; Ref_y2 = Ref_y1; Ref_y1 = Ref_y11;
         else:
@@ -511,16 +559,16 @@ class InclinedShockTracking(SOA):
         if not hasattr(inclination_info, "__len__"):
             CheckingWidth = inclination_info
             if CheckingWidth < 10: 
-                print('Reference width is not sufficient!'); 
-                CheckingWidth = int(input("Please provide reference width >10px: "))
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference width is not sufficient!{BCOLOR.ENDC}'); 
+                CheckingWidth = int(input(f'{BCOLOR.BGOKGREEN}Request: {BCOLOR.ENDC}{BCOLOR.ITALIC}Please provide reference width >10px: {BCOLOR.ENDC}'))
             inclined_ref_line = []
             try:
                 inclined_ref_line = self.LineDraw(self.clone, 'Inc', 3)[-1] 
             except Exception:
-                print(f'Nothing was drawn! inclined_ref_line value is {inclined_ref_line}')
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Nothing was drawn!{BCOLOR.ENDC} inclined_ref_line value is {inclined_ref_line}')
             
             if not hasattr(inclined_ref_line, "__len__") or len(inclined_ref_line) < 4: 
-                print('Reference lines are not sufficient!'); sys.exit()
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference lines are not sufficient!{BCOLOR.ENDC}'); sys.exit()
            
         elif len(inclination_info) > 2:
             P1,P2,m,a = InclinedLine(inclination_info[1],inclination_info[2],imgShape = shp)
@@ -530,8 +578,8 @@ class InclinedShockTracking(SOA):
         
         if nPnts == 0: 
             while nPnts == 0:
-                nPnts = int(input("Please provide number of points to be tracked: "))
-                if nPnts > abs(Ref_y1-Ref_y2): print('insufficient number of points'); nPnts = 0
+                nPnts = int(input(f'{BCOLOR.BGOKGREEN}Request: {BCOLOR.ENDC}{BCOLOR.ITALIC}Please provide number of points to be tracked: {BCOLOR.ENDC}'))
+                if nPnts > abs(Ref_y1-Ref_y2): print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}insufficient number of points{BCOLOR.ENDC}'); nPnts = 0
 
         Ref, nSlices, inclinationCheck = self.InclinedShockDomainSetup(CheckingWidth, 
                                                                        [Ref_y1,Ref_y2],

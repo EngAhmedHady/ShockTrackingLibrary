@@ -27,7 +27,7 @@ imgPath = 'D:\\TFAST\\TEAMAero experiments\\Roughness study\\Smooth profile (P1)
 Folders = imgPath.split("\\")
 FileDirectory = ''
 for i in range(len(Folders)-1): FileDirectory += (Folders[i]+'\\')
-NewFileDirectory = os.path.join(FileDirectory, "shock_signal")
+NewFileDirectory = os.path.join(FileDirectory, "shock_signal-test")
 if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
 
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     # start_time = time.time()
     SA_opt = SOA_opt(f,D)
     ShockwaveRegion ,n ,WR, Scale = SA_opt.GenerateSlicesArray(imgPath,
-                                                                n_files = 500,
+                                                                n_files = 50000,
                                                                 # within_range = [100,300],
                                                                 # every_n_files = 10,
                                                                 scale_pixels = True,
@@ -66,7 +66,7 @@ if __name__ == '__main__':
                                                                 comment='-opt', 
                                                                 # inclination_est_info =  110,
                                                                 inclination_est_info =  [110, (474, 591),(463, 482)],
-                                                                Ref_x0 = [108, 725], Ref_y1 = 542,
+                                                                # Ref_x0 = [108, 725], Ref_y1 = 542,
                                                                 # avg_shock_angle = 88, avg_shock_loc = 467,
                                                                 preview =  True)
 

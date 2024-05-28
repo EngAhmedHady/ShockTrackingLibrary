@@ -10,7 +10,7 @@ from ..ShockOscillationAnalysis import BCOLOR
 def genratingRandomNumberList(ShockAngleSamples, n1):
     if n1 < ShockAngleSamples:
         ShockAngleSamples = n1
-        print('ShockAngleSamples should not be more than the number of files; the number of files will be the only considered.')
+        print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} ShockAngleSamples should not be more than the number of files; the number of files will be the only considered.{BCOLOR.ENDC}')
 
     randomIndx = random.sample(range(n1), min(ShockAngleSamples, n1))
     return randomIndx

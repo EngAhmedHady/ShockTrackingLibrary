@@ -76,26 +76,33 @@ def SliceListAverage(img: np.array) -> np.array:
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
     print('\t - subtracting Averaging ...', end=" ")
     width = len(img[0])
+    
+    # Calculate the average intensity for each column
     Avg = np.zeros(width)
     for i in img: Avg += i
     Avg /= img.shape[0]
+    
     Newimg = np.zeros(img.shape)
+    
+    # Subtract the average intensity profile from each row
     for i in range(img.shape[0]):  Newimg[i] = img[i] - Avg
+    
+    # Normalize the new image to the range [0, 255]
     maxValue = np.amax(Newimg); minValue = np.amin(Newimg)
     Newimg = np.around(((Newimg-minValue)/(maxValue-minValue))*255).astype(np.uint8)
     print(u'\u2713')
     return Newimg
 
-def ImgListAverage(imgList: list[np.array]) -> list[np.array]:
-    NewImg = []; n = len(imgList)
-    shp = imgList[0].shape
-    AvgImg = np.zeros(shp)
-    for i in imgList:  
-        GrayImg = cv2.cvtColor(i, cv2.COLOR_BGR2GRAY)
-        AvgImg += GrayImg
-    AvgImg /= n
-    for i in imgList: NewImg.append(i - AvgImg)
-    return NewImg
+# def ImgListAverage(imgList: list[np.array]) -> list[np.array]:
+#     NewImg = []; n = len(imgList)
+#     shp = imgList[0].shape
+#     AvgImg = np.zeros(shp)
+#     for i in imgList:  
+#         GrayImg = cv2.cvtColor(i, cv2.COLOR_BGR2GRAY)
+#         AvgImg += GrayImg
+#     AvgImg /= n
+#     for i in imgList: NewImg.append(i - AvgImg)
+#     return NewImg
     
 
 def CleanIlluminationEffects(img: np.array, filterCenter:list[tuple] = [(0, 233)], 
@@ -110,7 +117,12 @@ def CleanIlluminationEffects(img: np.array, filterCenter:list[tuple] = [(0, 233)
     - D (float): Cut-off frequency for the low-pass filter. Default: 10.
     - n (int): Filter order. Default: 10.
     - ShowIm (bool): Whether to display intermediate images during processing. Default: False.
-    - **kwargs: Additional keyword arguments for optional parameters.
+    - kwargs (dict): Additional keyword arguments:
+       - filterCenter (list): Overrides the default filter center if provided.
+       - D (int): Overrides the default cut-off frequency if provided.
+       - n (int): Overrides the default filter order if provided.
+       - ShowIm (bool): Overrides the default value for displaying images if provided.
+
 
     Returns:
     numpy.ndarray: Cleaned image.
@@ -180,21 +192,20 @@ def CleanIlluminationEffects(img: np.array, filterCenter:list[tuple] = [(0, 233)
     print(u' \u2713')
     return CleanedImage
 
-def BrightnessAndContrast(img:np.array, 
-                          Brightness:float = 1, Contrast:float = 1, Sharpness:float = 1, 
-                          ShowIm:bool = False, **kwargs) -> np.array:
+def BrightnessAndContrast(img:np.array, **kwargs) -> np.array:
     """
     Adjusts the brightness, contrast, and sharpness of an image.
 
     Parameters:
     - img (numpy.ndarray): NumPy array representing the image.
-    - Brightness (float, optional): Brightness adjustment factor (default: 1).
-      Valid range: 0 (min) to 2 (max).
-    - Contrast (float, optional): Contrast adjustment factor (default: 1).
-      Valid range: 0 (min) to 2 (max).
-    - Sharpness (float, optional): Sharpness adjustment factor (default: 1).
-      Valid range: 0 (min) to 3 (max).
-    - **kwargs: Additional keyword arguments.
+    **kwargs:
+        - Brightness (float, optional): Brightness adjustment factor (default: 1).
+          Valid range: 0 (min) to 2 (max).
+        - Contrast (float, optional): Contrast adjustment factor (default: 1).
+          Valid range: 0 (min) to 2 (max).
+        - Sharpness (float, optional): Sharpness adjustment factor (default: 1).
+          Valid range: 0 (min) to 3 (max).
+      
 
     Returns:
     - numpy.ndarray: NumPy array representing the adjusted image.
@@ -222,15 +233,9 @@ def BrightnessAndContrast(img:np.array,
     """
     
     # Handle optional parameter values from **kwargs
-    Brightness = kwargs.get('Brightness', Brightness)
-    Contrast = kwargs.get('Contrast', Contrast)
-    Sharpness = kwargs.get('Sharpness', Sharpness)
-    ShowIm = kwargs.get('ShowIm', ShowIm)
-
-    # Validate parameter values
-    Brightness = max(0, min(2, Brightness))
-    Contrast = max(0, min(2, Contrast))
-    Sharpness = max(0, min(3, Sharpness))
+    Brightness = kwargs.get('Brightness', 1)
+    Contrast = kwargs.get('Contrast', 1)
+    Sharpness = kwargs.get('Sharpness', 1)
     
     # Convert image to grayscale if it is in color
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
