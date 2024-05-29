@@ -18,5 +18,7 @@ authors:
 orcid: https://orcid.org/0000-0002-1187-3910
 
 title: Shock Oscillation Analysis Liberary
+doi: 10.5281/zenodo.11197727
 version: v1.8.3
 date-released: 2024-05-15
+url: "https://github.com/EngAhmedHady/ShockTrackingLibrary"
