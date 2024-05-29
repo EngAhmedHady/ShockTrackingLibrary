@@ -14,7 +14,7 @@ authors:
 @co-advisor
 - family-names: "Kaczyński"
   given-names: "Piotr"
-orcid: "https://orcid.org/0000-0002-1187-3910"
+  orcid: "https://orcid.org/0000-0002-1187-3910"
 
 title: Shock Oscillation Analysis Liberary
 doi: 10.5281/zenodo.11197727
