@@ -11,13 +11,12 @@ import screeninfo # ............................... To find the  monitor resolut
 import numpy as np
 import matplotlib.pyplot as plt
 from ..preview import plot_review
-# from scipy.optimize import least_squares
 from ..shocktracking import ShockTraking
 from ..ShockOscillationAnalysis import SOA
-from ..ShockOscillationAnalysis import CVColor
 from ..ShockOscillationAnalysis import BCOLOR
+from ..ShockOscillationAnalysis import CVColor
+from scipy.interpolate import CubicSpline, PchipInterpolator
 from ..linedrawingfunctions import InclinedLine, AngleFromSlope
-# from ..imgcleaningfunctions import ImgListAverage
 from ..slice_list_generator.list_generation_tools import GenerateIndicesList
 
 px = 1/plt.rcParams['figure.dpi']
@@ -78,8 +77,12 @@ class InclinedShockTracking(SOA):
             flow_dir (list, optional): List of tuples containing the measured y-coordinates and the corresponding angles [(y_loc, angle),...].
             flow_Vxy (list, optional): List of tuples containing the measured y-coordinates and the corresponding velocity components [(y_loc, Vx, Vy),...].
             **kwargs: Additional keyword arguments:
+                - angle_interp_kind (str): If 'linear', linear interpolation will be performed. Default is 'linear'.
+                                           If 'CubicSpline', Interpolate data with a piecewise cubic polynomial which is twice continuously differentiable.
+                                           more details could be found: https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html#scipy.interpolate.CubicSpline
+                                           If 'PCHIP', PCHIP 1-D monotonic cubic interpolation will be performed.
+                                           more details could be found: https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html#scipy.interpolate.PchipInterpolator
                 - preview_angle_interpolation (bool): If True, plot the angle interpolation for preview. Default is False.
-        
         Returns:
             list: Interpolated angles for each y-coordinate in `pnts_y_list`. If the y-domain is out of valid range, returns an empty list.
         
@@ -91,11 +94,10 @@ class InclinedShockTracking(SOA):
             >>> print(interpolated_angles)
         
         Notes:
-            - The function performs linear interpolation to determine the angles at specified y-coordinates.
+            - interpolation can be performed using multible methods: 'linear','CubicSpline' and 'PCHIP' for better inflow representation
             - If a y-coordinate in `pnts_y_list` is out of the range defined by `flow_dir` or `flow_Vxy`, the function will consider only boundary angles.
             - If both `flow_dir` and `flow_Vxy` are provided, `flow_dir` will take precedence.
         """
-        
         if flow_dir is not None:
             # Unzip the angles_list into separate locs and angles lists
             locs, angles = zip(*flow_dir)
@@ -105,21 +107,21 @@ class InclinedShockTracking(SOA):
             angles = np.arctan(np.array(Vy)/np.array(Vx))*180/np.pi
         
         if min(locs) > min(pnts_y_list) or max(locs) < max(pnts_y_list):
-            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} provided y-domain is out of valid range, only boundary angles will considered ...{BCOLOR.ENDC}')
+            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Provided y-domain is out of valid range{BCOLOR.ENDC}')
         
-        intr_flow_dir = [];
-        for yi in pnts_y_list:
-            # Perform binary search to find the correct interval for yi
-            l, r = 0, len(angles)-1;
-            while r > l and r-l > 1:
-                mid = (r + l) // 2
-                if locs[mid] <= yi: r = mid
-                elif locs[mid] > yi: l = mid
-            if locs[r] >= yi: intr_flow_dir.append(angles[locs.index(min(locs))])
-            elif locs[l] <= yi: intr_flow_dir.append(angles[locs.index(max(locs))])
-            else:
-                # linear interpolation: y = y0+(x-x0)*((y1-y0)/(x1-x0))
-                intr_flow_dir.append(angles[r]+(yi-locs[r])*(angles[l]-angles[r])/(locs[l]-locs[r]))
+        angle_interp_kind = kwargs.get('angle_interp_kind', 'linear')
+        if angle_interp_kind == 'linear':
+            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Only boundary angles will considered ...{BCOLOR.ENDC}')
+            intr_flow_dir = np.interp(pnts_y_list, locs, angles)
+        elif angle_interp_kind == 'CubicSpline':
+            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} First derivative at curves ends will considered zero, overshooting is likely occurs ...{BCOLOR.ENDC}')
+            interp_fun = CubicSpline(locs, angles, bc_type = 'clamped')
+            intr_flow_dir = interp_fun(pnts_y_list)
+        elif angle_interp_kind == 'PCHIP':
+            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} First derivative at curves ends will considered zero, overshooting is likely occurs ...{BCOLOR.ENDC}')
+            interp_fun = PchipInterpolator(locs, angles, extrapolate = 'bool')
+            intr_flow_dir = interp_fun(pnts_y_list)
+            
         preview_angle_interpolation = kwargs.get('preview_angle_interpolation', False)
         if preview_angle_interpolation:
             fig, ax = plt.subplots(figsize=(10,20))
@@ -303,8 +305,8 @@ class InclinedShockTracking(SOA):
         # Optional keyword arguments
         avg_preview_mode = kwargs.get('avg_preview_mode', None)
         review_inc_slice_tracking = kwargs.get('review_inc_slice_tracking', -1)
-        tracking_std = kwargs.get('tracking_std', False)
-        
+        # tracking_std = kwargs.get('tracking_std', False)
+         
         # Array to review the tracked slices within the iamge set
         slice_ploting_array = np.zeros(len(imgSet))
         if hasattr(review_inc_slice_tracking, "__len__") and len(review_inc_slice_tracking) == 2:
@@ -339,6 +341,8 @@ class InclinedShockTracking(SOA):
 
         xLoc = -1*np.ones(nSlices)
         AngReg = []
+        
+        print('Shock tracking started ...', end=" ")
         for count, img in enumerate(imgSet):
             xLocOld = xLoc.copy()
             xLoc = []; uncertain = []; uncertainY = []
@@ -368,43 +372,70 @@ class InclinedShockTracking(SOA):
             avg_ang = avg_ang_glob*np.ones(nReview)
         else:
             avg_slope = m; avg_midLoc = midLocs; avg_ang = AngReg
-          
-        if tracking_std:   
-            avg_xloc = np.array(xLocs).mean(axis=0)
-            xLoc_std = np.sqrt(np.square(xLocs).mean(axis=0))
-            std_m = self.v_least_squares(xLoc_std, columnY, nSlices)
-            x_min = shp[1]; x_max = 0;
-            for j in range(nSlices): 
-                x_i1, x_i2 = Ref[0][j], Ref[1][j]
-                if x_min > min([x_i1, x_i2]): x_min = min([x_i1, x_i2])
-                if x_max < max([x_i1, x_i2]): x_max = max([x_i1, x_i2])
-            print(np.mean(xLoc_std),np.mean(avg_xloc))
-            kwargs['std_line_info'] = (std_m, np.mean(avg_xloc), xLoc_std, (columnY[-1]-columnY[0], x_max - x_min))
         
+        osc_boundary = kwargs.get('osc_boundary', False)
+        if osc_boundary:
+            max_b = np.zeros(nSlices); min_b = shp[1]*np.ones(nSlices)
+            for xloc_list in xLocs:
+                for n_count, xloc in enumerate(xloc_list):
+                    if xloc > max_b[n_count]: max_b[n_count] = xloc
+                    if xloc < min_b[n_count]: min_b[n_count] = xloc
+            m_min = self.v_least_squares(min_b, columnY, nSlices)
+            m_max = self.v_least_squares(max_b, columnY, nSlices)
+            mean_min = np.mean(min_b); mean_max = np.mean(max_b)
+            # kwargs['osc_bound_line_info'] = ([[min_b[0],min_b[-1]], m_min, mean_min], [[max_b[0],max_b[-1]], m_max, mean_max])
+            kwargs['osc_bound_line_info'] = ([min_b, m_min, mean_min], [max_b, m_max, mean_max])
+        # if tracking_std:   
+            # avg_xloc = np.array(xLocs).mean(axis=0)
+            # xLoc_std = np.sqrt(np.square(xLocs).mean(axis=0))
+            # std_m = self.v_least_squares(xLoc_std, columnY, nSlices)
+            # x_min = shp[1]; x_max = 0;
+            # for j in range(nSlices): 
+            #     x_i1, x_i2 = Ref[0][j], Ref[1][j]
+            #     if x_min > min([x_i1, x_i2]): x_min = min([x_i1, x_i2])
+            #     if x_max < max([x_i1, x_i2]): x_max = max([x_i1, x_i2])
+            # print(np.mean(xLoc_std),np.mean(avg_xloc))
+            # kwargs['std_line_info'] = (std_m, np.mean(avg_xloc), xLoc_std, (columnY[-1]-columnY[0], x_max - x_min))
+        print(u'\u2713')
         print('Plotting tracked data ...')
-        if nReview > 0:
-            if nReview > 20: 
-                print(f'{BCOLOR.BGOKCYAN}info.:{BCOLOR.ENDC}{BCOLOR.ITALIC} For memory reasons, only 20 images will be displayed.')
-                print(f'note: this will not be applied on images storing{BCOLOR.ENDC}')
-            for i in range(nReview):
+        if hasattr(nReview, "__len__"):
+            r_range = [0,0,1]
+            for j, element in enumerate(nReview): r_range[j] = element
+            r_range = tuple(sorted(r_range[:2])) + (r_range[2],)
+            st,en,sp = r_range; n_review = round((en-st)/sp)
+        else:
+            r_range = (0,nReview,1)
+            st,en,sp = r_range; n_review = nReview
+        
+        if en > len(imgSet):
+            en = len(imgSet)
+            print(f'{BCOLOR.WARNING}Warning: {BCOLOR.ENDC}{BCOLOR.ITALIC}Images to review is out of the image set, only within the range are considered{BCOLOR.ENDC}')
+            
+        if n_review > 20: 
+             print(f'{BCOLOR.BGOKCYAN}info.:{BCOLOR.ENDC}{BCOLOR.ITALIC} For memory reasons, only 20 images will be displayed.')
+             print(f'note: this will not be applied on images storing{BCOLOR.ENDC}')
+        
+        if n_review > 0:
+            n = 0
+            for i in range(st,en,sp):
                 fig, ax = plt.subplots(figsize=(int(shp[1]*1.75*px), int(shp[0]*1.75*px)))
                 ax.set_ylim([shp[0],0]); ax.set_xlim([0,shp[1]])
                 plot_review(ax, imgSet[i], shp, xLocs[i], columnY, 
                             uncertain_list[i], uncertainY_list[i], 
                             avg_slope[i], avg_ang[i], avg_midLoc[i] , y, **kwargs)
                 if len(output_directory) > 0: 
-                    fig.savefig(fr'{output_directory}\ShockAngleReview_Ang{avg_ang_glob:.2f}_{i:04d}.png', bbox_inches='tight', pad_inches=0.1)
+                    fig.savefig(fr'{output_directory}\ShockAngleReview_Ang{avg_ang_glob:.2f}_{i:05d}.png', bbox_inches='tight', pad_inches=0.1)
 
-                if i > 18:
+                if n > 20:
                     if len(output_directory) == 0: 
-                        plt.close(fig); i = nReview
+                        plt.close(fig); n = n_review
                         sys.stdout.write('\r')
-                        sys.stdout.write("[%-20s] %d%%" % ('='*int((i+1)/(nReview/20)), int(5*(i+1)/(nReview/20))))
+                        sys.stdout.write("[%-20s] %d%%" % ('='*int((n)/(n_review/20)), int(5*(n)/(n_review/20))))
                         break;
                     else: plt.close(fig)
-
                 sys.stdout.write('\r')
-                sys.stdout.write("[%-20s] %d%%" % ('='*int((i+1)/(nReview/20)), int(5*(i+1)/(nReview/20))))
+                sys.stdout.write("[%-20s] %d%%" % ('='*int((n+1)/(n_review/20)), int(5*(n+1)/(n_review/20))))
+                n += 1
             print()
 
         print(f'Angle range variation: [{min(AngReg):0.2f},{max(AngReg):0.2f}], \u03C3 = {np.std(AngReg):0.2f}')
@@ -610,11 +641,11 @@ class InclinedShockTracking(SOA):
         
         if inclinationCheck:
             original_img_list, img_list = self.ImportingFiles(files, indices_list, n_images, shp, **kwargs)
-            
-        print('Shock tracking started ...')
+        
+        store_n_files = kwargs.get('store_n_files', n_images)    
         avg_shock_angle, avg_shock_loc = self.InclinedShockTracking(img_list, 
                                                                     nSlices, Ref,  
-                                                                    nReview = n_images,
+                                                                    nReview = store_n_files,
                                                                     output_directory = output_directory,
                                                                     **kwargs)
         print('Average inclination angle {:.2f} deg'.format(avg_shock_angle))
