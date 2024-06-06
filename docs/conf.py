@@ -33,7 +33,7 @@ copyright = '2023, Ahmed H. Hanfy'
 author = 'Ahmed H. Hanfy'
 
 # The full version, including alpha/beta/rc tags
-release = '3.1.1'
+release = '1.9.1'
 
 
 # -- General configuration ---------------------------------------------------
