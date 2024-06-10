@@ -12,6 +12,11 @@ authors:
   given-names: Pawel
   orcid: https://orcid.org/0000-0002-4210-804X
 
+@supervisor
+- family-names: Doerffer
+  given-names: Piotr
+  orcid: https://orcid.org/0000-0002-2464-2054
+
 @co-advisor
 - family-names: Kaczyński
   given-names: Piotr
