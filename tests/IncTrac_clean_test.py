@@ -32,7 +32,7 @@ if __name__ == '__main__':
     Folders = imgPath.split("\\")
     FileDirectory = ''
     for i in range(len(Folders)-1): FileDirectory += (Folders[i]+'\\')
-    NewFileDirectory = os.path.join(FileDirectory, "IncTrac_test2")
+    NewFileDirectory = os.path.join(FileDirectory, "IncTrac_test-test")
     if not os.path.exists(NewFileDirectory): os.mkdir(NewFileDirectory)
     
     # DfEXPRe = pd.read_csv(inflow_path)

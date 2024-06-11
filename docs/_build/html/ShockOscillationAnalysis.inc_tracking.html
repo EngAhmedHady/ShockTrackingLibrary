@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ShockOscillationAnalysis.inc_tracking package &mdash; ShockTrackingLibrary 1.9.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
 
   
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=c4cb232b"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -46,6 +46,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Tutorial.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">ShockOscillationAnalysis</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="ShockOscillationAnalysis.html">ShockOscillationAnalysis package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="ShockOscillationAnalysis.html#subpackages">Subpackages</a><ul class="current">
@@ -96,21 +97,237 @@
            <div itemprop="articleBody">
              
   <section id="shockoscillationanalysis-inc-tracking-package">
-<h1>ShockOscillationAnalysis.inc_tracking package<a class="headerlink" href="#shockoscillationanalysis-inc-tracking-package" title="Link to this heading"></a></h1>
+<h1>ShockOscillationAnalysis.inc_tracking package<a class="headerlink" href="#shockoscillationanalysis-inc-tracking-package" title="Permalink to this heading"></a></h1>
 <section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
 <section id="module-ShockOscillationAnalysis.inc_tracking.inc_tracking">
-<span id="shockoscillationanalysis-inc-tracking-inc-tracking-module"></span><h2>ShockOscillationAnalysis.inc_tracking.inc_tracking module<a class="headerlink" href="#module-ShockOscillationAnalysis.inc_tracking.inc_tracking" title="Link to this heading"></a></h2>
+<span id="shockoscillationanalysis-inc-tracking-inc-tracking-module"></span><h2>ShockOscillationAnalysis.inc_tracking.inc_tracking module<a class="headerlink" href="#module-ShockOscillationAnalysis.inc_tracking.inc_tracking" title="Permalink to this heading"></a></h2>
 <p>Created on Wed Feb 28 13:47:27 2024</p>
 <p>&#64;author: Ahmed H. Hanfy</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking.</span></span><span class="sig-name descname"><span class="pre">InclinedShockTracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelScale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking.</span></span><span class="sig-name descname"><span class="pre">InclinedShockTracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelScale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="ShockOscillationAnalysis.html#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA" title="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA"><code class="xref py py-class docutils literal notranslate"><span class="pre">SOA</span></code></a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.ImportingFiles">
-<span class="sig-name descname"><span class="pre">ImportingFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathlist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_images</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgs_shp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.ImportingFiles" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockDomainSetup">
+<span class="sig-name descname"><span class="pre">InclinedShockDomainSetup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">CheckingWidth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CheckingHieght</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclined_ref_line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgShape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VMidPnt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nPnts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview_img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockDomainSetup" title="Permalink to this definition"></a></dt>
+<dd><p>Setup shock inclination test, provids the test slices info. with aid of the estimated inclined shock line.</p>
+<dl>
+<dt>Parameters:</dt><dd><ul class="simple">
+<li><p><strong>CheckingWidth (int)</strong>: Width for shock domain checking (sliceWidth).</p></li>
+<li><p><strong>CheckingHeight (int or list)</strong>: Height for shock domain checking in px. If a list is provided, it represents a range of heights for generating points [upper limit, lower limit].</p></li>
+<li><p><strong>imgShape (tuple)</strong>: Shape of the image (y-length, x-length).</p></li>
+<li><p><strong>VMidPnt (int, optional)</strong>: Vertical midpoint. Default is 0.</p></li>
+<li><p><strong>nPnts (int, optional)</strong>: Number of points to generate for inclined shock lines. Default is 0.</p></li>
+<li><p><strong>preview_img (np.ndarray, optional)</strong>: Image for preview as background. Default is None.</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><dl class="simple">
+<dt>tuple: A tuple containing:</dt><dd><ul class="simple">
+<li><p>SlicesInfo (list): List of shock domain slices, [[x-domainStrt,x-domainEnd],y-sliceLoc].</p></li>
+<li><p>nPnts (int): Number of slices generated for inclined shock.</p></li>
+<li><p>inclinationCheck (bool): Boolean indicating whether the shock inclination test is applicable.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ShockOscillationAnalysis</span> <span class="kn">import</span> <span class="n">InclinedShockTracking</span> <span class="k">as</span> <span class="n">IncTrac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instance</span> <span class="o">=</span> <span class="n">IncTrac</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">width</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">height</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">slices</span><span class="p">,</span> <span class="n">nPnts</span><span class="p">,</span> <span class="n">success</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">InclinedShockDomainSetup</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">nPnts</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">slices</span><span class="p">,</span> <span class="n">nPnts</span><span class="p">,</span> <span class="n">success</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The function sets up shock inclination testing by visualizing the shock domain.</p></li>
+<li><p>It returns a list of slices location and range, the number of slices, and the inclination applicability.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockTracking">
+<span class="sig-name descname"><span class="pre">InclinedShockTracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgSet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nSlices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nReview</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockTracking" title="Permalink to this definition"></a></dt>
+<dd><p>Track and analyze the shock angle in a sequence of images.</p>
+<dl>
+<dt>Parameters:</dt><dd><ul class="simple">
+<li><p><strong>imgSet (list)</strong>: List of images for shock tracking, the images should be formated as numpy array.</p></li>
+<li><p><strong>nSlices (int)</strong>: Number of slices to divide the image into for analysis.</p></li>
+<li><p><strong>Ref (list)</strong>: Reference points for slices [[x_1, x_2, y], …].</p></li>
+<li><p><strong>slice_thickness (int, optional)</strong>: Thickness of each slice. Default is 1.</p></li>
+<li><p><strong>nReview (int, optional)</strong>: Number of images to review. Default is 0.</p></li>
+<li><p><strong>output_directory (str, optional)</strong>: Directory to save the review images. Default is ‘’.</p></li>
+<li><dl class="simple">
+<dt><cite>**kwargs</cite>: Additional keyword arguments:</dt><dd><ul>
+<li><p><strong>avg_preview_mode (str)</strong>: Mode for previewing average angle.</p></li>
+<li><p><strong>review_inc_slice_tracking (list or int)</strong>: Slices to review for tracking.</p></li>
+<li><p><strong>osc_boundary (bool)</strong>: To display the oscilliation domain depending on the analyised image set.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><p>tuple: Average global angle (float) and average midpoint location (float).</p>
+</dd>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ShockOscillationAnalysis</span> <span class="kn">import</span> <span class="n">InclinedShockTracking</span> <span class="k">as</span> <span class="n">IncTrac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instance</span> <span class="o">=</span> <span class="n">IncTrac</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">img_set</span> <span class="o">=</span> <span class="p">[</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">img3</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">60</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">avg_angle</span><span class="p">,</span> <span class="n">avg_mid_loc</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">InclinedShockTracking</span><span class="p">(</span><span class="n">img_set</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="n">nReview</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">avg_angle</span><span class="p">,</span> <span class="n">avg_mid_loc</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The function performs shock tracking across a series of images and calculates the average shock angle.</p></li>
+<li><p>If <cite>nReview</cite> is specified, it plots and optionally saves review images for inspection.</p></li>
+<li><p>It uses least squares method to fit the shock locations and calculates the corresponding angle.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.ShockPointsTracking">
+<span class="sig-name descname"><span class="pre">ShockPointsTracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracking_V_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclination_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nPnts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_pixels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.ShockPointsTracking" title="Permalink to this definition"></a></dt>
+<dd><p>This function identifies shock points by slicing a predefined domain of the shock and tracking it at each slice based on the integral method of shock tracking outlined in this <a class="reference external" href="https://dx.doi.org/10.2139/ssrn.4797840">article</a>.
+It operates over a specified vertical range within the images, serving as the core function for inclination shock tracking. Additionally, all keyword arguments for output customization can be passed through this function.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><ul class="simple">
+<li><p><strong>path (str)</strong>: Path to the directory containing the image files.</p></li>
+<li><p><strong>tracking_V_range (list[int, float], optional)</strong>: Vertical range for tracking shock points, specified as a list with two elements representing the upper and lower bounds (default is [0, 0]).</p></li>
+<li><p><strong>inclination_info (int | list[int, tuple, tuple], optional)</strong>: Information about the inclination of the shock domain. It can be an integer representing the width of the domain or a list containing the width along with the start and end points of the line defining the inclination (default is 0).</p></li>
+<li><p><strong>nPnts (int, optional)</strong>: Number of points to be tracked (default is 0).</p></li>
+<li><p><strong>scale_pixels (bool, optional)</strong>: Whether to scale the pixels in the images (default is True).</p></li>
+<li><p><strong>preview (bool, optional)</strong>: Whether to preview the images (default is True).</p></li>
+<li><p><strong>output_directory (str, optional)</strong>: Directory to save the output images (default is ‘’).</p></li>
+<li><p><strong>comment (str, optional)</strong>: Additional comment for the output (default is ‘’).</p></li>
+<li><p><cite>**kwargs</cite>: Additional keyword</p></li>
+</ul>
+</dd>
+<dt>Additional keyword arguments <cite>**kwargs</cite> may include:</dt><dd><dl class="simple">
+<dt>Importing image options:</dt><dd><ul class="simple">
+<li><p><strong>n_files (int, optional)</strong>: To import the first n-files from the given path.</p></li>
+<li><p><strong>every_n_files (int, optional)</strong>: To import files with a step (default is 1).</p></li>
+<li><p><strong>within_range (list[int], optional)</strong>: To import files within range [start, end]</p></li>
+<li><p><strong>resize_img (tuple[int], optional)</strong>: Tuple specifying the dimensions to resize the images to (width, height). Default is the original image shape.</p></li>
+<li><p><strong>BG_path (str, optional)</strong>: Path to the background image to be subtracted. Default is ‘’.</p></li>
+</ul>
+</dd>
+<dt>Inflow data options:</dt><dd><ul class="simple">
+<li><p><strong>flow_dir (list, optional)</strong>: List of tuples containing the measured y-coordinates and the corresponding angles [(y_loc, angle),…].</p></li>
+<li><p><strong>flow_Vxy (list, optional)</strong>: List of tuples containing the measured y-coordinates and the corresponding velocity components [(y_loc, Vx, Vy),…].</p></li>
+<li><p><strong>angle_interp_kind (str)</strong>: ‘linear’,’CubicSpline’ or ‘PCHIP’ (default is linear)</p></li>
+</ul>
+</dd>
+<dt>Define the domain options and tracking:</dt><dd><ul class="simple">
+<li><p><strong>Ref_x0 (list[int], optional):</strong> list of x-coordinates for 2-vertical reference lines [Ref_x01, Ref_x02] used for scaling, used instead of drawing.</p></li>
+<li><p><strong>Ref_y0 (int, optional)</strong>: y-coordinate of the horizontal reference line [y = 0] used as reference for tracking_V_range, used instead of drawing.</p></li>
+<li><p><strong>slice_thickness (int, optional)</strong>: Thickness of each slice. Default is 1.</p></li>
+</ul>
+</dd>
+<dt>Review and results options:</dt><dd><ul class="simple">
+<li><p><strong>preview (bool)</strong>: Whether to preview the selected domain for the analysis or not (default is True)</p></li>
+<li><p><strong>review_inc_slice_tracking (int|list[int])</strong>: To plot all slices of spacific image or range of images (default is 0)</p></li>
+<li><p><strong>preview_angle_interpolation (bool)</strong>: If True, plot the angle interpolation for preview. (default is False).</p></li>
+<li><p><strong>avg_preview_mode (str)</strong>: ‘avg_all’, ‘avg_ang’ and None (default is None).</p></li>
+<li><p><strong>Mach_ang_mode (str)</strong>: Flag indicating whether to display the Mach number ‘Mach_num’ if inflow data is available or ‘flow_dir’ when the Mach number is available(defaults to None).</p></li>
+<li><p><strong>osc_boundary (bool)</strong>: To display the oscilliation domain depending on the analyised image set.</p></li>
+<li><p><strong>output_directory (str)</strong>: The pathe where the output results will be stored (default is ‘’).</p></li>
+<li><p><strong>store_n_files (int|list[int])</strong>: Specify the first n output results to be stored, or provide a range of output image indices to be stored in the format [start, end].</p></li>
+</ul>
+</dd>
+<dt>Results display options:</dt><dd><ul class="simple">
+<li><p><strong>points_opacity (float)</strong>: The transperancy of the tracking points from 0 to 1 (default is 1).</p></li>
+<li><p><strong>points_color (str)</strong>: The color of the tracking points (default is ‘yellow’)</p></li>
+<li><p><strong>uncertain_point_color (str)</strong>: The color of the uncertain tracked points (default is ‘red’)</p></li>
+<li><p><strong>avg_lin_color (str)</strong>: The average line color when the <cite>avg_preview_mode</cite> is not None (default is ‘white’)</p></li>
+<li><p><strong>avg_lin_opacity (float)</strong>: The transperancy of the average line from 0 to 1 (default is 1)</p></li>
+<li><p><strong>avg_show_txt (bool)</strong>: To display the angle value or not when the <cite>avg_preview_mode</cite> is not None (default is True)</p></li>
+<li><p><strong>avg_txt_Yloc (int)</strong>: y-location of the angle value text in pixels (default is image height minus 100.)</p></li>
+<li><p><strong>avg_txt_size (float)</strong>: Font size of the Angle value (default is 26pt)</p></li>
+<li><p><strong>M1_color (str)</strong>: The calculated values of Mach  when the <cite>avg_preview_mode</cite> is not None (default is ‘orange’)</p></li>
+<li><p><strong>M1_txt_size (float)</strong>: Font size of the Mach number and inflow Angle values (default is 26pt)</p></li>
+<li><p><strong>arc_dia (float)</strong>: inflow angle arc diameter (default is 80px)</p></li>
+<li><p><strong>arw_len (float)</strong>: inflow arrow length (default is 50px)</p></li>
+<li><p><strong>b_color (str)</strong>: boundary domain and lines color for the active <code class="docutils literal notranslate"><span class="pre">osc_boundary</span></code> (default is ‘tab:orange’)</p></li>
+<li><p><strong>osc_range_opacity (float)</strong>: The transperancy of the boundary domain from 0 to 1 (default is 0.3)</p></li>
+<li><p><strong>b_lins_opacity (float)</strong>: The transperancy of the boundary lines from 0 to 1 (default is 1)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>In case of <code class="docutils literal notranslate"><span class="pre">scale_pixels</span> <span class="pre">=</span> <span class="pre">True</span></code> the <code class="docutils literal notranslate"><span class="pre">Ref_x0</span></code> and <code class="docutils literal notranslate"><span class="pre">Ref_y0</span></code> must be defined either by drawing or as arguments.</p></li>
+<li><p>The values of <code class="docutils literal notranslate"><span class="pre">Ref_x0</span></code> and <code class="docutils literal notranslate"><span class="pre">Ref_y0</span></code> are in pixels.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tracking_V_range</span></code> values are in pixels, but if <code class="docutils literal notranslate"><span class="pre">scale_pixels</span> <span class="pre">=</span> <span class="pre">True</span></code>, the values should match the scale units [for example mm].</p></li>
+<li><p>The imported files are defined by thier index and sorted by name.</p></li>
+<li><p>For automation it is better to set <code class="docutils literal notranslate"><span class="pre">preview</span></code> to False.</p></li>
+<li><p>The plots from <code class="docutils literal notranslate"><span class="pre">review_inc_slice_tracking</span></code> give details of finding the shock location, such as local minima, shock location, last image shock location, etc.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">avg_preview_mode</span></code> the display of vertical least squares regression line of the tracked points: </dt><dd><ul>
+<li><p>‘avg_all’: Displays the average of all lines calculated from the tracked points across the entire image dataset.</p></li>
+<li><p>‘avg_ang’: Displays the line of the tracked points in each image</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>In this version <code class="docutils literal notranslate"><span class="pre">Mach_ang_mode</span></code> can only calculate Mach number when inflow data is available, ‘flow_dir’ is not yet supported!</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">osc_boundary</span></code> Calculated based on the minimum and maximum recorded location at each slice, a vertical least squares regression line is used to define the oscillation boundary and minimize any uncertainty that might occur.</p></li>
+</ul>
+</div>
+<dl>
+<dt>Returns:</dt><dd><p>tuple[float, float]: Average inclination angle and average shock location.</p>
+</dd>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ShockOscillationAnalysis</span> <span class="kn">import</span> <span class="n">InclinedShockTracking</span> <span class="k">as</span> <span class="n">IncTrac</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">D</span> <span class="o">=</span> <span class="mi">60</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">imgPath</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;C:\Usersdmin\Pictures\*.png&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">IncTrac</span> <span class="o">=</span> <span class="n">IncTrac</span><span class="p">(</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">IncTrac</span><span class="o">.</span><span class="n">ShockPointsTracking</span><span class="p">(</span><span class="n">imgPath</span><span class="p">,</span> <span class="n">scale_pixels</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="go">                                tracking_V_range = [5, 25],</span>
+<span class="go">                                nPnts = 9, inclination_info = [100, (249, 0), (0, 429)], slice_thickness = 4,</span>
+<span class="go">                                points_opacity = 0.0,</span>
+<span class="go">                                avg_preview_mode = &#39;avg_all&#39;, avg_show_txt = True, avg_txt_Yloc = 400, avg_txt_size = 30,</span>
+<span class="go">                                preview = True,</span>
+<span class="go">                                osc_boundary = True)</span>
+</pre></div>
+</div>
+</dd>
+<dt>Steps:</dt><dd><ol class="arabic simple">
+<li><p>Define reference vertical boundaries (for scaling). Draw or assine them in this parameter <code class="docutils literal notranslate"><span class="pre">Ref_x0</span></code>,</p></li>
+<li><p>Define reference horizontal line as the y-datum. Draw or assine it in this parameter <code class="docutils literal notranslate"><span class="pre">Ref_y0</span></code>,</p></li>
+<li><p>Define the estimated line of shock. Draw or assine it as two points in this parameter <cite>inclination_info</cite> as in the example</p></li>
+<li><p>Run shock tracking function within the selected vertical range <code class="docutils literal notranslate"><span class="pre">tracking_V_range</span></code>.</p></li>
+<li><p>The function will perform the tracking after dividing the vertical range into <code class="docutils literal notranslate"><span class="pre">nPnts</span></code>.</p></li>
+</ol>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-ShockOscillationAnalysis.inc_tracking.inc_tracking_support">
+<span id="shockoscillationanalysis-inc-tracking-inc-tracking-support-module"></span><h2>ShockOscillationAnalysis.inc_tracking.inc_tracking_support module<a class="headerlink" href="#module-ShockOscillationAnalysis.inc_tracking.inc_tracking_support" title="Permalink to this heading"></a></h2>
+<p>Created on Wed Jun  5 10:15:04 2024</p>
+<p>&#64;author: Ahmed H. Hanfy</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.ImportingFiles">
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">ImportingFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathlist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_images</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgs_shp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.ImportingFiles" title="Permalink to this definition"></a></dt>
 <dd><p>Import images from the specified paths, optionally resize them, and remove the background if provided.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
@@ -160,144 +377,9 @@
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockDomainSetup">
-<span class="sig-name descname"><span class="pre">InclinedShockDomainSetup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">CheckingWidth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CheckingHieght</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclined_ref_line</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgShape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VMidPnt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nPnts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview_img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockDomainSetup" title="Link to this definition"></a></dt>
-<dd><p>Setup shock inclination test, provids the test slices info. with aid of the estimated inclined shock line.</p>
-<dl>
-<dt>Parameters:</dt><dd><ul class="simple">
-<li><p><strong>CheckingWidth (int)</strong>: Width for shock domain checking (sliceWidth).</p></li>
-<li><p><strong>CheckingHeight (int or list)</strong>: Height for shock domain checking in px. If a list is provided, it represents a range of heights for generating points [upper limit, lower limit].</p></li>
-<li><p><strong>imgShape (tuple)</strong>: Shape of the image (y-length, x-length).</p></li>
-<li><p><strong>VMidPnt (int, optional)</strong>: Vertical midpoint. Default is 0.</p></li>
-<li><p><strong>nPnts (int, optional)</strong>: Number of points to generate for inclined shock lines. Default is 0.</p></li>
-<li><p><strong>preview_img (np.ndarray, optional)</strong>: Image for preview as background. Default is None.</p></li>
-</ul>
-</dd>
-<dt>Returns:</dt><dd><dl class="simple">
-<dt>tuple: A tuple containing:</dt><dd><ul class="simple">
-<li><p>SlicesInfo (list): List of shock domain slices, [[x-domainStrt,x-domainEnd],y-sliceLoc].</p></li>
-<li><p>nPnts (int): Number of slices generated for inclined shock.</p></li>
-<li><p>inclinationCheck (bool): Boolean indicating whether the shock inclination test is applicable.</p></li>
-</ul>
-</dd>
-</dl>
-</dd>
-<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ShockOscillationAnalysis</span> <span class="kn">import</span> <span class="n">InclinedShockTracking</span> <span class="k">as</span> <span class="n">IncTrac</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">instance</span> <span class="o">=</span> <span class="n">IncTrac</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">width</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">height</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">points</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">slices</span><span class="p">,</span> <span class="n">nPnts</span><span class="p">,</span> <span class="n">success</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">InclinedShockDomainSetup</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">nPnts</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">slices</span><span class="p">,</span> <span class="n">nPnts</span><span class="p">,</span> <span class="n">success</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<ul class="simple">
-<li><p>The function sets up shock inclination testing by visualizing the shock domain.</p></li>
-<li><p>It returns a list of slices location and range, the number of slices, and the inclination applicability.</p></li>
-</ul>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockTracking">
-<span class="sig-name descname"><span class="pre">InclinedShockTracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgSet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nSlices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nReview</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockTracking" title="Link to this definition"></a></dt>
-<dd><p>Track and analyze the shock angle in a sequence of images.</p>
-<dl>
-<dt>Parameters:</dt><dd><ul class="simple">
-<li><p><strong>imgSet (list)</strong>: List of images for shock tracking, the images should be formated as numpy array.</p></li>
-<li><p><strong>nSlices (int)</strong>: Number of slices to divide the image into for analysis.</p></li>
-<li><p><strong>Ref (list)</strong>: Reference points for slices [[x_1, x_2, y], …].</p></li>
-<li><p><strong>slice_thickness (int, optional)</strong>: Thickness of each slice. Default is 1.</p></li>
-<li><p><strong>nReview (int, optional)</strong>: Number of images to review. Default is 0.</p></li>
-<li><p><strong>output_directory (str, optional)</strong>: Directory to save the review images. Default is ‘’.</p></li>
-<li><dl class="simple">
-<dt><cite>**kwargs</cite>: Additional keyword arguments:</dt><dd><ul>
-<li><p><strong>avg_preview_mode (str)</strong>: Mode for previewing average angle.</p></li>
-<li><p><strong>review_inc_slice_tracking (list or int)</strong>: Slices to review for tracking.</p></li>
-<li><p><strong>tracking_std (bool)</strong>: to calculate the standard deviation of the tracked points</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-<dt>Returns:</dt><dd><p>tuple: Average global angle (float) and average midpoint location (float).</p>
-</dd>
-<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ShockOscillationAnalysis</span> <span class="kn">import</span> <span class="n">InclinedShockTracking</span> <span class="k">as</span> <span class="n">IncTrac</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">instance</span> <span class="o">=</span> <span class="n">IncTrac</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">img_set</span> <span class="o">=</span> <span class="p">[</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">img3</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ref</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">60</span><span class="p">]]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">avg_angle</span><span class="p">,</span> <span class="n">avg_mid_loc</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">InclinedShockTracking</span><span class="p">(</span><span class="n">img_set</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="n">nReview</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">avg_angle</span><span class="p">,</span> <span class="n">avg_mid_loc</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<ul class="simple">
-<li><p>The function performs shock tracking across a series of images and calculates the average shock angle.</p></li>
-<li><p>If <cite>nReview</cite> is specified, it plots and optionally saves review images for inspection.</p></li>
-<li><p>It uses least squares method to fit the shock locations and calculates the corresponding angle.</p></li>
-</ul>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.ShockPointsTracking">
-<span class="sig-name descname"><span class="pre">ShockPointsTracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracking_V_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclination_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nPnts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_pixels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.ShockPointsTracking" title="Link to this definition"></a></dt>
-<dd><p>Track shock points in a series of images.
-This function tracks shock points in a series of images along a specified vertical range. 
-This function can be considered as the main function of inclination shock tracking and all kwargs for output can be passed through this function</p>
-<dl>
-<dt>Parameters:</dt><dd><ul class="simple">
-<li><p><strong>path (str)</strong>: Path to the directory containing the image files.</p></li>
-<li><p><strong>tracking_V_range (list[int, float], optional)</strong>: Vertical range for tracking shock points, specified as a list with two elements representing the upper and lower bounds (default is [0, 0]).</p></li>
-<li><p><strong>inclination_info (int | list[int, tuple, tuple], optional)</strong>: Information about the inclination of the shock domain. It can be an integer representing the width of the domain or a list containing the width along with the start and end points of the line defining the inclination (default is 0).</p></li>
-<li><p><strong>nPnts (int, optional)</strong>: Number of points to be tracked (default is 0).</p></li>
-<li><p><strong>scale_pixels (bool, optional)</strong>: Whether to scale the pixels in the images (default is True).</p></li>
-<li><p><strong>preview (bool, optional)</strong>: Whether to preview the images (default is True).</p></li>
-<li><p><strong>output_directory (str, optional)</strong>: Directory to save the output images (default is ‘’).</p></li>
-<li><p><strong>comment (str, optional)</strong>: Additional comment for the output (default is ‘’).</p></li>
-<li><p><cite>**kwargs</cite>: Additional keyword arguments.</p></li>
-</ul>
-</dd>
-<dt>Returns:</dt><dd><p>tuple[float, float]: Average inclination angle and average shock location.</p>
-</dd>
-<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ShockOscillationAnalysis</span> <span class="kn">import</span> <span class="n">InclinedShockTracking</span> <span class="k">as</span> <span class="n">IncTrac</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">D</span> <span class="o">=</span> <span class="mi">60</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">imgPath</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;C:\Usersdmin\Pictures\*.png&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">IncTrac</span> <span class="o">=</span> <span class="n">IncTrac</span><span class="p">(</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">IncTrac</span><span class="o">.</span><span class="n">ShockPointsTracking</span><span class="p">(</span><span class="n">imgPath</span><span class="p">,</span> <span class="n">scale_pixels</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="go">                                tracking_V_range = [5, 25],</span>
-<span class="go">                                nPnts = 9, inclination_info = [100, (249, 0), (0, 429)], slice_thickness = 4,</span>
-<span class="go">                                points_opacity = 0.0,</span>
-<span class="go">                                avg_preview_mode = &#39;avg_all&#39;, avg_show_txt = True, avg_txt_Yloc = 400, avg_txt_size = 30,</span>
-<span class="go">                                preview = True,</span>
-<span class="go">                                osc_boundary = True)</span>
-</pre></div>
-</div>
-</dd>
-<dt>Steps:</dt><dd><ol class="arabic simple">
-<li><p>Define reference vertical boundaries (for scaling). Draw or assine them in this parameter <cite>Ref_x0</cite>,</p></li>
-<li><p>Define reference horizontal line as the y-datum. Draw or assine it in this parameter <cite>Ref_y0</cite>,</p></li>
-<li><p>Define the estimated line of shock. Draw or assine it as two points in this parameter <cite>inclination_info</cite> as in the example</p></li>
-<li><p>Run shock tracking function within the selected vertical range <cite>tracking_V_range</cite>.</p></li>
-<li><p>The function will perform the tracking after dividing the vertical range into <cite>nPnts</cite>.</p></li>
-</ol>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.anglesInterpolation">
-<span class="sig-name descname"><span class="pre">anglesInterpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pnts_y_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_Vxy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.anglesInterpolation" title="Link to this definition"></a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.anglesInterpolation">
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">anglesInterpolation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pnts_y_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_Vxy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.anglesInterpolation" title="Permalink to this definition"></a></dt>
 <dd><p>Interpolate angles based on given y-coordinates and corresponding angles or velocity components.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
@@ -351,9 +433,9 @@ This function can be considered as the main function of inclination shock tracki
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.shockDomain">
-<span class="sig-name descname"><span class="pre">shockDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HalfSliceWidth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LineSlope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgShape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview_img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.shockDomain" title="Link to this definition"></a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.shockDomain">
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">shockDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HalfSliceWidth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LineSlope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgShape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview_img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.shockDomain" title="Permalink to this definition"></a></dt>
 <dd><p>Generate and visualize a shock domain based on the slice width and 
 the drawn line parameters (one point and slope).</p>
 <dl>
@@ -385,9 +467,9 @@ the drawn line parameters (one point and slope).</p>
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.v_least_squares">
-<span class="sig-name descname"><span class="pre">v_least_squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xLoc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columnY</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nSlices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.v_least_squares" title="Link to this definition"></a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.v_least_squares">
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">v_least_squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xLoc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columnY</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nSlices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.v_least_squares" title="Permalink to this definition"></a></dt>
 <dd><p>Perform a vertical least squares linear regression to find the slope.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
@@ -418,16 +500,9 @@ the drawn line parameters (one point and slope).</p>
 </div>
 </dd></dl>
 
-</dd></dl>
-
-</section>
-<section id="module-ShockOscillationAnalysis.inc_tracking.inc_tracking_support">
-<span id="shockoscillationanalysis-inc-tracking-inc-tracking-support-module"></span><h2>ShockOscillationAnalysis.inc_tracking.inc_tracking_support module<a class="headerlink" href="#module-ShockOscillationAnalysis.inc_tracking.inc_tracking_support" title="Link to this heading"></a></h2>
-<p>Created on Wed Jun  5 10:15:04 2024</p>
-<p>&#64;author: Ahmed H. Hanfy</p>
 </section>
 <section id="module-ShockOscillationAnalysis.inc_tracking">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ShockOscillationAnalysis.inc_tracking" title="Link to this heading"></a></h2>
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ShockOscillationAnalysis.inc_tracking" title="Permalink to this heading"></a></h2>
 </section>
 </section>
 

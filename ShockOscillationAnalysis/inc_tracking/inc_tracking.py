@@ -12,12 +12,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ..preview import plot_review
 from ..shocktracking import ShockTraking
-from ..ShockOscillationAnalysis import SOA
-from ..ShockOscillationAnalysis import BCOLOR
-from ..ShockOscillationAnalysis import CVColor
-from scipy.interpolate import CubicSpline, PchipInterpolator
+from ..ShockOscillationAnalysis import SOA, CVColor, BCOLOR
 from ..linedrawingfunctions import InclinedLine, AngleFromSlope
 from ..slice_list_generator.list_generation_tools import GenerateIndicesList
+from .inc_tracking_support import anglesInterpolation, v_least_squares, shockDomain, ImportingFiles
 
 px = 1/plt.rcParams['figure.dpi']
 plt.rcParams.update({'font.size': 25})
@@ -30,114 +28,6 @@ class InclinedShockTracking(SOA):
         self.D = D # ----------------------- refrence length for scaling (mm)
         self.pixelScale = pixelScale # ----- initialize scale of the pixels
         super().__init__(f, D, pixelScale)
-        
-    def shockDomain(self, Loc: str, P1: tuple[int], HalfSliceWidth: int, LineSlope: float, 
-                    imgShape: tuple[int], preview_img: np.ndarray = None) -> float:
-        """
-        Generate and visualize a shock domain based on the slice width and 
-        the drawn line parameters (one point and slope).
-    
-        Parameters:
-            - **Loc (str)**: The shock direction, either 'up' or 'down'.
-            - **P1 (tuple)**: The starting point of the shock domain.
-            - **HalfSliceWidth (int)**: Half the width of the slice.
-            - **LineSlope (float)**: Slope of the inclined line.
-            - **imgShape (tuple)**: Image size (y-length, x-length).
-            - **preview_img (optional)**: Image for previewing the shock domain. Default is None.
-    
-        Returns:
-            float: The y-intercept of the inclined line.
-    
-        Example:
-            >>> from ShockOscillationAnalysis import InclinedShockTracking
-            >>> instance = InclinedShockTracking()
-            >>> slope_intercept = instance.shockDomain('up', (10, 20), 5, 0.5, (100, 200))
-            >>> print(slope_intercept)
-    
-        .. note::
-            - The function generates and visualizes a shock domain line based on the specified parameters.
-            - It returns the y-intercept of the inclined line.
-    
-        """
-        if Loc =='up': P1new = (P1[0] - HalfSliceWidth, P1[1])
-        else: P1new = (P1[0] + HalfSliceWidth, P1[1])  
-        anew = P1new[1] - LineSlope*P1new[0] # y-intercept
-        P1new,P2new,m,a = InclinedLine(P1new, slope = LineSlope, imgShape=imgShape)
-        if preview_img is not None: cv2.line(preview_img, P1new, P2new, CVColor.RED, 1)
-        return anew 
-
-    def anglesInterpolation(self, pnts_y_list: list[int],                              # Generated points by class
-                            flow_dir: list[float] = None, flow_Vxy:list[tuple] = None, # measured data (LDA, CFD, ... )
-                            **kwargs) -> list[float]:                                  # other parameters
-        """
-        Interpolate angles based on given y-coordinates and corresponding angles or velocity components.
-        
-        Parameters:
-           - **pnts_y_list (list)**: List of y-coordinates to interpolate angles for.
-           - **flow_dir (list, optional)**: List of tuples containing the measured y-coordinates and the corresponding angles [(y_loc, angle),...].
-           - **flow_Vxy (list, optional)**: List of tuples containing the measured y-coordinates and the corresponding velocity components [(y_loc, Vx, Vy),...].
-           - `**kwargs`: Additional keyword arguments:
-                - angle_interp_kind (str): 
-                - preview_angle_interpolation (bool): If True, plot the angle interpolation for preview. Default is False.
-        
-        Returns:
-            list: Interpolated angles for each y-coordinate in `pnts_y_list`. If the y-domain is out of valid range, returns an empty list.
-        
-        Example:
-            >>> from ShockOscillationAnalysis import InclinedShockTracking
-            >>> instance = InclinedShockTracking()
-            >>> pnts_y = [5, 15, 25]
-            >>> flow_dir = [(0, 10), (10, 20), (20, 30)]
-            >>> interpolated_angles = instance.anglesInterpolation(pnts_y, flow_dir)
-            >>> print(interpolated_angles)
-        
-        .. note ::
-            - interpolation can be performed using multible methods 'linear','CubicSpline' and 'PCHIP' for better inflow representation
-                - If 'linear', linear interpolation will be performed. Default is 'linear'.
-                - If 'CubicSpline', Interpolate data with a piecewise cubic polynomial which is twice continuously differentiable.  
-                - If 'PCHIP', PCHIP 1-D monotonic cubic interpolation will be performed.
-            - If a y-coordinate in `pnts_y_list` is out of the range defined by `flow_dir` or `flow_Vxy`, the function will consider only boundary angles.
-            - If both `flow_dir` and `flow_Vxy` are provided, `flow_dir` will take precedence.
-            
-        .. seealso ::
-            - For more information about CubicSpline: `scipy.interpolate.CubicSpline`_.
-            - For more information about PCHIP: `scipy.interpolate.PchipInterpolator`_. 
-            
-        .. _scipy.interpolate.CubicSpline: https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.CubicSpline.html#scipy.interpolate.CubicSpline
-        .. _scipy.interpolate.PchipInterpolator: https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html#scipy.interpolate.PchipInterpolator
-            
-        """
-        
-        if flow_dir is not None:
-            # Unzip the angles_list into separate locs and angles lists
-            locs, angles = zip(*flow_dir)
-        elif flow_Vxy is not None:
-            # Unzip the Vxy into separate locs, Vx, Vy lists
-            locs, Vx, Vy = zip(*flow_Vxy)
-            angles = np.arctan(np.array(Vy)/np.array(Vx))*180/np.pi
-        
-        if min(locs) > min(pnts_y_list) or max(locs) < max(pnts_y_list):
-            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Provided y-domain is out of valid range{BCOLOR.ENDC}')
-        
-        angle_interp_kind = kwargs.get('angle_interp_kind', 'linear')
-        if angle_interp_kind == 'linear':
-            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Only boundary angles will considered ...{BCOLOR.ENDC}')
-            intr_flow_dir = np.interp(pnts_y_list, locs, angles)
-        elif angle_interp_kind == 'CubicSpline':
-            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} First derivative at curves ends will considered zero, overshooting is likely occurs ...{BCOLOR.ENDC}')
-            interp_fun = CubicSpline(locs, angles, bc_type = 'clamped')
-            intr_flow_dir = interp_fun(pnts_y_list)
-        elif angle_interp_kind == 'PCHIP':
-            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} First derivative at curves ends will considered zero, overshooting is likely occurs ...{BCOLOR.ENDC}')
-            interp_fun = PchipInterpolator(locs, angles, extrapolate = 'bool')
-            intr_flow_dir = interp_fun(pnts_y_list)
-            
-        preview_angle_interpolation = kwargs.get('preview_angle_interpolation', False)
-        if preview_angle_interpolation:
-            fig, ax = plt.subplots(figsize=(10,20))
-            ax.plot(angles, locs, '-o', ms = 5)
-            ax.plot(intr_flow_dir, pnts_y_list, 'x', ms = 10)
-        return intr_flow_dir
 
     def InclinedShockDomainSetup(self, CheckingWidth: int, CheckingHieght: int|list, inclined_ref_line: int|list[int,tuple,tuple], # define the calculation domain
                                  imgShape: tuple,                                              # define the whole image parameters
@@ -202,8 +92,8 @@ class InclinedShockTracking(SOA):
         LineSlope = inclined_ref_line[2]
         
         # Calculate the y-intercepts of the upper and lower inclined lines
-        aUp = self.shockDomain('up', P1, HalfSliceWidth, LineSlope, imgShape, preview_img)
-        aDown = self.shockDomain('down', P1, HalfSliceWidth, LineSlope, imgShape, preview_img)
+        aUp = shockDomain('up', P1, HalfSliceWidth, LineSlope, imgShape, preview_img)
+        aDown = shockDomain('down', P1, HalfSliceWidth, LineSlope, imgShape, preview_img)
         
         # Calculate y-coordinates of the points
         y_i = np.array(Pnts + DatumY).astype(int)
@@ -229,38 +119,6 @@ class InclinedShockTracking(SOA):
         slices_info = x_i1,x_i2,y_i
         print(u'\u2713')
         return slices_info, nPnts, inclinationCheck
-    
-    def v_least_squares(self, xLoc: list[float], columnY:list[float], nSlices: int) -> list[float]:
-        """
-        Perform a vertical least squares linear regression to find the slope.
-    
-        Parameters:
-            - **xLoc (list[float])**: List of x-coordinates of the points.
-            - **columnY (list[float])**: List of y-coordinates of the points.
-            - **nSlices (int)**: Number of slices or data points.
-    
-        Returns:
-            list[float]: List containing the slope of the best-fit line.
-    
-        Example:
-            >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
-            >>> instance = IncTrac(f)
-            >>> xLoc = [1, 2, 3, 4, 5]
-            >>> columnY = [2, 4, 6, 8, 10]
-            >>> nSlices = 5
-            >>> slope = instance.v_least_squares(xLoc, columnY, nSlices)
-            >>> print(slope)
-        
-        .. note::
-            - The function calculates the slope of the best-fit line using the vertical least squares method.
-            - It returns the slope as a single-element list.
-        """
-        xy = np.array(xLoc)*columnY; yy = columnY**2
-        x_sum = np.sum(xLoc)       ; y_sum = np.sum(columnY)
-        xy_sum = np.sum(xy)        ; yy_sum = np.sum(yy)
-
-        
-        return 1/((nSlices*xy_sum - x_sum * y_sum)/(nSlices*yy_sum - y_sum**2))
 
     def InclinedShockTracking(self, imgSet: list[np.ndarray],                         # image set for line tracking
                               nSlices: int, Ref: list[int], slice_thickness: int = 1, # slices and tracking info. 
@@ -280,7 +138,7 @@ class InclinedShockTracking(SOA):
             - `**kwargs`: Additional keyword arguments:
                 - **avg_preview_mode (str)**: Mode for previewing average angle.
                 - **review_inc_slice_tracking (list or int)**: Slices to review for tracking.
-                - **tracking_std (bool)**: to calculate the standard deviation of the tracked points
+                - **osc_boundary (bool)**: To display the oscilliation domain depending on the analyised image set.
         
         Returns:
             tuple: Average global angle (float) and average midpoint location (float).
@@ -314,7 +172,6 @@ class InclinedShockTracking(SOA):
         # Optional keyword arguments
         avg_preview_mode = kwargs.get('avg_preview_mode', None)
         review_inc_slice_tracking = kwargs.get('review_inc_slice_tracking', -1)
-        # tracking_std = kwargs.get('tracking_std', False)
          
         # Array to review the tracked slices within the iamge set
         slice_ploting_array = np.zeros(len(imgSet))
@@ -369,7 +226,7 @@ class InclinedShockTracking(SOA):
             midLocs.append(np.mean([xLoc[midIndx], xLoc[midIndx2]]))
             
             # Calculate the slope using least squares method
-            m.append(self.v_least_squares(xLoc, columnY, nSlices))
+            m.append(v_least_squares(xLoc, columnY, nSlices))
             AngReg.append(AngleFromSlope(m[-1]))
             xLocs.append(xLoc); 
             uncertain_list.append(uncertain); uncertainY_list.append(uncertainY)
@@ -389,22 +246,11 @@ class InclinedShockTracking(SOA):
                 for n_count, xloc in enumerate(xloc_list):
                     if xloc > max_b[n_count]: max_b[n_count] = xloc
                     if xloc < min_b[n_count]: min_b[n_count] = xloc
-            m_min = self.v_least_squares(min_b, columnY, nSlices)
-            m_max = self.v_least_squares(max_b, columnY, nSlices)
+            m_min = v_least_squares(min_b, columnY, nSlices)
+            m_max = v_least_squares(max_b, columnY, nSlices)
             mean_min = np.mean(min_b); mean_max = np.mean(max_b)
             # kwargs['osc_bound_line_info'] = ([[min_b[0],min_b[-1]], m_min, mean_min], [[max_b[0],max_b[-1]], m_max, mean_max])
             kwargs['osc_bound_line_info'] = ([min_b, m_min, mean_min], [max_b, m_max, mean_max])
-        # if tracking_std:   
-            # avg_xloc = np.array(xLocs).mean(axis=0)
-            # xLoc_std = np.sqrt(np.square(xLocs).mean(axis=0))
-            # std_m = self.v_least_squares(xLoc_std, columnY, nSlices)
-            # x_min = shp[1]; x_max = 0;
-            # for j in range(nSlices): 
-            #     x_i1, x_i2 = Ref[0][j], Ref[1][j]
-            #     if x_min > min([x_i1, x_i2]): x_min = min([x_i1, x_i2])
-            #     if x_max < max([x_i1, x_i2]): x_max = max([x_i1, x_i2])
-            # print(np.mean(xLoc_std),np.mean(avg_xloc))
-            # kwargs['std_line_info'] = (std_m, np.mean(avg_xloc), xLoc_std, (columnY[-1]-columnY[0], x_max - x_min))
         print(u'\u2713')
         print('Plotting tracked data ...')
         if hasattr(nReview, "__len__"):
@@ -449,94 +295,14 @@ class InclinedShockTracking(SOA):
 
         print(f'Angle range variation: [{min(AngReg):0.2f},{max(AngReg):0.2f}], \u03C3 = {np.std(AngReg):0.2f}')
         return avg_ang_glob, AvgMidLoc
-    
-    def ImportingFiles(self, pathlist: list[str], indices_list: list[int], n_images: int, # Importing info.
-                       imgs_shp: tuple[int],                                              # Images info.
-                       **kwargs) -> tuple[list[np.ndarray], list[np.ndarray]]:            # Other parameters 
-        """
-        Import images from the specified paths, optionally resize them, and remove the background if provided.
-    
-        Parameters:
-            - **pathlist (list[str])**: List of paths to the images.
-            - **indices_list (list[int])**: List of indices specifying which images to import from the pathlist.
-            - **n_images (int)**: Number of images to import.
-            - **imgs_shp (tuple[int])**: Shape of the images (height, width).
-            - `**kwargs`: Additional parameters.
-                - **BG_path (str)**: Path to the background image to be subtracted. Default is ''.
-                - **resize_img (tuple[int])**: Tuple specifying the dimensions to resize the images to (width, height). Default is the original image shape.
-    
-        Returns:
-            - tuple: A tuple containing:
-                - original_img_list (list[np.ndarray]): List of original images (resized if specified).
-                - img_list (list[np.ndarray]): List of grayscale images with the background removed if provided.
-    
-        Example:
-            >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
-            >>> instance = IncTrac(f)
-            >>> pathlist = ['path/to/image1.jpg', 'path/to/image2.jpg']
-            >>> indices = [0, 1]
-            >>> n_images = 2
-            >>> shape = (100, 200)
-            >>> original_imgs, processed_imgs = instance.ImportingFiles(pathlist, indices, n_images, shape)
-            >>> print(original_imgs, processed_imgs)
-    
-        .. note ::
-            - The function reads images from the specified paths, converts them to grayscale, and optionally removes a background image.
-            - The images can be resized if the `resize_img` parameter is provided in kwargs.
-    
-        """
-        print(f'Importing {n_images} images ...')
-        img_list=[]; n = 0; original_img_list=[]
-        
-        # Get additional parameters from kwargs
-        BG_path = kwargs.get('BG_path', '')
-        resize_img = kwargs.get('resize_img', (imgs_shp[1],imgs_shp[0]))
-        
-        # Import images
-        for i in indices_list:
-            img = cv2.imread(pathlist[i])
-            # original_img_list.append(cv2.resize(img.astype('float32'), resize_img))
-            
-            # Resize and store the original image if needed, and Convert image to grayscale
-            img_list.append(cv2.cvtColor(cv2.resize(img.astype('float32'), resize_img), cv2.COLOR_BGR2GRAY))
-            
-            # Print progress
-            n += 1
-            sys.stdout.write('\r')
-            sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n_images/20)), int(5*n/(n_images/20))))
-        print('')
-        
-        # Remove background if path is provided
-        if len(BG_path) > 0:
-            print('Removing background image ...', end=" ")
-            BG = cv2.imread(BG_path)
-            BG = cv2.cvtColor(BG, cv2.COLOR_BGR2GRAY).astype(np.float32)
-            
-            BG_len , BG_Wid  = BG.shape
-            img_len, img_wid = imgs_shp
-            
-            # Adjust background size if resizing is specified
-            if resize_img != imgs_shp: 
-                BG_len = resize_img[0]; r = BG_Wid / BG_len
-                BG = BG[0:BG_len,0:r*BG_len]
-                
-            if BG_len < img_len: img_len = BG_len; img_wid = BG_Wid
-            else: BG = BG[0:img_len,0:img_wid]
-            
-            # Subtract the background from each image in the list
-            for img in img_list:
-                img = cv2.subtract(img[0:img_len,0:img_wid],BG)
-            print(u'\u2713')
-        return original_img_list, img_list
+
     
     def ShockPointsTracking(self, path: str, 
                             tracking_V_range:list[int,float] = [0,0], inclination_info: int|list[int,tuple,tuple] = 0, nPnts: int = 0, scale_pixels = True, 
                             preview = True, output_directory = '',comment='', **kwargs):
         """
-        Track shock points in a series of images.
-        This function tracks shock points in a series of images along a specified vertical range. 
-        This function can be considered as the main function of inclination shock tracking and all kwargs for output can be passed through this function
-    
+        This function identifies shock points by slicing a predefined domain of the shock and tracking it at each slice based on the integral method of shock tracking outlined in this `article <https://dx.doi.org/10.2139/ssrn.4797840>`_.
+        It operates over a specified vertical range within the images, serving as the core function for inclination shock tracking. Additionally, all keyword arguments for output customization can be passed through this function.
         
         Parameters:
             - **path (str)**: Path to the directory containing the image files.
@@ -547,8 +313,66 @@ class InclinedShockTracking(SOA):
             - **preview (bool, optional)**: Whether to preview the images (default is True).
             - **output_directory (str, optional)**: Directory to save the output images (default is '').
             - **comment (str, optional)**: Additional comment for the output (default is '').
-            - `**kwargs`: Additional keyword arguments.
-    
+            - `**kwargs`: Additional keyword
+                
+        Additional keyword arguments `**kwargs` may include:
+            Importing image options:
+                - **n_files (int, optional)**: To import the first n-files from the given path.
+                - **every_n_files (int, optional)**: To import files with a step (default is 1).
+                - **within_range (list[int], optional)**: To import files within range [start, end]
+                - **resize_img (tuple[int], optional)**: Tuple specifying the dimensions to resize the images to (width, height). Default is the original image shape.
+                - **BG_path (str, optional)**: Path to the background image to be subtracted. Default is ''.
+            
+            Inflow data options:
+                - **flow_dir (list, optional)**: List of tuples containing the measured y-coordinates and the corresponding angles [(y_loc, angle),...].
+                - **flow_Vxy (list, optional)**: List of tuples containing the measured y-coordinates and the corresponding velocity components [(y_loc, Vx, Vy),...].
+                - **angle_interp_kind (str)**: 'linear','CubicSpline' or 'PCHIP' (default is linear)
+            
+            Define the domain options and tracking:
+                - **Ref_x0 (list[int], optional):** list of x-coordinates for 2-vertical reference lines [Ref_x01, Ref_x02] used for scaling, used instead of drawing.
+                - **Ref_y0 (int, optional)**: y-coordinate of the horizontal reference line [y = 0] used as reference for tracking_V_range, used instead of drawing.
+                - **slice_thickness (int, optional)**: Thickness of each slice. Default is 1. 
+            
+            Review and results options:
+                - **preview (bool)**: Whether to preview the selected domain for the analysis or not (default is True)
+                - **review_inc_slice_tracking (int|list[int])**: To plot all slices of spacific image or range of images (default is 0)
+                - **preview_angle_interpolation (bool)**: If True, plot the angle interpolation for preview. (default is False).
+                - **avg_preview_mode (str)**: 'avg_all', 'avg_ang' and None (default is None).
+                - **Mach_ang_mode (str)**: Flag indicating whether to display the Mach number 'Mach_num' if inflow data is available or 'flow_dir' when the Mach number is available(defaults to None).
+                - **osc_boundary (bool)**: To display the oscilliation domain depending on the analyised image set.
+                - **output_directory (str)**: The pathe where the output results will be stored (default is '').
+                - **store_n_files (int|list[int])**: Specify the first n output results to be stored, or provide a range of output image indices to be stored in the format [start, end].
+                
+            Results display options:
+                - **points_opacity (float)**: The transperancy of the tracking points from 0 to 1 (default is 1).
+                - **points_color (str)**: The color of the tracking points (default is 'yellow')
+                - **uncertain_point_color (str)**: The color of the uncertain tracked points (default is 'red')
+                - **avg_lin_color (str)**: The average line color when the `avg_preview_mode` is not None (default is 'white')
+                - **avg_lin_opacity (float)**: The transperancy of the average line from 0 to 1 (default is 1)
+                - **avg_show_txt (bool)**: To display the angle value or not when the `avg_preview_mode` is not None (default is True)
+                - **avg_txt_Yloc (int)**: y-location of the angle value text in pixels (default is image height minus 100.)
+                - **avg_txt_size (float)**: Font size of the Angle value (default is 26pt)
+                - **M1_color (str)**: The calculated values of Mach  when the `avg_preview_mode` is not None (default is 'orange')
+                - **M1_txt_size (float)**: Font size of the Mach number and inflow Angle values (default is 26pt)
+                - **arc_dia (float)**: inflow angle arc diameter (default is 80px)
+                - **arw_len (float)**: inflow arrow length (default is 50px)
+                - **b_color (str)**: boundary domain and lines color for the active ``osc_boundary`` (default is 'tab:orange')
+                - **osc_range_opacity (float)**: The transperancy of the boundary domain from 0 to 1 (default is 0.3)
+                - **b_lins_opacity (float)**: The transperancy of the boundary lines from 0 to 1 (default is 1)
+                
+        .. note ::
+            - In case of ``scale_pixels = True`` the ``Ref_x0`` and ``Ref_y0`` must be defined either by drawing or as arguments.
+            - The values of ``Ref_x0`` and ``Ref_y0`` are in pixels.
+            - ``tracking_V_range`` values are in pixels, but if ``scale_pixels = True``, the values should match the scale units [for example mm].
+            - The imported files are defined by thier index and sorted by name.
+            - For automation it is better to set ``preview`` to False.
+            - The plots from ``review_inc_slice_tracking`` give details of finding the shock location, such as local minima, shock location, last image shock location, etc.
+            - ``avg_preview_mode`` the display of vertical least squares regression line of the tracked points: 
+                - 'avg_all': Displays the average of all lines calculated from the tracked points across the entire image dataset.
+                - 'avg_ang': Displays the line of the tracked points in each image 
+            - In this version ``Mach_ang_mode`` can only calculate Mach number when inflow data is available, 'flow_dir' is not yet supported!
+            - ``osc_boundary`` Calculated based on the minimum and maximum recorded location at each slice, a vertical least squares regression line is used to define the oscillation boundary and minimize any uncertainty that might occur.
+                
         Returns:
             tuple[float, float]: Average inclination angle and average shock location.
             
@@ -565,11 +389,11 @@ class InclinedShockTracking(SOA):
                                             preview = True,
                                             osc_boundary = True)
         Steps:
-            1. Define reference vertical boundaries (for scaling). Draw or assine them in this parameter `Ref_x0`,
-            2. Define reference horizontal line as the y-datum. Draw or assine it in this parameter `Ref_y0`,
+            1. Define reference vertical boundaries (for scaling). Draw or assine them in this parameter ``Ref_x0``,
+            2. Define reference horizontal line as the y-datum. Draw or assine it in this parameter ``Ref_y0``,
             3. Define the estimated line of shock. Draw or assine it as two points in this parameter `inclination_info` as in the example
-            4. Run shock tracking function within the selected vertical range `tracking_V_range`.
-            5. The function will perform the tracking after dividing the vertical range into `nPnts`.
+            4. Run shock tracking function within the selected vertical range ``tracking_V_range``.
+            5. The function will perform the tracking after dividing the vertical range into ``nPnts``.
             
         """
         
@@ -593,15 +417,6 @@ class InclinedShockTracking(SOA):
         screen = screeninfo.get_monitors()[0]
         screen_width, screen_height = screen.width, screen.height
         print(f'Screen resolution: {screen_width}, {screen_height}')
-        
-        # if shp[0] >= screen_height*0.85:
-        #     r = shp[0]/shp[1] # ---------- Image aspect ratio
-        #     NewImgSize = (round(screen_height*0.85/r),round(screen_height*0.85))
-        #     Refimg = cv2.resize(Refimg, NewImgSize)
-        #     reductionRatio = NewImgSize[0]/shp[0]
-        #     shp = NewImgSize
-        #     print('Warning: Image hieght is larger than your monitor hieght')
-        #     print(f'Only reference image will be adjusted to {shp}')
         
         tracking_V_range.sort(); start, end = tracking_V_range
         y_diff = abs(end-start);  draw_y = y_diff == 0       
@@ -669,12 +484,11 @@ class InclinedShockTracking(SOA):
         
         pnts_y_list = []; 
         for i in range(nSlices): pnts_y_list.append((Ref_y0-Ref[2][i])*self.pixelScale)
-        # input_locs = kwargs.get('input_locs', [])
         flow_dir = kwargs.get('flow_dir', [])
         flow_Vxy = kwargs.get('flow_Vxy', [])
         Mach_ang_mode = kwargs.get('Mach_ang_mode', None)
         if (len(flow_dir) > 0 or len(flow_Vxy) > 0) and Mach_ang_mode != None:
-            kwargs['inflow_dir_deg'] = self.anglesInterpolation(pnts_y_list, **kwargs)
+            kwargs['inflow_dir_deg'] = anglesInterpolation(pnts_y_list, **kwargs)
             kwargs['inflow_dir_rad'] = np.array(kwargs['inflow_dir_deg'])*np.pi/180
 
         if preview:
@@ -689,7 +503,7 @@ class InclinedShockTracking(SOA):
         indices_list, n_images = GenerateIndicesList(n1, import_n_files, import_step)
         
         if inclinationCheck:
-            original_img_list, img_list = self.ImportingFiles(files, indices_list, n_images, shp, **kwargs)
+            original_img_list, img_list = ImportingFiles(files, indices_list, n_images, shp, **kwargs)
         
         store_n_files = kwargs.get('store_n_files', n_images)    
         avg_shock_angle, avg_shock_loc = self.InclinedShockTracking(img_list, 
@@ -700,3 +514,31 @@ class InclinedShockTracking(SOA):
         print('Average inclination angle {:.2f} deg'.format(avg_shock_angle))
         
         return avg_shock_angle, avg_shock_loc
+    
+## ========= Draft code ================
+"""
+Screen resize:
+        # if shp[0] >= screen_height*0.85:
+        #     r = shp[0]/shp[1] # ---------- Image aspect ratio
+        #     NewImgSize = (round(screen_height*0.85/r),round(screen_height*0.85))
+        #     Refimg = cv2.resize(Refimg, NewImgSize)
+        #     reductionRatio = NewImgSize[0]/shp[0]
+        #     shp = NewImgSize
+        #     print('Warning: Image hieght is larger than your monitor hieght')
+        #     print(f'Only reference image will be adjusted to {shp}')
+        
+standard deviation of the shock angle:
+    tracking_std = kwargs.get('tracking_std', False)
+    # if tracking_std:   
+        # avg_xloc = np.array(xLocs).mean(axis=0)
+        # xLoc_std = np.sqrt(np.square(xLocs).mean(axis=0))
+        # std_m = self.v_least_squares(xLoc_std, columnY, nSlices)
+        # x_min = shp[1]; x_max = 0;
+        # for j in range(nSlices): 
+        #     x_i1, x_i2 = Ref[0][j], Ref[1][j]
+        #     if x_min > min([x_i1, x_i2]): x_min = min([x_i1, x_i2])
+        #     if x_max < max([x_i1, x_i2]): x_max = max([x_i1, x_i2])
+        # print(np.mean(xLoc_std),np.mean(avg_xloc))
+        # kwargs['std_line_info'] = (std_m, np.mean(avg_xloc), xLoc_std, (columnY[-1]-columnY[0], x_max - x_min))
+
+"""
