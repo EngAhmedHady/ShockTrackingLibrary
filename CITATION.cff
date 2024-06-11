@@ -1,22 +1,28 @@
-cff-version: 1.1.0
+cff-version: 1.1.2
 message: "If you use this software, please cite it as below."
 authors:
-@corespondance auther
-- family-names: H. Hanfy
-  given-names: Ahmed
-  orcid: https://orcid.org/0000-0001-6833-7791
-  email: ahmed.hanfy@imp.gda.pl
-         ahmed.hady.hanfy92@gmail.com
-@supervisor
-- family-names: Flaszyński
-  given-names: Pawel
-  orcid: https://orcid.org/0000-0002-4210-804X
+  - family-names: "Hanfy"
+    given-names: "Ahmed"
+    orcid: "https://orcid.org/0000-0001-6833-7791"
+    email: "ahmed.hady.hanfy92@gmail.com"
+    roles:
+      - author
+    # Note: Assuming H. Hanfy is the main/corresponding author.
+  - family-names: "Flaszynski"
+    given-names: "Pawel"
+    orcid: "https://orcid.org/0000-0002-4210-804X"
+    roles:
+      - supervisor
+  - family-names: "Kaczynski"
+    given-names: "Piotr"
+    orcid: "https://orcid.org/0000-0002-1187-3910"
+    roles:
+      - co-advisor
 
-@co-advisor
-- family-names: Kaczyński
-  given-names: Piotr
-orcid: https://orcid.org/0000-0002-1187-3910
-
-title: Shock Oscillation Analysis Liberary
-version: v1.8.3
-date-released: 2024-05-15
+title: "Shock Oscillation Analysis Library"
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.11197727
+version: "1.8.3"
+date-released: "2024-05-15"
+url: "https://github.com/EngAhmedHady/ShockTrackingLibrary"
