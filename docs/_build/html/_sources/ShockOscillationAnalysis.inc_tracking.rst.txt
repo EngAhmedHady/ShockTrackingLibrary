@@ -1,8 +1,8 @@
 ShockOscillationAnalysis.inc\_tracking package
 ==============================================
 
-Submodules
-----------
+.. Submodules
+.. ----------
 
 ShockOscillationAnalysis.inc\_tracking.inc\_tracking module
 -----------------------------------------------------------
@@ -20,10 +20,10 @@ ShockOscillationAnalysis.inc\_tracking.inc\_tracking\_support module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+.. Module contents
+.. ---------------
 
-.. automodule:: ShockOscillationAnalysis.inc_tracking
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: ShockOscillationAnalysis.inc_tracking
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
