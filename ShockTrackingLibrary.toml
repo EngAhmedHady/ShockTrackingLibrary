@@ -1,0 +1,22 @@
+[project]
+name = "Shock Oscillation Analysis"
+version = "1.9.0"
+authors = [
+  { name="Ahmed H. Hanfy", email="ahmed.hady.hanfy92@gmail.com" },
+  { name="Pawel Flaszyński"},
+  { name="Piotr Kaczyński"},
+  { name="Piotr Doerffer" },
+]
+description = "Image processing library to detect and track shock waves from Schlieren images using line-scanning technique. The library uses OpenCV, scipy, glob, sys, numpy and matplotlib libraries"
+readme = "README.md"
+requires-python = ">=3.8"
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/EngAhmedHady/ShockTrackingLibrary"
+Issues = "https://github.com/EngAhmedHady/ShockTrackingLibrary/issues"
