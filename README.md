@@ -7,12 +7,12 @@ The instability of shock waves due to induced separation presents a significant 
 
 ## Installation
 
-| To install **Shock Tracking Liberary** from pip you can use:
-| ``pip install ShockOscillationAnalysis``
+To install **Shock Tracking Liberary** from pip you can use: <br>
+``pip install ShockOscillationAnalysis``
 
-| Alternatively, you can also clone the repository manually by running:
-| ``git clone https://github.com/EngAhmedHady/ShockTrackingLibrary.git`` 
+Alternatively, you can also clone the repository manually by running: <br>
+``git clone https://github.com/EngAhmedHady/ShockTrackingLibrary.git`` 
 
-| Then install the package using:
-| ``pip3 install dist\ShockOscillationAnalysis-2.0.0-py3-none-any.whl``
+Then install the package using: <br>
+`pip3 install dist\ShockOscillationAnalysis-2.0.0-py3-none-any.whl``
 
