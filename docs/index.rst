@@ -7,11 +7,11 @@
 Welcome to ShockTrackingLibrary's documentation!
 ================================================
 
-.. video:: _static\\animation.mp4
+.. image:: _static\\animation.gif
    :width: 600
-   :autoplay:
-   :loop:
+   :align: center
 
+|
 
 .. toctree::
    :maxdepth: 2
