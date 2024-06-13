@@ -7,7 +7,6 @@ Created on Tue Dec 20 09:32:30 2022
 
 import cv2
 import sys
-# import screeninfo
 import numpy as np
 import matplotlib.pyplot as plt
 from .imgcleaningfunctions import SliceListAverage, CleanIlluminationEffects, BrightnessAndContrast
@@ -85,13 +84,6 @@ class SOA:
         self.line_coordinates = [] # ------- initialize Line coordinate
         self.outputPath = '' # ------------- Image output
 
-    # def screenMidLoc(self, shp: tuple[int]) -> tuple[int]:
-    #     screen = screeninfo.get_monitors()[0]
-    #     screen_width, screen_height = screen.width, screen.height
-    #     x_pos = (screen_width - shp[1]) // 2
-    #     y_pos = (screen_height - shp[0]) // 2
-    #     return x_pos, y_pos
-
     def extract_coordinates(self, event: int,                                   # call event
                             x: int, y: int, flags: int,                         # mouse current status
                             parameters: tuple[str, tuple[int], str]) -> None:   # other parameters
@@ -126,7 +118,7 @@ class SOA:
             >>> instance = SOA()
             >>> cv2.setMouseCallback(window_name, instance.extract_coordinates, parameters)
 
-        Note:
+        .. note::
             - If 'Inc' is provided as the line type, it uses the 'InclinedLine' method
               to calculate the inclined line and display it on the image.
 
@@ -209,9 +201,17 @@ class SOA:
             >>> line_set = instance.LineDraw(image, 'V', 0, Initialize=True)
             >>> print(line_set)
 
-        Note:
+        .. note::
             - The function uses the `extract_coordinates` method to interactively draw lines on the image.
             - It waits until the user presses a key to close the drawing window.
+            
+        .. note::
+           ``LineNameInd`` is the index number refering to one of these values as window title:
+               
+            0. "First Reference Line (left)",
+            1. "Second Reference Line (right)",
+            2. "Horizontal Reference Line",
+            3. "estimated shock location"
 
         """
         
@@ -278,7 +278,7 @@ class SOA:
             >>> ref_x0, ref_y0, ref_y1 = instance.DefineReferences(img, shape, Ref_x0, scale_pixels, Ref_y0, Ref_y1, slice_loc)
             >>> print(ref_x0, ref_y0, ref_y1)
     
-        Notes:
+        .. note::
             - The function sets up vertical and horizontal reference lines on the image.
             - It calculates the pixel scale if `scale_pixels` is True using horizontal distance between the reference vertical lines {Ref_x0}.
         """
@@ -348,7 +348,7 @@ class SOA:
         Example:
             >>> cleaned_image = instance.CleanSnapshots(original_image, 'Brightness/Contrast', 'FFT', Brightness=1.5, D=20)
 
-        Notes:
+        .. note::
             - If 'Brightness/Contrast' is in `*args`, the image undergoes brightness and contrast adjustments.
             - If 'Average' is in `*args`, the average illumination effect is removed.
             - If 'FFT' is in `*args`, the illumination effects are corrected using FFT-based filtering.
@@ -418,7 +418,7 @@ class SOA:
             >>> velocity_signal = VelocitySignal(signal, total_time)
             >>> print(velocity_signal)
     
-        Notes:
+        .. note::
             - The velocity is calculated in units per second, while the signal amplitudes are measured in millimeters (mm).
             - The returned velocity signal has the mean velocity subtracted.
         """
@@ -435,3 +435,18 @@ class SOA:
         V_avg = np.mean(dx_dt)  # Calculate the average velocity
         V = dx_dt - V_avg       # Subtract the average velocity from each point
         return V
+
+
+# ------------------------------| Draft code |--------------------------------
+"""
+import screeninfo
+
+def screenMidLoc(self, shp: tuple[int]) -> tuple[int]:
+    screen = screeninfo.get_monitors()[0]
+    screen_width, screen_height = screen.width, screen.height
+    x_pos = (screen_width - shp[1]) // 2
+    y_pos = (screen_height - shp[0]) // 2
+    return x_pos, y_pos
+
+"""
+    

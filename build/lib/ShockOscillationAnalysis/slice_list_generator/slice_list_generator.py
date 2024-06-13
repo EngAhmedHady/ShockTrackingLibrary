@@ -129,8 +129,8 @@ class SliceListGenerator(SOA):
                             shock_angle_samples = 30, inclination_est_info: list[int,tuple,tuple] = [], # Angle estimation
                             preview: bool = True, angle_samples_review = 10,                            # preview options
                             output_directory: str = '', comment: str ='',                               # Data store
-                            **kwargs) -> tuple[np.ndarray[int], int, dict, float]:                                                                  # Other
-        """
+                            **kwargs) -> tuple[np.ndarray[int], int, dict, float]:                      # Other
+        """        
         Generate a sequence of image slices for single horizontal line shock wave analysis.
         This function imports a sequence of images to perform an optimized analysis by extracting
         a single pixel slice from each image as defined by the user, appending them together, and

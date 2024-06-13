@@ -3,8 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+================================================
 Welcome to ShockTrackingLibrary's documentation!
 ================================================
+
+.. video:: _static\\animation.mp4
+   :width: 600
+   :autoplay:
+   :loop:
+
 
 .. toctree::
    :maxdepth: 2
