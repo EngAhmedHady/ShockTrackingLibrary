@@ -1,6 +1,6 @@
 [![DOI](https://zenodo.org/badge/711672788.svg)](https://zenodo.org/doi/10.5281/zenodo.11197727) [![Documentation Status](https://readthedocs.org/projects/shocktrackinglibrary/badge/?version=latest)](https://shocktrackinglibrary.readthedocs.io/en/latest/?badge=latest) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/EngAhmedHady/ShockTrackingLibrary/blob/main/LICENSE)
 
-![PyPI - Version](https://img.shields.io/pypi/v/:ShockOscillationAnalysis)
+![PyPI - Version](https://img.shields.io/pypi/v/ShockOscillationAnalysis)
 
 
 
