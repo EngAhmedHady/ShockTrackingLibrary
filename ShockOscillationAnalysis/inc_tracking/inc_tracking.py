@@ -249,7 +249,6 @@ class InclinedShockTracking(SOA):
             m_min = v_least_squares(min_b, columnY, nSlices)
             m_max = v_least_squares(max_b, columnY, nSlices)
             mean_min = np.mean(min_b); mean_max = np.mean(max_b)
-            # kwargs['osc_bound_line_info'] = ([[min_b[0],min_b[-1]], m_min, mean_min], [[max_b[0],max_b[-1]], m_max, mean_max])
             kwargs['osc_bound_line_info'] = ([min_b, m_min, mean_min], [max_b, m_max, mean_max])
         print(u'\u2713')
         print('Plotting tracked data ...')
@@ -300,10 +299,10 @@ class InclinedShockTracking(SOA):
     def ShockPointsTracking(self, path: str, 
                             tracking_V_range:list[int,float] = [0,0], inclination_info: int|list[int,tuple,tuple] = 0, nPnts: int = 0, scale_pixels = True, 
                             preview = True, output_directory = '',comment='', **kwargs):
-        """
+        """  
         This function identifies shock points by slicing a predefined domain of the shock and tracking it at each slice based on the integral method of shock tracking outlined in this `article <https://dx.doi.org/10.2139/ssrn.4797840>`_.
         It operates over a specified vertical range within the images, serving as the core function for inclination shock tracking. Additionally, all keyword arguments for output customization can be passed through this function.
-        
+            
         Parameters:
             - **path (str)**: Path to the directory containing the image files.
             - **tracking_V_range (list[int, float], optional)**: Vertical range for tracking shock points, specified as a list with two elements representing the upper and lower bounds (default is [0, 0]).
@@ -394,7 +393,6 @@ class InclinedShockTracking(SOA):
             3. Define the estimated line of shock. Draw or assine it as two points in this parameter `inclination_info` as in the example
             4. Run shock tracking function within the selected vertical range ``tracking_V_range``.
             5. The function will perform the tracking after dividing the vertical range into ``nPnts``.
-            
         """
         
         files = sorted(glob.glob(path))
@@ -541,4 +539,6 @@ standard deviation of the shock angle:
         # print(np.mean(xLoc_std),np.mean(avg_xloc))
         # kwargs['std_line_info'] = (std_m, np.mean(avg_xloc), xLoc_std, (columnY[-1]-columnY[0], x_max - x_min))
 
+Oscillation Domain from two points:       
+        # kwargs['osc_bound_line_info'] = ([[min_b[0],min_b[-1]], m_min, mean_min], [[max_b[0],max_b[-1]], m_max, mean_max])
 """

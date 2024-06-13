@@ -1,8 +1,9 @@
+================================
 ShockOscillationAnalysis package
 ================================
 
 Subpackages
------------
+===========
 
 .. toctree::
    :maxdepth: 4
@@ -11,7 +12,7 @@ Subpackages
    ShockOscillationAnalysis.slice_list_generator
 
 Submodules
-----------
+==========
 
 ShockOscillationAnalysis.ShockOscillationAnalysis module
 --------------------------------------------------------
@@ -77,10 +78,10 @@ ShockOscillationAnalysis.shocktrackingoptimized module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+.. Module contents
+.. ---------------
 
-.. automodule:: ShockOscillationAnalysis
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: ShockOscillationAnalysis
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:

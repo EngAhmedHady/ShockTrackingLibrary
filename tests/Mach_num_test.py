@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # use ShockTracking function
     IncTrac.ShockPointsTracking(imgPath, 
                                 scale_pixels = True,
-                                tracking_V_range = [5, 13],  # as scaled tracking reference values in mm
+                                tracking_V_range = [5, 13],    # as scaled tracking reference values in mm
                                 nPnts = 3,                     # number of slices         
                                 inclination_info = 50,         # width of each slice
                                 points_opacity = 0.5,          # displayed tracked points transparency

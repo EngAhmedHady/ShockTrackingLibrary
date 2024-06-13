@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyze a shock signal &mdash; ShockTrackingLibrary 1.9.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=c4cb232b"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Inclined Shock Tracking" href="Inclined%20Shock%20Tracking.html" />
+    <link rel="prev" title="Slice list generation" href="Slice%20list%20generation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ShockTrackingLibrary
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="Tutorial.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Tutorial.html#installing">Installing</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="Tutorial.html#examples">Examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Slice%20list%20generation.html">Slice list generation</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Analyze a shock signal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Inclined%20Shock%20Tracking.html">Inclined Shock Tracking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Mach%20number%20estimation.html">Mach number estimation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">ShockOscillationAnalysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ShockTrackingLibrary</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="Tutorial.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Analyze a shock signal</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Analyze a shock signal.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="analyze-a-shock-signal">
+<h1>Analyze a shock signal<a class="headerlink" href="#analyze-a-shock-signal" title="Link to this heading"></a></h1>
+<p>The line-scanning technique has been developed and widely used to determine the position of shocks, particularly for normal shocks or those close to normal.
+In this example, the core method of the shock tracking algorithm is based on detecting the variation in the maximum density gradient area. The methodology is detailed in <a class="reference external" href="`https://dx.doi.org/10.2139/ssrn.4797840`">this artical</a>.
+From the generated slice list (discussed in detail in the <a class="reference internal" href="Slice%20list%20generation.html"><span class="doc">Slice list generation</span></a> example), the shock will be tracked, and the corresponding signal will be generated for analysis.</p>
+<p>Steps are as following:</p>
+<ol class="arabic simple">
+<li><p>Import the slice list and define important parameters:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ShockOscillationAnalysis</span> <span class="kn">import</span> <span class="n">SOA</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+   <span class="c1"># define the slice list file</span>
+   <span class="n">imgPath</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;results\2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png&#39;</span>
+
+   <span class="n">f</span> <span class="o">=</span> <span class="mi">2000</span>    <span class="c1"># images sampling rate</span>
+
+   <span class="c1"># from the file name or can be passed directly from SliceListGenerator.GenerateSlicesArray function</span>
+   <span class="n">Scale</span> <span class="o">=</span> <span class="mf">0.12965964343598055</span> <span class="c1"># mm/px indicates the displacement accuracy</span>
+
+   <span class="c1"># import the slice list</span>
+   <span class="n">slicelist</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">imgPath</span><span class="p">)</span>
+
+   <span class="c1"># iniate the ShockOscillationAnalysis module</span>
+   <span class="n">SA</span> <span class="o">=</span> <span class="n">SOA</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+   <span class="c1"># spacify the shock region (Draw 2 vertical lines)</span>
+   <span class="n">NewRef</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">LineDraw</span><span class="p">(</span><span class="n">slicelist</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Intialize</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+   <span class="n">NewRef</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">LineDraw</span><span class="p">(</span><span class="n">SA</span><span class="o">.</span><span class="n">clone</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+   <span class="n">NewRef</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>                                <span class="c1"># to make sure the spacified lines are correctly sorted</span>
+   <span class="n">ShockwaveRegion</span> <span class="o">=</span> <span class="n">slicelist</span><span class="p">[:,</span><span class="n">NewRef</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">NewRef</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="c1"># to crop the slicelist to the shock region</span>
+   <span class="n">xPixls</span> <span class="o">=</span> <span class="p">(</span><span class="n">NewRef</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">NewRef</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>               <span class="c1"># the width of the slice list in pixels</span>
+   <span class="n">ShockResionScale</span> <span class="o">=</span> <span class="n">xPixls</span><span class="o">*</span><span class="n">Scale</span>              <span class="c1"># the width of the slice list in mm</span>
+   <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Shock Regions: </span><span class="si">{</span><span class="n">NewRef</span><span class="si">}</span><span class="s1">,</span><span class="se">\t</span><span class="s1"> Represents: </span><span class="si">{</span><span class="n">xPixls</span><span class="si">}</span><span class="s1">px, </span><span class="se">\t</span><span class="s1"> Shock Regions in mm:</span><span class="si">{</span><span class="n">ShockResionScale</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">SA.clone</span></code> is the modified image to see the first line, to keep original without modification.</p></li>
+</ul>
+</div>
+<a class="reference internal image-reference" href="_images/T4-1.png"><img alt="_images/T4-1.png" class="align-center" src="_images/T4-1.png" style="width: 600px;" /></a>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<ul class="simple">
+<li><p>The tracking domain must not contain more than one shock, as this will confuse the software and generate incorrect results.</p></li>
+</ul>
+</div>
+<p>And the console output of this step is:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">registered line: 429</span>
+<span class="go">registered line: 286</span>
+<span class="go">Shock Regions: [276, 428],    Represents: 152px,      Shock Regions in mm:19.708265802269043</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>To improve the traking quality, it is good to clean optical defects by subtracting Average slice from all slices:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#%% slice list cleaning</span>
+<span class="c1"># [subtracting the average, subtracting ambiant light frequency, improve brightness/contrast/sharpness]</span>
+<span class="n">ShockwaveRegion</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">CleanSnapshots</span><span class="p">(</span><span class="n">ShockwaveRegion</span><span class="p">,</span><span class="s1">&#39;Average&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The console output of this step is:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Improving image quality ...</span>
+<span class="go">      - subtracting Averaging ... ✓</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Clean illumination disturbances by Fast Fourier Transform (FFT) also can be done by adding <code class="docutils literal notranslate"><span class="pre">FFT</span></code> and other parameters as follow.</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ShockwaveRegion</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">CleanSnapshots</span><span class="p">(</span><span class="n">ShockwaveRegion</span><span class="p">,</span>
+                                    <span class="s1">&#39;Average&#39;</span><span class="p">,</span><span class="s1">&#39;FFT&#39;</span><span class="p">,</span>
+                                    <span class="n">filterCenter</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">25</span><span class="p">)],</span> <span class="n">D</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                                    <span class="n">ShowIm</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/FFT.png"><img alt="_images/FFT.png" src="_images/FFT.png" style="width: 315px;" /></a>
+<a class="reference internal image-reference" href="_images/FFT-Filtered.png"><img alt="_images/FFT-Filtered.png" src="_images/FFT-Filtered.png" style="width: 315px;" /></a>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">filterCenter</span></code> and other <code class="docutils literal notranslate"><span class="pre">FFT</span></code> parameters can be determined by enebling <code class="docutils literal notranslate"><span class="pre">ShowIm</span></code> to detect the defect frequency location.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">filterCenter</span></code> may contain multiple locations.</p></li>
+<li><p>The cleaning process follows the order of the argument, in the above example the Averaging will take place first then FFT.</p></li>
+<li><p>Additional parameters such as <code class="docutils literal notranslate"><span class="pre">Brightness/Contrast</span></code> may also appended to the arguments if required check <a class="reference internal" href="ShockOscillationAnalysis.html#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.CleanSnapshots" title="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.CleanSnapshots"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">SOA.CleanSnapshots</span></code></a>.</p></li>
+</ul>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>To track the shock and generate the shock signal and scale it.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#%% Find shock location</span>
+<span class="n">shock_loc_px</span><span class="p">,</span> <span class="n">uncer</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">ShockTrakingAutomation</span><span class="p">(</span><span class="n">shock_region</span><span class="p">,</span>
+                                                <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;integral&#39;</span><span class="p">,</span>        <span class="c1"># there is also &#39;maxGrad&#39; and &#39;darkest_spot&#39;</span>
+                                                <span class="n">reviewInterval</span> <span class="o">=</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span><span class="mi">14</span><span class="p">],</span>   <span class="c1"># to review the tracking process within this range</span>
+                                                <span class="n">Signalfilter</span> <span class="o">=</span> <span class="s1">&#39;med-Wiener&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;uncertainty ratio: </span><span class="si">{</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">uncer</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">shock_loc_px</span><span class="p">))</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1">%&#39;</span><span class="p">)</span>
+
+<span class="c1"># unpack and scale the output values</span>
+<span class="n">shock_loc_mm</span><span class="o">=</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shock_loc_px</span><span class="p">)</span>     <span class="c1"># to scale the shock location output to mm</span>
+
+<span class="n">snapshot_indx</span><span class="p">,</span> <span class="n">uncertain</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">uncer</span><span class="p">)</span>   <span class="c1"># unpack uncertainity columns</span>
+<span class="n">uncertain_mm</span> <span class="o">=</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uncertain</span><span class="p">)</span>       <span class="c1"># to scale the uncertain locatshock location output to mm</span>
+
+<span class="c1"># plotting the output</span>
+<span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">50</span><span class="p">))</span>
+<span class="c1"># shock region image as background to review the tracked points</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">shock_region</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">shock_region_mm</span><span class="p">,</span> <span class="n">shock_region</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;0.1&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">shock_loc_mm</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">lw</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">ms</span> <span class="o">=</span> <span class="mi">7</span><span class="p">)</span>        <span class="c1"># To plot the detected shock locations</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">uncertain_mm</span><span class="p">,</span> <span class="n">snapshot_indx</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">lw</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">ms</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span>   <span class="c1"># To plot the uncertain shock points</span>
+</pre></div>
+</div>
+<p>The tracking review:</p>
+<a class="reference internal image-reference" href="_images/T4-5c.png"><img alt="_images/T4-5c.png" class="align-center" src="_images/T4-5c.png" style="width: 300px;" /></a>
+<a class="reference internal image-reference" href="_images/T4-2c.png"><img alt="_images/T4-2c.png" src="_images/T4-2c.png" style="width: 228px;" /></a>
+<a class="reference internal image-reference" href="_images/T4-3c.png"><img alt="_images/T4-3c.png" src="_images/T4-3c.png" style="width: 228px;" /></a>
+<a class="reference internal image-reference" href="_images/T4-4c.png"><img alt="_images/T4-4c.png" src="_images/T4-4c.png" style="width: 228px;" /></a>
+<p>The out put results:</p>
+<a class="reference internal image-reference" href="_images/T4-6.png"><img alt="_images/T4-6.png" class="align-center" src="_images/T4-6.png" style="width: 600px;" /></a>
+<p>The console output of this step is:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Processing the shock location ...</span>
+<span class="go">[====================] 100%</span>
+<span class="go">Appling med-Wiener filter...</span>
+<span class="go">Processing time: 0 Sec</span>
+<span class="go">uncertainty ratio: 14.00%</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>Mostly, the tracked points follow the shock location; however, the uncertainty ratio is quite high at 14%.</p></li>
+<li><p>The reasons for uncertainty can be reviewed from the uncertainty output. Based on this review, users may choose to change the strategy by adjusting the cleaning parameters or their order. Additionally, the selected range of the shock could be a parameter to consider.</p></li>
+</ul>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Finally, shift the signal by the average value and use welch method to study the power spectral density (PSD).</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#%% Apply welch method for PSD</span>
+ <span class="n">avg_shock_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">shock_loc_mm</span><span class="p">)</span>      <span class="c1"># find the average shock location</span>
+ <span class="n">shock_loc_mm</span> <span class="o">=</span> <span class="n">shock_loc_mm</span> <span class="o">-</span> <span class="n">avg_shock_loc</span>   <span class="c1"># to shift the signal to the average</span>
+
+<span class="c1"># Calculate the PSD</span>
+<span class="n">Freq</span><span class="p">,</span> <span class="n">psd</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">welch</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">shock_loc_mm</span><span class="p">,</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">f</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;barthann&#39;</span><span class="p">,</span>
+                         <span class="n">nperseg</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span> <span class="n">noverlap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detrend</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">,</span>
+                         <span class="n">return_onesided</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;density&#39;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">Freq</span><span class="p">,</span> <span class="n">psd</span><span class="p">,</span> <span class="n">lw</span> <span class="o">=</span> <span class="s1">&#39;2&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;PSD [mm$^2$/Hz]&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency [Hz]&quot;</span><span class="p">)</span>
+
+<span class="n">The</span> <span class="n">out</span> <span class="n">put</span> <span class="n">results</span><span class="p">:</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/T4-7.png"><img alt="_images/T4-7.png" class="align-center" src="_images/T4-7.png" style="width: 600px;" /></a>
+<p>The full code example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">ShockOscillationAnalysis</span> <span class="kn">import</span> <span class="n">SOA</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+   <span class="c1"># define the slice list file</span>
+   <span class="n">imgPath</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;results\2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png&#39;</span>
+
+   <span class="n">f</span> <span class="o">=</span> <span class="mi">2000</span>    <span class="c1"># images sampling rate</span>
+
+   <span class="c1"># from the file name or can be passed directly from SliceListGenerator.GenerateSlicesArray function</span>
+   <span class="n">scale</span> <span class="o">=</span> <span class="mf">0.12965964343598055</span> <span class="c1"># mm/px</span>
+
+   <span class="c1"># import the slice list</span>
+   <span class="n">slicelist</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">imgPath</span><span class="p">)</span>
+   <span class="n">n</span> <span class="o">=</span> <span class="n">slicelist</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># time</span>
+
+   <span class="c1"># iniate the ShockOscillationAnalysis module</span>
+   <span class="n">SA</span> <span class="o">=</span> <span class="n">SOA</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+   <span class="c1"># spacify the shock region (Draw 2 vertical lines)</span>
+   <span class="n">newref</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">LineDraw</span><span class="p">(</span><span class="n">slicelist</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Intialize</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+   <span class="n">newref</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">LineDraw</span><span class="p">(</span><span class="n">SA</span><span class="o">.</span><span class="n">clone</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+   <span class="n">newref</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>                                   <span class="c1"># to make sure the spacified lines are correctly sorted</span>
+   <span class="n">shock_region</span> <span class="o">=</span> <span class="n">slicelist</span><span class="p">[:,</span><span class="n">newref</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">newref</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="c1"># to crop the slicelist to the shock region</span>
+   <span class="n">xPixls</span> <span class="o">=</span> <span class="p">(</span><span class="n">newref</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">newref</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>                  <span class="c1"># the width of the slice list in pixels</span>
+   <span class="n">shock_region_mm</span> <span class="o">=</span> <span class="n">xPixls</span><span class="o">*</span><span class="n">scale</span>                  <span class="c1"># the width of the slice list in mm</span>
+   <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Shock Regions: </span><span class="si">{</span><span class="n">newref</span><span class="si">}</span><span class="s1">,</span><span class="se">\t</span><span class="s1"> Represents: </span><span class="si">{</span><span class="n">xPixls</span><span class="si">}</span><span class="s1">px, </span><span class="se">\t</span><span class="s1"> Shock Regions in mm:</span><span class="si">{</span><span class="n">shock_region_mm</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+   <span class="c1">#%% slice list cleaning</span>
+   <span class="c1"># [subtracting the average, subtracting ambiant light frequency, improve brightness/contrast/sharpness]</span>
+   <span class="n">shock_region</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">CleanSnapshots</span><span class="p">(</span><span class="n">shock_region</span><span class="p">,</span><span class="s1">&#39;Average&#39;</span><span class="p">)</span>
+
+   <span class="c1">#%% Find shock location</span>
+   <span class="n">shock_loc_px</span><span class="p">,</span> <span class="n">uncer</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">ShockTrakingAutomation</span><span class="p">(</span><span class="n">shock_region</span><span class="p">,</span>
+                                                   <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;integral&#39;</span><span class="p">,</span>        <span class="c1"># There is also &#39;maxGrad&#39; and &#39;darkest_spot&#39;</span>
+                                                   <span class="n">reviewInterval</span> <span class="o">=</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span><span class="mi">14</span><span class="p">],</span>   <span class="c1"># to review the tracking process within this range</span>
+                                                   <span class="n">Signalfilter</span> <span class="o">=</span> <span class="s1">&#39;med-Wiener&#39;</span><span class="p">)</span>
+
+   <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;uncertainty ratio: </span><span class="si">{</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">uncer</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">shock_loc_px</span><span class="p">))</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s1">0.2f</span><span class="si">}</span><span class="s1">%&#39;</span><span class="p">)</span>
+
+   <span class="c1"># unpack and scale the output values</span>
+   <span class="n">shock_loc_mm</span><span class="o">=</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shock_loc_px</span><span class="p">)</span>  <span class="c1"># to scale the shock location output to mm</span>
+
+   <span class="n">snapshot_indx</span><span class="p">,</span> <span class="n">uncertain</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">uncer</span><span class="p">)</span>   <span class="c1"># unpack uncertainity columns</span>
+   <span class="n">uncertain_mm</span> <span class="o">=</span> <span class="n">scale</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">uncertain</span><span class="p">)</span>       <span class="c1"># to scale the uncertain locatshock location output to mm</span>
+
+   <span class="c1"># plotting the output</span>
+   <span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">50</span><span class="p">))</span>
+   <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">shock_region</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">shock_region_mm</span><span class="p">,</span> <span class="n">shock_region</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">],</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;0.1&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">);</span>
+   <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">shock_loc_mm</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">lw</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">ms</span> <span class="o">=</span> <span class="mi">7</span><span class="p">)</span>
+   <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">uncertain_mm</span><span class="p">,</span> <span class="n">snapshot_indx</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">lw</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">ms</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span>
+
+   <span class="c1">#%% Apply welch method for PSD</span>
+   <span class="n">avg_shock_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">shock_loc_mm</span><span class="p">)</span>      <span class="c1"># find the average shock location</span>
+   <span class="n">shock_loc_mm</span> <span class="o">=</span> <span class="n">shock_loc_mm</span> <span class="o">-</span> <span class="n">avg_shock_loc</span>   <span class="c1"># to shift the signal to the average</span>
+
+   <span class="n">Freq</span><span class="p">,</span> <span class="n">psd</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">welch</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">shock_loc_mm</span><span class="p">,</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">f</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="s1">&#39;barthann&#39;</span><span class="p">,</span>
+                        <span class="n">nperseg</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span> <span class="n">noverlap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nfft</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">detrend</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">,</span>
+                        <span class="n">return_onesided</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="s1">&#39;density&#39;</span><span class="p">)</span>
+
+   <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+   <span class="n">ax</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">Freq</span><span class="p">,</span> <span class="n">psd</span><span class="p">,</span> <span class="n">lw</span> <span class="o">=</span> <span class="s1">&#39;2&#39;</span><span class="p">)</span>
+   <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;PSD [mm$^2$/Hz]&quot;</span><span class="p">);</span>
+   <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency [Hz]&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="ShockOscillationAnalysis.html#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.LineDraw" title="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.LineDraw"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">SOA.LineDraw</span></code></a>,
+<a class="reference internal" href="ShockOscillationAnalysis.html#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.CleanSnapshots" title="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.CleanSnapshots"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">SOA.CleanSnapshots</span></code></a>,
+<a class="reference internal" href="ShockOscillationAnalysis.html#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.ShockTrakingAutomation" title="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.ShockTrakingAutomation"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">SOA.ShockTrakingAutomation</span></code></a>,
+<a class="reference internal" href="Slice%20list%20generation.html"><span class="doc">Slice list generation</span></a></p>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Slice%20list%20generation.html" class="btn btn-neutral float-left" title="Slice list generation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Inclined%20Shock%20Tracking.html" class="btn btn-neutral float-right" title="Inclined Shock Tracking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Ahmed H. Hanfy, Paweł Flaszyński, Piotr Kaczyński, and Piotr Doerffer..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

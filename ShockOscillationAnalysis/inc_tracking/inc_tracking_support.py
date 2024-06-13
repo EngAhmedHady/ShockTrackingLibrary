@@ -47,7 +47,7 @@ def v_least_squares(xLoc: list[float], columnY:list[float], nSlices: int) -> lis
 def anglesInterpolation(pnts_y_list: list[int],                              # Generated points by class
                         flow_dir: list[float] = None, flow_Vxy:list[tuple] = None, # measured data (LDA, CFD, ... )
                         **kwargs) -> list[float]:                                  # other parameters
-    """
+    """   
     Interpolate angles based on given y-coordinates and corresponding angles or velocity components.
     
     Parameters:

@@ -35,17 +35,21 @@ In this tutorial, the first leading edge shock from 100 schlieren images, is tra
 
     2. The spacified ``tracking_V_range`` is reviewed, and the estimated shock line is asked:
     
-    .. image:: _static\\img\\defined-vertical-domain-c.png
+    .. image:: _static\\img\\T1\\defined-vertical-domain-c.png
         :width: 400
         :align: center
     
-    3. Press the left mouse button and drag to draw a line. Two lines will appear: the bold red line represents the start and end mouse locations, and the blue line represents the full line. Left-click again to confirm or right-click to remove the line and try again.
+    |
     
-    .. image:: _static\\img\\draw-the-estimate-avg-shocLoc.png
+    3. Press the left mouse button and drag to draw a line. Two lines will appear: the bold red line represents the start and end mouse locations, and the blue line represents the full line. Left-click again to confirm flowed by any keyboard key to close the preview window or right-click to remove the line and try again.
+    
+    .. image:: _static\\img\\T1\\draw-the-estimate-avg-shocLoc.png
         :width: 325
 
-    .. image:: _static\\img\\confirm-the-drawn-line.png
+    .. image:: _static\\img\\T1\\confirm-the-drawn-line.png
         :width: 325
+
+    |
 
     4. The software will track the shock and show results as follow:
     
@@ -69,11 +73,16 @@ In this tutorial, the first leading edge shock from 100 schlieren images, is tra
     
     And the 20 images are displayed, among of them
 
-    .. image:: _static\\img\\R1.png
+    .. image:: _static\\img\\T1\\R1.png
         :width: 215
 
-    .. image:: _static\\img\\R2.png
+    .. image:: _static\\img\\T1\\R2.png
         :width: 215
 
-    .. image:: _static\\img\\R3.png
+    .. image:: _static\\img\\T1\\R3.png
         :width: 215
+    
+    |
+
+    .. seealso::
+        :any:`InclinedShockTracking.ShockPointsTracking<ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.ShockPointsTracking>`

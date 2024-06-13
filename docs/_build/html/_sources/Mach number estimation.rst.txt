@@ -28,7 +28,7 @@ Additionally, the flow direction can be evaluated using LDA measurements upstrea
             Vxy = np.genfromtxt(inflow_path, delimiter=',', skip_header = 1)
             
             # iniate the inclined shock tracking module
-            IncTrac = IncTrac(D = 80)
+            IncTrac = IncTrac(D = 80) # D is the reference true length in this case is 80mm
             
             # use ShockTracking function
             IncTrac.ShockPointsTracking(imgPath, 
@@ -49,19 +49,34 @@ Additionally, the flow direction can be evaluated using LDA measurements upstrea
                                         arc_dia = 50,                  # the flow angle arc diameter
                                         )
 
-    2. The spacified ``tracking_V_range`` is reviewed, and the estimated shock line is asked:
+    2. Define the scalling lines. Press the left mouse button and drag to draw a line. Two lines will appear: the **bold red line** represents the start and end mouse locations, and the **green line** represents the full line. Left-click again to confirm flowed by any keyboard key to close the preview window or right-click to remove the line and try again.
     
-    .. image:: _static\\img\\defined-vertical-domain-c.png
+    .. image:: _static\\img\\T2\\T2-1c.png
         :width: 400
         :align: center
     
-    3. Press the left mouse button and drag to draw a line. Two lines will appear: the bold red line represents the start and end mouse locations, and the blue line represents the full line. Left-click again to confirm or right-click to remove the line and try again.
+    |
+
+    3. Repeat the drawing process to define y-Reference line (the **yellow line** in this case the leading of the lower profile) 
     
-    .. image:: _static\\img\\draw-the-estimate-avg-shocLoc.png
+    .. image:: _static\\img\\T2\\T2-2c.png
+        :width: 400
+        :align: center
+
+    |
+
+    .. important:: 
+        The vertical lines of scaling and the horsintol line of y-reference are defined as the middle point of start and end of the drawn line.
+
+
+    4. The spacified ``tracking_V_range`` is reviewed, and the estimated shock line is asked, Repeat the drawing process defining the Mach wave: 
+    
+    .. image:: _static\\img\\T2\\T2-3c.png
         :width: 325
 
-    .. image:: _static\\img\\confirm-the-drawn-line.png
+    .. image:: _static\\img\\T2\\T2-4.png
         :width: 325
+
 
     4. The software will track the shock and show results as follow:
     
@@ -90,11 +105,21 @@ Additionally, the flow direction can be evaluated using LDA measurements upstrea
     
     And the 20 images are displayed, among of them
 
-    .. image:: _static\\img\\R1.png
+    .. image:: _static\\img\\T2\\T2-5.png
         :width: 215
 
-    .. image:: _static\\img\\R2.png
+    .. image:: _static\\img\\T2\\T2-6.png
         :width: 215
 
-    .. image:: _static\\img\\R3.png
+    .. image:: _static\\img\\T2\\T2-7.png
         :width: 215
+    
+    |
+
+    .. note:: 
+        - In the second image, there is an orange uncertain point, which completely misses the location of the Mach wave due to its weakness in this region.
+        - The orange uncertain point does not always indicate a false shock location, but it suggests the possibility of missing the shock location.
+
+    .. seealso::
+        :any:`InclinedShockTracking.ShockPointsTracking<ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.ShockPointsTracking>`,
+        :any:`inc_tracking_support.anglesInterpolation<ShockOscillationAnalysis.inc_tracking.inc_tracking_support.anglesInterpolation>`

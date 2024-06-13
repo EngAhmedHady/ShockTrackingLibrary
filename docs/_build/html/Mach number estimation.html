@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mach number estimation &mdash; ShockTrackingLibrary 1.9.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=c4cb232b"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -50,6 +50,8 @@
 <li class="toctree-l1 current"><a class="reference internal" href="Tutorial.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Tutorial.html#installing">Installing</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="Tutorial.html#examples">Examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Slice%20list%20generation.html">Slice list generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Analyze%20a%20shock%20signal.html">Analyze a shock signal</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Inclined%20Shock%20Tracking.html">Inclined Shock Tracking</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Mach number estimation</a></li>
 </ul>
@@ -85,7 +87,7 @@
            <div itemprop="articleBody">
              
   <section id="mach-number-estimation">
-<h1>Mach number estimation<a class="headerlink" href="#mach-number-estimation" title="Permalink to this heading"></a></h1>
+<h1>Mach number estimation<a class="headerlink" href="#mach-number-estimation" title="Link to this heading"></a></h1>
 <p>As an application of the <strong>Shock Tracking Library</strong> the estimation of the local Mach number from Mach waves as well as other vital flow properties such as pressure and temperature, within intricate shock structures.
 In such scenarios, the presence of pressure taps may obstruct the visibility of the shock system, requiring the utilization of pressure tubes, wires, or another system that may partially block the test section window.
 Nonetheless, with a thorough understanding of the flow direction, the Mach number can still be accurately determined using the following formula:</p>
@@ -110,7 +112,7 @@ Additionally, the flow direction can be evaluated using LDA measurements upstrea
     <span class="n">Vxy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">inflow_path</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">skip_header</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># iniate the inclined shock tracking module</span>
-    <span class="n">IncTrac</span> <span class="o">=</span> <span class="n">IncTrac</span><span class="p">(</span><span class="n">D</span> <span class="o">=</span> <span class="mi">80</span><span class="p">)</span>
+    <span class="n">IncTrac</span> <span class="o">=</span> <span class="n">IncTrac</span><span class="p">(</span><span class="n">D</span> <span class="o">=</span> <span class="mi">80</span><span class="p">)</span> <span class="c1"># D is the reference true length in this case is 80mm</span>
 
     <span class="c1"># use ShockTracking function</span>
     <span class="n">IncTrac</span><span class="o">.</span><span class="n">ShockPointsTracking</span><span class="p">(</span><span class="n">imgPath</span><span class="p">,</span>
@@ -133,14 +135,28 @@ Additionally, the flow direction can be evaluated using LDA measurements upstrea
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
-<li><p>The spacified <code class="docutils literal notranslate"><span class="pre">tracking_V_range</span></code> is reviewed, and the estimated shock line is asked:</p></li>
+<li><p>Define the scalling lines. Press the left mouse button and drag to draw a line. Two lines will appear: the <strong>bold red line</strong> represents the start and end mouse locations, and the <strong>green line</strong> represents the full line. Left-click again to confirm flowed by any keyboard key to close the preview window or right-click to remove the line and try again.</p></li>
 </ol>
-<a class="reference internal image-reference" href="_images/defined-vertical-domain-c.png"><img alt="_images/defined-vertical-domain-c.png" class="align-center" src="_images/defined-vertical-domain-c.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="_images/T2-1c.png"><img alt="_images/T2-1c.png" class="align-center" src="_images/T2-1c.png" style="width: 400px;" /></a>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
 <ol class="arabic simple" start="3">
-<li><p>Press the left mouse button and drag to draw a line. Two lines will appear: the bold red line represents the start and end mouse locations, and the blue line represents the full line. Left-click again to confirm or right-click to remove the line and try again.</p></li>
+<li><p>Repeat the drawing process to define y-Reference line (the <strong>yellow line</strong> in this case the leading of the lower profile)</p></li>
 </ol>
-<a class="reference internal image-reference" href="_images/draw-the-estimate-avg-shocLoc.png"><img alt="_images/draw-the-estimate-avg-shocLoc.png" src="_images/draw-the-estimate-avg-shocLoc.png" style="width: 325px;" /></a>
-<a class="reference internal image-reference" href="_images/confirm-the-drawn-line.png"><img alt="_images/confirm-the-drawn-line.png" src="_images/confirm-the-drawn-line.png" style="width: 325px;" /></a>
+<a class="reference internal image-reference" href="_images/T2-2c.png"><img alt="_images/T2-2c.png" class="align-center" src="_images/T2-2c.png" style="width: 400px;" /></a>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The vertical lines of scaling and the horsintol line of y-reference are defined as the middle point of start and end of the drawn line.</p>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>The spacified <code class="docutils literal notranslate"><span class="pre">tracking_V_range</span></code> is reviewed, and the estimated shock line is asked, Repeat the drawing process defining the Mach wave:</p></li>
+</ol>
+<a class="reference internal image-reference" href="_images/T2-3c.png"><img alt="_images/T2-3c.png" src="_images/T2-3c.png" style="width: 325px;" /></a>
+<a class="reference internal image-reference" href="_images/T2-4.png"><img alt="_images/T2-4.png" src="_images/T2-4.png" style="width: 325px;" /></a>
 <ol class="arabic simple" start="4">
 <li><p>The software will track the shock and show results as follow:</p></li>
 </ol>
@@ -167,9 +183,24 @@ Additionally, the flow direction can be evaluated using LDA measurements upstrea
 </pre></div>
 </div>
 <p>And the 20 images are displayed, among of them</p>
-<a class="reference internal image-reference" href="_images/R1.png"><img alt="_images/R1.png" src="_images/R1.png" style="width: 215px;" /></a>
-<a class="reference internal image-reference" href="_images/R2.png"><img alt="_images/R2.png" src="_images/R2.png" style="width: 215px;" /></a>
-<a class="reference internal image-reference" href="_images/R3.png"><img alt="_images/R3.png" src="_images/R3.png" style="width: 215px;" /></a>
+<a class="reference internal image-reference" href="_images/T2-5.png"><img alt="_images/T2-5.png" src="_images/T2-5.png" style="width: 215px;" /></a>
+<a class="reference internal image-reference" href="_images/T2-6.png"><img alt="_images/T2-6.png" src="_images/T2-6.png" style="width: 215px;" /></a>
+<a class="reference internal image-reference" href="_images/T2-7.png"><img alt="_images/T2-7.png" src="_images/T2-7.png" style="width: 215px;" /></a>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>In the second image, there is an orange uncertain point, which completely misses the location of the Mach wave due to its weakness in this region.</p></li>
+<li><p>The orange uncertain point does not always indicate a false shock location, but it suggests the possibility of missing the shock location.</p></li>
+</ul>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.ShockPointsTracking" title="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.ShockPointsTracking"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">InclinedShockTracking.ShockPointsTracking</span></code></a>,
+<a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.anglesInterpolation" title="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.anglesInterpolation"><code class="xref any py py-func docutils literal notranslate"><span class="pre">inc_tracking_support.anglesInterpolation</span></code></a></p>
+</div>
 </div></blockquote>
 </section>
 

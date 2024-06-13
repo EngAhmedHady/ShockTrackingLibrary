@@ -185,18 +185,14 @@ def GenerateShockSignal(img, method = 'integral',
         
     nShoots = img.shape[0] # .................... total number of snapshots
     print('Processing the shock location ...')
-    
-    if ploting: 
-        fig, ax = plt.subplots(figsize=(30,300))
-        ax.imshow(img, cmap='gray');
-        # check ploting conditions        
+            
     for SnapshotSlice in ShockRegion:
         Plot = ploting and start <= count < end
         ShockLocation, uncertain = TrakingMethod(SnapshotSlice,Plot,count,ShockLocation,uncertain)
         count += 1
         sys.stdout.write('\r')
         sys.stdout.write("[%-20s] %d%%" % ('='*int(count/(nShoots/20)), int(5*count/(nShoots/20))))
-        # sys.stdout.flush()
+        sys.stdout.flush()
     print('')
     
     print(f'Appling {signalfilter} filter...')

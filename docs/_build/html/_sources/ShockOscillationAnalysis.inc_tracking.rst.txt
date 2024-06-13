@@ -1,8 +1,9 @@
+==============================================
 ShockOscillationAnalysis.inc\_tracking package
 ==============================================
 
-.. Submodules
-.. ----------
+Submodules
+==========
 
 ShockOscillationAnalysis.inc\_tracking.inc\_tracking module
 -----------------------------------------------------------

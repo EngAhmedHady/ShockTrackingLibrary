@@ -1,8 +1,9 @@
+=======================================================
 ShockOscillationAnalysis.slice\_list\_generator package
 =======================================================
 
 Submodules
-----------
+==========
 
 ShockOscillationAnalysis.slice\_list\_generator.list\_generation\_tools module
 ------------------------------------------------------------------------------
@@ -20,10 +21,10 @@ ShockOscillationAnalysis.slice\_list\_generator.slice\_list\_generator module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+.. Module contents
+.. ---------------
 
-.. automodule:: ShockOscillationAnalysis.slice_list_generator
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. .. automodule:: ShockOscillationAnalysis.slice_list_generator
+..    :members:
+..    :undoc-members:
+..    :show-inheritance:
