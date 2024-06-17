@@ -14,7 +14,7 @@ if __name__ == '__main__':
     IncTrac = IncTrac()
     
     # use ShockTracking function
-    IncTrac.ShockPointsTracking(imgPath, 
+    print(IncTrac.ShockPointsTracking(imgPath, 
                                 scale_pixels = False,
                                 tracking_V_range = [575, 200], # as not scaled tracking reference values in pixels
                                 nPnts = 9,                     # number of slices         
@@ -27,4 +27,4 @@ if __name__ == '__main__':
                                 avg_txt_Yloc = 650,            # y-location of the estimated angle value in pixels
                                 avg_txt_size = 30,             # font size of estimated angle value in pt
                                 osc_boundary = True,           # to display the oscilation domain
-                                )
+                                ))
