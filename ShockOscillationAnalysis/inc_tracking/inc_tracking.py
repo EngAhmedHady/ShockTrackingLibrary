@@ -7,7 +7,7 @@ Created on Wed Feb 28 13:47:27 2024
 import cv2
 import sys
 import glob
-import screeninfo # ............................... To find the  monitor resolution
+import screeninfo  # .......................... To find the  monitor resolution
 import numpy as np
 import matplotlib.pyplot as plt
 from ..preview import plot_review
@@ -15,18 +15,20 @@ from ..shocktracking import ShockTraking
 from ..ShockOscillationAnalysis import SOA, CVColor, BCOLOR
 from ..linedrawingfunctions import InclinedLine, AngleFromSlope
 from ..slice_list_generator.list_generation_tools import GenerateIndicesList
-from .inc_tracking_support import anglesInterpolation, v_least_squares, shockDomain, ImportingFiles
+from .inc_tracking_support import (anglesInterpolation, v_least_squares,
+                                   shockDomain, ImportingFiles)
 
 px = 1/plt.rcParams['figure.dpi']
 plt.rcParams.update({'font.size': 25})
-plt.rcParams["text.usetex"] =  True
+plt.rcParams["text.usetex"] = True
 plt.rcParams["font.family"] = "Times New Roman"
+
 
 class InclinedShockTracking(SOA):
     def __init__(self, f: int = 1, D: float = 1, pixelScale: float = 1):
-        self.f = f # ----------------------- sampling rate (fps)
-        self.D = D # ----------------------- refrence length for scaling (mm)
-        self.pixelScale = pixelScale # ----- initialize scale of the pixels
+        self.f = f  # ----------------------- sampling rate (fps)
+        self.D = D  # ----------------------- refrence length for scaling (mm)
+        self.pixelScale = pixelScale  # ----- initialize scale of the pixels
         super().__init__(f, D, pixelScale)
 
     def InclinedShockDomainSetup(self, CheckingWidth: int, CheckingHieght: int|list, inclined_ref_line: int|list[int,tuple,tuple], # define the calculation domain
@@ -394,7 +396,7 @@ class InclinedShockTracking(SOA):
             4. Run shock tracking function within the selected vertical range ``tracking_V_range``.
             5. The function will perform the tracking after dividing the vertical range into ``nPnts``.
         """
-        
+
         files = sorted(glob.glob(path))
         n1 = len(files)
         # In case no file found end the progress and eleminate the program
@@ -415,43 +417,59 @@ class InclinedShockTracking(SOA):
         screen = screeninfo.get_monitors()[0]
         screen_width, screen_height = screen.width, screen.height
         print(f'Screen resolution: {screen_width}, {screen_height}')
-        
-        tracking_V_range.sort(); start, end = tracking_V_range
-        y_diff = abs(end-start);  draw_y = y_diff == 0       
-        
+
+        tracking_V_range.sort()
+        start, end = tracking_V_range
+        y_diff = abs(end-start)
+        draw_y = y_diff == 0
+
         if draw_y:
             tracking_V_range = []
-            # Vertical limits and scale 
+            # Vertical limits and scale
             try:
-                Ref_y1 = self.LineDraw(self.clone, 'H', 2, line_color = CVColor.ORANGE)[-1]
+                Ref_y1 = self.LineDraw(self.clone, 'H', 2, line_color=CVColor.ORANGE)[-1]
             except Exception:
-                Ref_y1 = Ref_y0;
+                Ref_y1 = Ref_y0
                 print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Nothing was drawn!{BCOLOR.ENDC} Ref_y1 value is {Ref_y1}')
-            tracking_V_range.append((Ref_y0 - Ref_y1)* self.pixelScale)
+            tracking_V_range.append((Ref_y0 - Ref_y1) * self.pixelScale)
             try:
-                Ref_y2 = self.LineDraw(self.clone, 'H', 2, line_color = CVColor.ORANGE)[-1]
+                Ref_y2 = self.LineDraw(self.clone, 'H', 2, line_color=CVColor.ORANGE)[-1]
             except Exception:
                 Ref_y2 = Ref_y1;
                 print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC}Nothing was drawn!{BCOLOR.ENDC} Ref_y1 value is {Ref_y2}')
-                
-            tracking_V_range.append((Ref_y0 - Ref_y2)* self.pixelScale)
-            if Ref_y1 == Ref_y2: print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Vertical range of tracking is not sufficient!{BCOLOR.ENDC}'); sys.exit()
+
+            tracking_V_range.append((Ref_y0 - Ref_y2) * self.pixelScale)
+            if Ref_y1 == Ref_y2:
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Vertical range of tracking is not sufficient!{BCOLOR.ENDC}')
+                sys.exit()
+
             tracking_V_range.sort()
-            if Ref_y1 > Ref_y2: Ref_y11 = Ref_y2; Ref_y2 = Ref_y1; Ref_y1 = Ref_y11;
+
+            if Ref_y1 > Ref_y2:
+                Ref_y11 = Ref_y2
+                Ref_y2 = Ref_y1
+                Ref_y1 = Ref_y11
+
         else:
             tracking_V_range.sort() if Ref_y0 > -1 else tracking_V_range.sort(reverse=True)
-            Ref_y2, Ref_y1  = [round(Ref_y0 - (x / self.pixelScale)) for x in tracking_V_range] if Ref_y0 > -1 else tracking_V_range
-            if Ref_y1< 0 or Ref_y2 > shp[0]: print('Vertical range of tracking is not sufficient!'); sys.exit()
-            cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), CVColor.ORANGE, 1)
-            cv2.line(self.clone, (0,Ref_y2), (shp[1],Ref_y2), CVColor.ORANGE, 1)
-            
+            Ref_y2, Ref_y1 = [round(Ref_y0 - (x / self.pixelScale)) for x in tracking_V_range] if Ref_y0 > -1 else tracking_V_range
+
+            if Ref_y1 < 0 or Ref_y2 > shp[0]:
+                print('Vertical range of tracking is not sufficient!')
+                sys.exit()
+
+            cv2.line(self.clone, (0, Ref_y1), (shp[1], Ref_y1),
+                     CVColor.ORANGE, 1)
+            cv2.line(self.clone, (0, Ref_y2), (shp[1], Ref_y2),
+                     CVColor.ORANGE, 1)
+
         print(f'Vertical range of tracking points starts from {tracking_V_range[0]:0.2f}mm to {tracking_V_range[1]:0.2f}mm')
         print(f'in pixels from {Ref_y1}px to {Ref_y2}px')
-        
+
         # estemat shock domain
         if not hasattr(inclination_info, "__len__"):
             CheckingWidth = inclination_info
-            if CheckingWidth < 10: 
+            if CheckingWidth < 10:
                 print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference width is not sufficient!{BCOLOR.ENDC}'); 
                 CheckingWidth = int(input(f'{BCOLOR.BGOKGREEN}Request: {BCOLOR.ENDC}{BCOLOR.ITALIC}Please provide reference width >10px: {BCOLOR.ENDC}'))
             inclined_ref_line = []
@@ -468,77 +486,95 @@ class InclinedShockTracking(SOA):
             cv2.line(self.clone, P1, P2, (0,255,0), 1)
             inclined_ref_line = [P1,P2,m,a]
             CheckingWidth = inclination_info[0]
-        
-        if nPnts == 0: 
+
+        if nPnts == 0:
             while nPnts == 0:
                 nPnts = int(input(f'{BCOLOR.BGOKGREEN}Request: {BCOLOR.ENDC}{BCOLOR.ITALIC}Please provide number of points to be tracked: {BCOLOR.ENDC}'))
-                if nPnts > abs(Ref_y1-Ref_y2): print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}insufficient number of points{BCOLOR.ENDC}'); nPnts = 0
+                if nPnts > abs(Ref_y1-Ref_y2):
+                    print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}insufficient number of points{BCOLOR.ENDC}')
+                    nPnts = 0
 
         Ref, nSlices, inclinationCheck = self.InclinedShockDomainSetup(CheckingWidth, 
-                                                                       [Ref_y1,Ref_y2],
+                                                                       [Ref_y1, Ref_y2],
                                                                        inclined_ref_line,
-                                                                       shp, nPnts = nPnts,
-                                                                       preview_img = self.clone)
-        
-        pnts_y_list = []; 
-        for i in range(nSlices): pnts_y_list.append((Ref_y0-Ref[2][i])*self.pixelScale)
+                                                                       shp,
+                                                                       nPnts=nPnts,
+                                                                       preview_img=self.clone)
+
+        pnts_y_list = []
+        for i in range(nSlices):
+            pnts_y_list.append((Ref_y0-Ref[2][i])*self.pixelScale)
         flow_dir = kwargs.get('flow_dir', [])
         flow_Vxy = kwargs.get('flow_Vxy', [])
         Mach_ang_mode = kwargs.get('Mach_ang_mode', None)
-        if (len(flow_dir) > 0 or len(flow_Vxy) > 0) and Mach_ang_mode != None:
+        if (len(flow_dir) > 0 or len(flow_Vxy) > 0) and Mach_ang_mode is not None:
             kwargs['inflow_dir_deg'] = anglesInterpolation(pnts_y_list, **kwargs)
             kwargs['inflow_dir_rad'] = np.array(kwargs['inflow_dir_deg'])*np.pi/180
 
         if preview:
             cv2.imshow('investigation domain before rotating', self.clone)
-            cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
-            
-            cv2.imwrite(fr'{output_directory}\AnalysisDomain-Points.jpg', self.clone)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            cv2.waitKey(1)
 
-        import_n_files = kwargs.get('n_files', 0);
-        if import_n_files == 0: import_n_files = kwargs.get('within_range', [0,0])
+            cv2.imwrite(fr'{output_directory}\AnalysisDomain-Points.jpg',
+                        self.clone)
+
+        import_n_files = kwargs.get('n_files', 0)
+        if import_n_files == 0:
+            import_n_files = kwargs.get('within_range', [0, 0])
         import_step = kwargs.get('every_n_files', 1)
-        indices_list, n_images = GenerateIndicesList(n1, import_n_files, import_step)
-        
+        indices_list, n_images = GenerateIndicesList(n1, import_n_files,
+                                                     import_step)
+
         if inclinationCheck:
-            original_img_list, img_list = ImportingFiles(files, indices_list, n_images, shp, **kwargs)
-        
-        store_n_files = kwargs.get('store_n_files', n_images)    
-        avg_shock_angle, avg_shock_loc = self.InclinedShockTracking(img_list, 
-                                                                    nSlices, Ref,  
-                                                                    nReview = store_n_files,
-                                                                    output_directory = output_directory,
+            original_img_list, img_list = ImportingFiles(files, indices_list,
+                                                         n_images, shp,
+                                                         **kwargs)
+
+        store_n_files = kwargs.get('store_n_files', n_images)
+        avg_shock_angle, avg_shock_loc = self.InclinedShockTracking(img_list,
+                                                                    nSlices,
+                                                                    Ref,
+                                                                    nReview=store_n_files,
+                                                                    output_directory=output_directory,
                                                                     **kwargs)
+
         print('Average inclination angle {:.2f} deg'.format(avg_shock_angle))
-        
+
         return avg_shock_angle, avg_shock_loc
-    
-## ========= Draft code ================
+
+
+# ================================| Draft code |===============================
 """
 Screen resize:
         # if shp[0] >= screen_height*0.85:
         #     r = shp[0]/shp[1] # ---------- Image aspect ratio
-        #     NewImgSize = (round(screen_height*0.85/r),round(screen_height*0.85))
+        #     NewImgSize = (round(screen_height*0.85/r),
+                            round(screen_height*0.85))
+
         #     Refimg = cv2.resize(Refimg, NewImgSize)
         #     reductionRatio = NewImgSize[0]/shp[0]
         #     shp = NewImgSize
         #     print('Warning: Image hieght is larger than your monitor hieght')
         #     print(f'Only reference image will be adjusted to {shp}')
-        
+
 standard deviation of the shock angle:
     tracking_std = kwargs.get('tracking_std', False)
-    # if tracking_std:   
+    # if tracking_std:
         # avg_xloc = np.array(xLocs).mean(axis=0)
         # xLoc_std = np.sqrt(np.square(xLocs).mean(axis=0))
         # std_m = self.v_least_squares(xLoc_std, columnY, nSlices)
         # x_min = shp[1]; x_max = 0;
-        # for j in range(nSlices): 
+        # for j in range(nSlices):
         #     x_i1, x_i2 = Ref[0][j], Ref[1][j]
         #     if x_min > min([x_i1, x_i2]): x_min = min([x_i1, x_i2])
         #     if x_max < max([x_i1, x_i2]): x_max = max([x_i1, x_i2])
         # print(np.mean(xLoc_std),np.mean(avg_xloc))
-        # kwargs['std_line_info'] = (std_m, np.mean(avg_xloc), xLoc_std, (columnY[-1]-columnY[0], x_max - x_min))
+        # kwargs['std_line_info'] = (std_m, np.mean(avg_xloc),
+                             xLoc_std, (columnY[-1]-columnY[0], x_max - x_min))
 
-Oscillation Domain from two points:       
-        # kwargs['osc_bound_line_info'] = ([[min_b[0],min_b[-1]], m_min, mean_min], [[max_b[0],max_b[-1]], m_max, mean_max])
+Oscillation Domain from two points:
+        # kwargs['osc_bound_line_info'] = ([[min_b[0],min_b[-1]],
+                     m_min, mean_min], [[max_b[0],max_b[-1]], m_max, mean_max])
 """
