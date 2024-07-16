@@ -59,7 +59,7 @@ class BCOLOR:  # For coloring the text in terminal
         - BGOKGREEN: background green
         - OKGREEN: green text
         - WARNING: yellow background (warning)
-        - FAIL: yellow text (fail)
+        - FAIL: red text (fail)
         - ITALIC: italic text
         - UNDERLINE: underlined text
         - ENDC: reset all attributes.
@@ -71,7 +71,7 @@ class BCOLOR:  # For coloring the text in terminal
     BGOKGREEN = '\033[42m'
     OKGREEN = '\033[32m'
     WARNING = '\033[43m'
-    FAIL = '\033[33m'
+    FAIL = '\033[31m'
     ENDC = '\033[0m'
     ITALIC = '\033[3m'
     UNDERLINE = '\033[4m'

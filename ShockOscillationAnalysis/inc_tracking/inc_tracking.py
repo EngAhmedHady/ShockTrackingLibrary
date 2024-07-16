@@ -16,7 +16,8 @@ from ..ShockOscillationAnalysis import SOA, CVColor, BCOLOR
 from ..linedrawingfunctions import InclinedLine, AngleFromSlope
 from ..slice_list_generator.list_generation_tools import GenerateIndicesList
 from .inc_tracking_support import (anglesInterpolation, v_least_squares,
-                                   shockDomain, ImportingFiles)
+                                   pearson_corr_coef, shockDomain,
+                                   ImportingFiles)
 
 px = 1/plt.rcParams['figure.dpi']
 plt.rcParams.update({'font.size': 25})
@@ -37,7 +38,7 @@ class InclinedShockTracking(SOA):
                                  preview_img: np.ndarray = None) -> tuple[list, int, int]:     # preview parameters
         """
         Setup shock inclination test, provids the test slices info. with aid of the estimated inclined shock line.
-     
+
         Parameters:
             - **CheckingWidth (int)**: Width for shock domain checking (sliceWidth).
             - **CheckingHeight (int or list)**: Height for shock domain checking in px. If a list is provided, it represents a range of heights for generating points [upper limit, lower limit].
@@ -45,13 +46,13 @@ class InclinedShockTracking(SOA):
             - **VMidPnt (int, optional)**: Vertical midpoint. Default is 0.
             - **nPnts (int, optional)**: Number of points to generate for inclined shock lines. Default is 0.
             - **preview_img (np.ndarray, optional)**: Image for preview as background. Default is None.
-         
+
         Returns:
             tuple: A tuple containing:
                 - SlicesInfo (list): List of shock domain slices, [[x-domainStrt,x-domainEnd],y-sliceLoc].
                 - nPnts (int): Number of slices generated for inclined shock.
                 - inclinationCheck (bool): Boolean indicating whether the shock inclination test is applicable.
-     
+
         Example:
             >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
             >>> instance = IncTrac(f)
@@ -61,15 +62,15 @@ class InclinedShockTracking(SOA):
             >>> points = 5
             >>> slices, nPnts, success = instance.InclinedShockDomainSetup(width, height, shape, nPnts=points)
             >>> print(slices, nPnts, success)
-     
+
         .. note::
             - The function sets up shock inclination testing by visualizing the shock domain.
             - It returns a list of slices location and range, the number of slices, and the inclination applicability.
-     
+
         """
         print('Shock inclination test and setup ...', end=" ")
         slices_info = []; inclinationCheck = True
-        
+
         # Generate the points
         if hasattr(CheckingHieght, "__len__"):
             # If CheckingHeight is a list, generate nPnts points within the height range
@@ -85,18 +86,18 @@ class InclinedShockTracking(SOA):
                 print(u'\u2717')
                 print(f'{BCOLOR.BGOKCYAN}info.:{BCOLOR.ENDC}{BCOLOR.ITALIC}Escaping the shock angle checking... \nSlice thickness is not sufficient for check the shock angle{BCOLOR.ENDC}')
                 return slices_info, 0, False
-        
+
         # IncInfoIndx = len(self.Reference) - 1
-        HalfSliceWidth = round(CheckingWidth/2) 
+        HalfSliceWidth = round(CheckingWidth/2)
 
         # Define the estimated shock line using 2 points P1, P2 --> User defined
-        P1 = (round(inclined_ref_line[0][0]), round(inclined_ref_line[0][1]))            
+        P1 = (round(inclined_ref_line[0][0]), round(inclined_ref_line[0][1]))
         LineSlope = inclined_ref_line[2]
-        
+
         # Calculate the y-intercepts of the upper and lower inclined lines
         aUp = shockDomain('up', P1, HalfSliceWidth, LineSlope, imgShape, preview_img)
         aDown = shockDomain('down', P1, HalfSliceWidth, LineSlope, imgShape, preview_img)
-        
+
         # Calculate y-coordinates of the points
         y_i = np.array(Pnts + DatumY).astype(int)
         if LineSlope != 0 and LineSlope != np.inf:
@@ -112,8 +113,8 @@ class InclinedShockTracking(SOA):
             print(u'\u2717')
             print(f'{BCOLOR.FAIL}Error:{BCOLOR.ENDC}{BCOLOR.ITALIC} Software is not supporting horizontal shock waves, aborting...{BCOLOR.ENDC}')
             sys.exit()
-         
-        # Optionally, preview the shock domain on the image    
+
+        # Optionally, preview the shock domain on the image
         if preview_img is not None:
             for pnt in range(len(Pnts)):
                 cv2.circle(preview_img, (x_i1[pnt],y_i[pnt]), radius=3, color=CVColor.RED, thickness=-1)
@@ -123,13 +124,13 @@ class InclinedShockTracking(SOA):
         return slices_info, nPnts, inclinationCheck
 
     def InclinedShockTracking(self, imgSet: list[np.ndarray],                         # image set for line tracking
-                              nSlices: int, Ref: list[int], slice_thickness: int = 1, # slices and tracking info. 
+                              nSlices: int, Ref: list[int], slice_thickness: int = 1, # slices and tracking info.
                               nReview: int = 0, output_directory: str = '',           # Review parameters
                               **kwargs) -> tuple:                                     # Other parameters
-        
+
         """
         Track and analyze the shock angle in a sequence of images.
-        
+
         Parameters:
             - **imgSet (list)**: List of images for shock tracking, the images should be formated as numpy array.
             - **nSlices (int)**: Number of slices to divide the image into for analysis.
@@ -141,10 +142,10 @@ class InclinedShockTracking(SOA):
                 - **avg_preview_mode (str)**: Mode for previewing average angle.
                 - **review_inc_slice_tracking (list or int)**: Slices to review for tracking.
                 - **osc_boundary (bool)**: To display the oscilliation domain depending on the analyised image set.
-        
+
         Returns:
             tuple: Average global angle (float) and average midpoint location (float).
-        
+
         Example:
             >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
             >>> instance = IncTrac(f)
@@ -152,7 +153,7 @@ class InclinedShockTracking(SOA):
             >>> ref = [[10, 20], [30, 40], [50, 60]]
             >>> avg_angle, avg_mid_loc = instance.InclinedShockTracking(img_set, 2, ref, nReview=5)
             >>> print(avg_angle, avg_mid_loc)
-        
+
         .. note ::
             - The function performs shock tracking across a series of images and calculates the average shock angle.
             - If `nReview` is specified, it plots and optionally saves review images for inspection.
@@ -170,11 +171,10 @@ class InclinedShockTracking(SOA):
         uncertainY_list = []     # List to store y-coordinates of uncertain x-locations
         shp = imgSet[0].shape    # Shape of images in the image set from the first image
         m = []                   # list of slops from least square calculation
-        
         # Optional keyword arguments
         avg_preview_mode = kwargs.get('avg_preview_mode', None)
         review_inc_slice_tracking = kwargs.get('review_inc_slice_tracking', -1)
-         
+
         # Array to review the tracked slices within the iamge set
         slice_ploting_array = np.zeros(len(imgSet))
         if hasattr(review_inc_slice_tracking, "__len__") and len(review_inc_slice_tracking) == 2:
@@ -187,20 +187,20 @@ class InclinedShockTracking(SOA):
 
         elif not hasattr(review_inc_slice_tracking, "__len__") and review_inc_slice_tracking > -1:
             slice_ploting_array[review_inc_slice_tracking] = 1
-        
+
         # Determine half thickness for slice processing
         if slice_thickness > 1: Ht = int(slice_thickness/2)  # Ht -> Half Thickness
         else: Ht = 1; slice_thickness = 2;
-        
+
         # Initialize upper and lower bounds for slices
         upper_bounds = np.zeros(nSlices, dtype = int); lower_bounds = np.zeros(nSlices, dtype = int)
-        
-        for i in range(nSlices): 
+
+        for i in range(nSlices):
             upper_bounds[i] = Ref[2][i] - Ht
             lower_bounds[i] = Ref[2][i] + Ht if slice_thickness%2 == 0 else Ref[2][i] + Ht + 1
-            columnY.append(Ref[2][i]) 
+            columnY.append(Ref[2][i])
         columnY = np.array(columnY)
-        
+
         # Determine middle index for slices
         midIndx = nSlices // 2
         midIndx2 = midIndx if nSlices % 2 != 0 else midIndx - 1
@@ -209,7 +209,7 @@ class InclinedShockTracking(SOA):
 
         xLoc = -1*np.ones(nSlices)
         AngReg = []
-        
+
         print('Shock tracking started ...', end=" ")
         for count, img in enumerate(imgSet):
             xLocOld = xLoc.copy()
@@ -217,22 +217,30 @@ class InclinedShockTracking(SOA):
             for i in range(nSlices):
                 x_i1, x_i2 = Ref[0][i], Ref[1][i]
                 Slice = np.sum(img[upper_bounds[i]-1:lower_bounds[i], x_i1:x_i2], axis=0) / slice_thickness
-                
+
                 LastShockLoc = xLocOld[i]-Ref[0][i]
                 ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count, Plot = slice_ploting_array[count])
                 # ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count)
-                xLoc.append(ShockLoc + Ref[0][i])                
+                xLoc.append(ShockLoc + Ref[0][i])
                 if not certainLoc: uncertain.append(xLoc[-1]); uncertainY.append(Ref[2][i])
 
             # finding the middle point
             midLocs.append(np.mean([xLoc[midIndx], xLoc[midIndx2]]))
-            
+
             # Calculate the slope using least squares method
             m.append(v_least_squares(xLoc, columnY, nSlices))
             AngReg.append(AngleFromSlope(m[-1]))
-            xLocs.append(xLoc); 
+
+            # Pearson correlation coefficient
+            r = pearson_corr_coef(xLoc, columnY, nSlices)
+            if 0.7 < abs(r) < 0.98:
+                print(f'good Pearson coefficient: {BCOLOR.OKGREEN}{r:0.2f}{BCOLOR.ENDC} @ {count}')
+            elif abs(r) < 0.7:
+                print(f'low Pearson coefficient: {BCOLOR.FAIL}{r:0.2f}{BCOLOR.ENDC}, with slope {m[-1]} @ {count}')
+
+            xLocs.append(xLoc);
             uncertain_list.append(uncertain); uncertainY_list.append(uncertainY)
-            
+
         AvgMidLoc= np.mean(midLocs);  avg_ang_glob = np.mean(AngReg);
         if avg_preview_mode != 'avg_ang':
             avg_slope = np.mean(m)*np.ones(nReview)
@@ -240,7 +248,7 @@ class InclinedShockTracking(SOA):
             avg_ang = avg_ang_glob*np.ones(nReview)
         else:
             avg_slope = m; avg_midLoc = midLocs; avg_ang = AngReg
-        
+
         osc_boundary = kwargs.get('osc_boundary', False)
         if osc_boundary:
             max_b = np.zeros(nSlices); min_b = shp[1]*np.ones(nSlices)
@@ -262,28 +270,28 @@ class InclinedShockTracking(SOA):
         else:
             r_range = (0,nReview,1)
             st,en,sp = r_range; n_review = nReview
-        
+
         if en > len(imgSet):
             en = len(imgSet)
             print(f'{BCOLOR.WARNING}Warning: {BCOLOR.ENDC}{BCOLOR.ITALIC}Images to review is out of the image set, only within the range are considered{BCOLOR.ENDC}')
-            
-        if n_review > 20: 
+
+        if n_review > 20:
              print(f'{BCOLOR.BGOKCYAN}info.:{BCOLOR.ENDC}{BCOLOR.ITALIC} For memory reasons, only 20 images will be displayed.')
              print(f'note: this will not be applied on images storing{BCOLOR.ENDC}')
-        
+
         if n_review > 0:
             n = 0
             for i in range(st,en,sp):
                 fig, ax = plt.subplots(figsize=(int(shp[1]*1.75*px), int(shp[0]*1.75*px)))
                 ax.set_ylim([shp[0],0]); ax.set_xlim([0,shp[1]])
-                plot_review(ax, imgSet[i], shp, xLocs[i], columnY, 
-                            uncertain_list[i], uncertainY_list[i], 
+                plot_review(ax, imgSet[i], shp, xLocs[i], columnY,
+                            uncertain_list[i], uncertainY_list[i],
                             avg_slope[i], avg_ang[i], avg_midLoc[i] , y, **kwargs)
-                if len(output_directory) > 0: 
+                if len(output_directory) > 0:
                     fig.savefig(fr'{output_directory}\ShockAngleReview_Ang{avg_ang_glob:.2f}_{i:05d}.png', bbox_inches='tight', pad_inches=0.1)
 
                 if n > 20:
-                    if len(output_directory) == 0: 
+                    if len(output_directory) == 0:
                         plt.close(fig); n = n_review
                         sys.stdout.write('\r')
                         sys.stdout.write("[%-20s] %d%%" % ('='*int((n)/(n_review/20)), int(5*(n)/(n_review/20))))
@@ -297,14 +305,14 @@ class InclinedShockTracking(SOA):
         print(f'Angle range variation: [{min(AngReg):0.2f},{max(AngReg):0.2f}], \u03C3 = {np.std(AngReg):0.2f}')
         return avg_ang_glob, AvgMidLoc
 
-    
-    def ShockPointsTracking(self, path: str, 
-                            tracking_V_range:list[int,float] = [0,0], inclination_info: int|list[int,tuple,tuple] = 0, nPnts: int = 0, scale_pixels = True, 
+
+    def ShockPointsTracking(self, path: str,
+                            tracking_V_range:list[int,float] = [0,0], inclination_info: int|list[int,tuple,tuple] = 0, nPnts: int = 0, scale_pixels = True,
                             preview = True, output_directory = '',comment='', **kwargs):
-        """  
+        """
         This function identifies shock points by slicing a predefined domain of the shock and tracking it at each slice based on the integral method of shock tracking outlined in this `article <https://dx.doi.org/10.2139/ssrn.4797840>`_.
         It operates over a specified vertical range within the images, serving as the core function for inclination shock tracking. Additionally, all keyword arguments for output customization can be passed through this function.
-            
+
         Parameters:
             - **path (str)**: Path to the directory containing the image files.
             - **tracking_V_range (list[int, float], optional)**: Vertical range for tracking shock points, specified as a list with two elements representing the upper and lower bounds (default is [0, 0]).
@@ -315,7 +323,7 @@ class InclinedShockTracking(SOA):
             - **output_directory (str, optional)**: Directory to save the output images (default is '').
             - **comment (str, optional)**: Additional comment for the output (default is '').
             - `**kwargs`: Additional keyword
-                
+
         Additional keyword arguments `**kwargs` may include:
             Importing image options:
                 - **n_files (int, optional)**: To import the first n-files from the given path.
@@ -323,17 +331,17 @@ class InclinedShockTracking(SOA):
                 - **within_range (list[int], optional)**: To import files within range [start, end]
                 - **resize_img (tuple[int], optional)**: Tuple specifying the dimensions to resize the images to (width, height). Default is the original image shape.
                 - **BG_path (str, optional)**: Path to the background image to be subtracted. Default is ''.
-            
+
             Inflow data options:
                 - **flow_dir (list, optional)**: List of tuples containing the measured y-coordinates and the corresponding angles [(y_loc, angle),...].
                 - **flow_Vxy (list, optional)**: List of tuples containing the measured y-coordinates and the corresponding velocity components [(y_loc, Vx, Vy),...].
                 - **angle_interp_kind (str)**: 'linear','CubicSpline' or 'PCHIP' (default is linear)
-            
+
             Define the domain options and tracking:
                 - **Ref_x0 (list[int], optional):** list of x-coordinates for 2-vertical reference lines [Ref_x01, Ref_x02] used for scaling, used instead of drawing.
                 - **Ref_y0 (int, optional)**: y-coordinate of the horizontal reference line [y = 0] used as reference for tracking_V_range, used instead of drawing.
-                - **slice_thickness (int, optional)**: Thickness of each slice. Default is 1. 
-            
+                - **slice_thickness (int, optional)**: Thickness of each slice. Default is 1.
+
             Review and results options:
                 - **preview (bool)**: Whether to preview the selected domain for the analysis or not (default is True)
                 - **review_inc_slice_tracking (int|list[int])**: To plot all slices of spacific image or range of images (default is 0)
@@ -343,7 +351,7 @@ class InclinedShockTracking(SOA):
                 - **osc_boundary (bool)**: To display the oscilliation domain depending on the analyised image set.
                 - **output_directory (str)**: The pathe where the output results will be stored (default is '').
                 - **store_n_files (int|list[int])**: Specify the first n output results to be stored, or provide a range of output image indices to be stored in the format [start, end].
-                
+
             Results display options:
                 - **points_opacity (float)**: The transperancy of the tracking points from 0 to 1 (default is 1).
                 - **points_color (str)**: The color of the tracking points (default is 'yellow')
@@ -360,7 +368,7 @@ class InclinedShockTracking(SOA):
                 - **b_color (str)**: boundary domain and lines color for the active ``osc_boundary`` (default is 'tab:orange')
                 - **osc_range_opacity (float)**: The transperancy of the boundary domain from 0 to 1 (default is 0.3)
                 - **b_lins_opacity (float)**: The transperancy of the boundary lines from 0 to 1 (default is 1)
-                
+
         .. note ::
             - In case of ``scale_pixels = True`` the ``Ref_x0`` and ``Ref_y0`` must be defined either by drawing or as arguments.
             - The values of ``Ref_x0`` and ``Ref_y0`` are in pixels.
@@ -368,15 +376,15 @@ class InclinedShockTracking(SOA):
             - The imported files are defined by thier index and sorted by name.
             - For automation it is better to set ``preview`` to False.
             - The plots from ``review_inc_slice_tracking`` give details of finding the shock location, such as local minima, shock location, last image shock location, etc.
-            - ``avg_preview_mode`` the display of vertical least squares regression line of the tracked points: 
+            - ``avg_preview_mode`` the display of vertical least squares regression line of the tracked points:
                 - 'avg_all': Displays the average of all lines calculated from the tracked points across the entire image dataset.
-                - 'avg_ang': Displays the line of the tracked points in each image 
+                - 'avg_ang': Displays the line of the tracked points in each image
             - In this version ``Mach_ang_mode`` can only calculate Mach number when inflow data is available, 'flow_dir' is not yet supported!
             - ``osc_boundary`` Calculated based on the minimum and maximum recorded location at each slice, a vertical least squares regression line is used to define the oscillation boundary and minimize any uncertainty that might occur.
-                
+
         Returns:
             tuple[float, float]: Average inclination angle and average shock location.
-            
+
         Example:
             >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
             >>> D = 60
@@ -410,10 +418,10 @@ class InclinedShockTracking(SOA):
         Ref_y0 = kwargs.get('Ref_y0', -1)
         resize_img = kwargs.get('resize_img', (shp[1],shp[0]))
         Refimg = cv2.resize(Refimg, resize_img)
-        
+
         if scale_pixels: Ref_x0, Ref_y0, Ref_y1 = self.DefineReferences(Refimg, shp, Ref_x0, scale_pixels, Ref_y0)
         else: self.clone = Refimg.copy()
-        
+
         screen = screeninfo.get_monitors()[0]
         screen_width, screen_height = screen.width, screen.height
         print(f'Screen resolution: {screen_width}, {screen_height}')
@@ -470,17 +478,17 @@ class InclinedShockTracking(SOA):
         if not hasattr(inclination_info, "__len__"):
             CheckingWidth = inclination_info
             if CheckingWidth < 10:
-                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference width is not sufficient!{BCOLOR.ENDC}'); 
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference width is not sufficient!{BCOLOR.ENDC}');
                 CheckingWidth = int(input(f'{BCOLOR.BGOKGREEN}Request: {BCOLOR.ENDC}{BCOLOR.ITALIC}Please provide reference width >10px: {BCOLOR.ENDC}'))
             inclined_ref_line = []
             try:
-                inclined_ref_line = self.LineDraw(self.clone, 'Inc', 3)[-1] 
+                inclined_ref_line = self.LineDraw(self.clone, 'Inc', 3)[-1]
             except Exception:
                 print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Nothing was drawn!{BCOLOR.ENDC} inclined_ref_line value is {inclined_ref_line}')
-            
-            if not hasattr(inclined_ref_line, "__len__") or len(inclined_ref_line) < 4: 
+
+            if not hasattr(inclined_ref_line, "__len__") or len(inclined_ref_line) < 4:
                 print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference lines are not sufficient!{BCOLOR.ENDC}'); sys.exit()
-           
+
         elif len(inclination_info) > 2:
             P1,P2,m,a = InclinedLine(inclination_info[1],inclination_info[2],imgShape = shp)
             cv2.line(self.clone, P1, P2, (0,255,0), 1)
@@ -494,7 +502,7 @@ class InclinedShockTracking(SOA):
                     print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}insufficient number of points{BCOLOR.ENDC}')
                     nPnts = 0
 
-        Ref, nSlices, inclinationCheck = self.InclinedShockDomainSetup(CheckingWidth, 
+        Ref, nSlices, inclinationCheck = self.InclinedShockDomainSetup(CheckingWidth,
                                                                        [Ref_y1, Ref_y2],
                                                                        inclined_ref_line,
                                                                        shp,
