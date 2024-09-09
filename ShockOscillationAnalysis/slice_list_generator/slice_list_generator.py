@@ -22,9 +22,6 @@ from .list_generation_tools import (genratingRandomNumberList,
 
 class SliceListGenerator(SOA):
     def __init__(self, f: int, D: float = 1, pixelScale: float = 1):
-        # self.f = f # ----------------------- sampling rate (fps)
-        # self.D = D # ----------------------- refrence distance (mm)
-        # self.pixelScale = pixelScale # ----- initialize scale of the pixels
         self.inc_trac = InclinedShockTracking(f, D)
         super().__init__(f, D, pixelScale)
 
@@ -126,7 +123,7 @@ class SliceListGenerator(SOA):
         return img_list, n
 
     def GenerateSlicesArray(self, path: str, scale_pixels:bool = True , full_img_width: bool = False,   # Domain info.
-                            slice_loc:int = 0, slice_thickness: int = 0,                                # Slice properties
+                            slice_loc:int = 0, slice_thickness: int | list[int, str]= 0,                # Slice properties
                             shock_angle_samples = 30, inclination_est_info: list[int,tuple,tuple] = [], # Angle estimation
                             preview: bool = True, angle_samples_review = 10,                            # preview options
                             output_directory: str = '', comment: str ='',                               # Data store
@@ -189,7 +186,9 @@ class SliceListGenerator(SOA):
         n1 = len(files)
 
         # In case no file found end the progress and eleminate the program
-        if n1 < 1: print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}No files found!{BCOLOR.ENDC}'); sys.exit();
+        if n1 < 1: 
+            print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}No files found!{BCOLOR.ENDC}'); 
+            sys.exit();
 
         # Open first file and set the limits and scale
         img = cv2.imread(files[0])
@@ -199,11 +198,20 @@ class SliceListGenerator(SOA):
         Ref_y0 = kwargs.get('Ref_y0', -1);    Ref_y1 = kwargs.get('Ref_y1', -1)
 
         Ref_x0, Ref_y0, Ref_y1 = self.DefineReferences(img, shp,
-                                                                Ref_x0, scale_pixels,
-                                                                Ref_y0, Ref_y1, slice_loc)
-        print(f'Slice is located at: {Ref_y1}px')
-        if Ref_y1 > 0 and Ref_y1 != Ref_y0: cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), CVColor.RED, 1)
+                                                       Ref_x0, scale_pixels,
+                                                       Ref_y0, Ref_y1, slice_loc)
+        print(f'Slice center is located at: {Ref_y1}px ~ {abs(Ref_y1-Ref_y0)*self.pixelScale:0.2f}{self.univ_unit["dis"]} from reference')
+        if Ref_y1 > 0 and Ref_y1 != Ref_y0: 
+            cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), CVColor.RED, 1)
 
+        if hasattr(slice_thickness, "__len__"):        
+            if slice_thickness[1] == 'mm' and self.pixelScale > 0: 
+                slice_thickness = int(slice_thickness[0]/self.pixelScale)
+            elif slice_thickness[1] == 'px':
+                slice_thickness = int(slice_thickness[0])
+            else: 
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}insufficient scale/unit!{BCOLOR.ENDC}');
+                sys.exit();
         if slice_thickness > 0: Ht = int(slice_thickness/2)  # Half Thickness
         else: Ht = 1;
 
@@ -214,12 +222,25 @@ class SliceListGenerator(SOA):
 
         avg_shock_angle = kwargs.get('avg_shock_angle', 90)
         avg_shock_loc = kwargs.get('avg_shock_loc', 0)
+        sat_vr = kwargs.get('sat_vr', slice_thickness) # Shock Angle Test Vertical Range
+        if hasattr(sat_vr, "__len__"):
+            start_vr, end_vr = sat_vr[:2]
+            if len(sat_vr) > 2 and sat_vr[2] == 'mm':
+               sat_vr = [Ref_y1 + (start_vr/self.pixelScale), 
+                         Ref_y1 - (end_vr/self.pixelScale)]
+            else:
+                sat_vr = [Ref_y1 + start_vr, Ref_y1 - end_vr]
+            
+            sat_vr.sort()
+            if abs(end_vr-start_vr) == 0:
+                sat_vr = slice_thickness
+                
         if not hasattr(inclination_est_info, "__len__"):
             self.LineDraw(self.clone, 'Inc', 3)
             if len(self.Reference) < 4: print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference lines are not sufficient!{BCOLOR.ENDC}'); sys.exit()
             P1,P2,m,a = self.Reference[3]
             Ref, nSlices, inclinationCheck = self.inc_trac.InclinedShockDomainSetup(inclination_est_info,
-                                                                                    slice_thickness, [P1,P2,m,a],
+                                                                                    sat_vr, [P1,P2,m,a],
                                                                                     shp, VMidPnt=Ref_y1,
                                                                                     preview_img=self.clone)
         elif len(inclination_est_info) > 2:
@@ -227,7 +248,7 @@ class SliceListGenerator(SOA):
             cv2.line(self.clone, P1, P2, CVColor.GREEN, 1)
             self.Reference.append([P1, P2, m,a])
             Ref, nSlices, inclinationCheck = self.inc_trac.InclinedShockDomainSetup(inclination_est_info[0],
-                                                                                    slice_thickness, [P1,P2,m,a],
+                                                                                    sat_vr, [P1,P2,m,a],
                                                                                     shp, VMidPnt=Ref_y1,
                                                                                     preview_img=self.clone)
         elif avg_shock_angle != 90 and avg_shock_loc == 0: # in case the rotation angle only is provieded in working _range

@@ -132,7 +132,8 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.ShockOscillationAnalysis.</span></span><span class="sig-name descname"><span class="pre">BCOLOR</span></span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class to represent ANSI escape sequences for coloring terminal text.
-This class provides various ANSI escape codes to color and style text in terminal output.</p>
+This class provides various ANSI escape codes to color and style text in
+terminal output.</p>
 <dl class="simple">
 <dt>Supported formats:</dt><dd><ul class="simple">
 <li><p>BGOKBLUE: background blue</p></li>
@@ -141,7 +142,7 @@ This class provides various ANSI escape codes to color and style text in termina
 <li><p>BGOKGREEN: background green</p></li>
 <li><p>OKGREEN: green text</p></li>
 <li><p>WARNING: yellow background (warning)</p></li>
-<li><p>FAIL: yellow text (fail)</p></li>
+<li><p>FAIL: red text (fail)</p></li>
 <li><p>ITALIC: italic text</p></li>
 <li><p>UNDERLINE: underlined text</p></li>
 <li><p>ENDC: reset all attributes.</p></li>
@@ -170,7 +171,7 @@ This class provides various ANSI escape codes to color and style text in termina
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.FAIL">
-<span class="sig-name descname"><span class="pre">FAIL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[33m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.FAIL" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">FAIL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[31m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.FAIL" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -207,8 +208,8 @@ This class provides various ANSI escape codes to color and style text in termina
 <p>A class to represent common colors used in OpenCV.
 This class provides RGB tuples for a variety of commonly used colors.</p>
 <dl class="simple">
-<dt>Supported colors:</dt><dd><p>BLACK, WHITE, RED, GREEN, BLUE, GREENBLUE, YELLOW, CYAN, MAGENTA, FUCHSIPINK
-GRAY, ORANGE</p>
+<dt>Supported colors:</dt><dd><p>BLACK, WHITE, RED, GREEN, BLUE, GREENBLUE, YELLOW, CYAN, MAGENTA,
+FUCHSIPINK, GRAY, ORANGE</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -286,7 +287,7 @@ Supported corrections include ‘Brightness/Contrast’, ‘Average’, and ‘F
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>img (numpy.ndarray)</strong>: Original image snapshot.</p></li>
 <li><dl class="simple">
-<dt><strong>*args (str)</strong>: Variable-length argument list specifying the corrections to apply.</dt><dd><p>Supported corrections: ‘Brightness/Contrast’, ‘Average’, ‘FFT’.</p>
+<dt>** <em>args (str)*</em>: Variable-length argument list specifying the corrections to apply.</dt><dd><p>Supported corrections: ‘Brightness/Contrast’, ‘Average’, ‘FFT’.</p>
 </dd>
 </dl>
 </li>
@@ -455,7 +456,7 @@ where a snapshots list is given as input, three methods of tracking can be propo
 <li><p><strong>img (numpy.ndarray)</strong>: Input image or image data.</p></li>
 <li><p><strong>method (str)</strong>: Method for shock tracking (integral, darkest_spot, maxGrad). Default is ‘integral’.</p></li>
 <li><dl class="simple">
-<dt><strong>reviewInterval (list)</strong>: List containing two integers representing the review interval. </dt><dd><p>Available only with ‘integral’ method. Default is [0, 0].</p>
+<dt><strong>reviewInterval (list)</strong>: List containing two integers representing the review interval.</dt><dd><p>Available only with ‘integral’ method. Default is [0, 0].</p>
 </dd>
 </dl>
 </li>
@@ -466,7 +467,11 @@ where a snapshots list is given as input, three methods of tracking can be propo
 </dd>
 <dt>Returns:</dt><dd><p>numpy.ndarray: Generated shock signals.</p>
 </dd>
-<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">shock_signals</span> <span class="o">=</span> <span class="n">ShockTrakingAutomation</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;integral&#39;</span><span class="p">,</span> <span class="n">reviewInterval</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="n">Signalfilter</span><span class="o">=</span><span class="n">filter_function</span><span class="p">,</span> <span class="n">CheckSolutionTime</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>    
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">shock_signals</span> <span class="o">=</span> <span class="n">ShockTrakingAutomation</span><span class="p">(</span><span class="n">image</span><span class="p">,</span>
+<span class="go">                                           method=&#39;integral&#39;,</span>
+<span class="go">                                           reviewInterval=[10, 20],</span>
+<span class="go">                                           Signalfilter=filter_function,</span>
+<span class="go">                                           CheckSolutionTime=True)</span>
 </pre></div>
 </div>
 </dd>
@@ -477,14 +482,20 @@ where a snapshots list is given as input, three methods of tracking can be propo
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.VelocitySignal">
 <span class="sig-name descname"><span class="pre">VelocitySignal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Signal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TotalTime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.VelocitySignal" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the velocity signal from the given positional signal.
-The function calculates the velocity at each point in the Signal using finite differences.
-It uses a forward difference for the first point, a backward difference for the last point,
-and a central difference for all intermediate points. It then subtracts the average velocity
-from each point to return the velocity signal.</p>
+The function calculates the velocity at each point in the Signal using
+finite differences. It uses a forward difference for the first point, a
+backward difference for the last point, and a central difference for
+all intermediate points. It then subtracts the average velocity from
+each point to return the velocity signal.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
-<li><p><strong>Signal (list or numpy.ndarray)</strong>: Positional signal data points in mm.</p></li>
-<li><p><strong>TotalTime (float)</strong>: Total time duration over which the signal is recorded.</p></li>
+<li><p><strong>Signal (list or numpy.ndarray)</strong>: Positional signal data points
+in mm.</p></li>
+<li><dl class="simple">
+<dt><strong>TotalTime (float)</strong>: Total time duration over which the signal</dt><dd><p>is recorded.</p>
+</dd>
+</dl>
+</li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><p>numpy.ndarray: Velocity signal after removing the average velocity.</p>
@@ -500,7 +511,8 @@ from each point to return the velocity signal.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>The velocity is calculated in units per second, while the signal amplitudes are measured in millimeters (mm).</p></li>
+<li><p>The velocity is calculated in units per second, while the signal
+amplitudes are measured in millimeters (mm).</p></li>
 <li><p>The returned velocity signal has the mean velocity subtracted.</p></li>
 </ul>
 </div>
@@ -510,21 +522,22 @@ from each point to return the velocity signal.</p>
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.extract_coordinates">
 <span class="sig-name descname"><span class="pre">extract_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.extract_coordinates" title="Permalink to this definition"></a></dt>
 <dd><p>Record starting (x, y) coordinates on left mouse button click and draw
-a line that crosses all over the image, storing it in a global variable.
-In case of horizontal or vertical lines, it takes the average between points.</p>
+a line that crosses all over the image, storing it in a global
+variable. In case of horizontal or vertical lines, it takes the average
+between points.</p>
 <dl>
 <dt>Drawing steps:</dt><dd><ol class="arabic simple">
 <li><p>Push the left mouse on the first point.</p></li>
 <li><p>Pull the mouse cursor to the second point.</p></li>
-<li><p>The software will draw a thick red line (indicating the mouse locations)
-and a green line indicating the Final line result.</p></li>
+<li><p>The software will draw a thick red line (indicating the mouse
+locations) and a green line indicating the Final line result.</p></li>
 <li><p>To confirm, press the left click anywhere on the image, or
 to delete the line, press the right click anywhere on the image.</p></li>
 <li><p>Press any key to proceed.</p></li>
 </ol>
 </dd>
 <dt>Parameters:</dt><dd><ul class="simple">
-<li><p>event (int): The type of mouse event (e.g., cv2.EVENT_LBUTTONDOWN).</p></li>
+<li><p>event (int): The type of event (e.g., cv2.EVENT_LBUTTONDOWN).</p></li>
 <li><p>x (int): The x-coordinate of the mouse cursor.</p></li>
 <li><p>y (int): The y-coordinate of the mouse cursor.</p></li>
 <li><p>flags (int): Flags associated with the mouse event.</p></li>
@@ -532,7 +545,11 @@ to delete the line, press the right click anywhere on the image.</p></li>
 <dt>parameters (tuple): A tuple containing:</dt><dd><ul>
 <li><p>Name of the window to display the image.</p></li>
 <li><p>Image shape (tuple of y-length and x-length).</p></li>
-<li><p>Line type (‘V’ for vertical, ‘H’ for horizontal, ‘Inc’ for inclined).</p></li>
+<li><dl class="simple">
+<dt>Line type (‘V’ for vertical, ‘H’ for horizontal,</dt><dd><p>‘Inc’ for inclined).</p>
+</dd>
+</dl>
+</li>
 </ul>
 </dd>
 </dl>

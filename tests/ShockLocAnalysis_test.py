@@ -5,9 +5,11 @@ Created on Wed Jun 12 14:23:30 2024
 @author: Ahmed H. Hanfy
 """
 import cv2
+import sys
 import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
+sys.path.append(r'..\ShockOscillationAnalysis')
 from ShockOscillationAnalysis import SOA
 
 if __name__ == '__main__':

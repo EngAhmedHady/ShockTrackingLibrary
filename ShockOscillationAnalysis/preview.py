@@ -7,6 +7,8 @@ Created on Wed Feb 28 11:05:30 2024
 
 import cv2
 import numpy as np
+# from ShockOscillationAnalysis import CVColor
+# from linedrawingfunctions import InclinedLine, AngleFromSlope
 from .ShockOscillationAnalysis import CVColor
 from .linedrawingfunctions import InclinedLine, AngleFromSlope
 from matplotlib.patches import Arc, FancyArrowPatch
@@ -47,7 +49,7 @@ def AvgAnglePlot(ax, img_shp:tuple , P: tuple, slope: float, angle: float,
     avg_txt_size = kwargs.get('avg_txt_size', 26)
     
     # Calculate the inclined line end points
-    P1,P2,avg_slope,a = InclinedLine(P,slope = slope ,imgShape = img_shp)
+    P1,P2,_,a = InclinedLine(P,slope = slope ,imgShape = img_shp)
     # Calculate the X position for the text annotation
     X = int((avg_txt_Yloc-a)/slope) if slope != 0 else avg_txt_Yloc
     # Plot the inclined line

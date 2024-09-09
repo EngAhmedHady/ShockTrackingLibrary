@@ -6,6 +6,7 @@ Created on Wed Feb 28 12:28:27 2024
 """
 import random
 from ..ShockOscillationAnalysis import BCOLOR
+# from ShockOscillationAnalysis import BCOLOR
 
 def genratingRandomNumberList(ShockAngleSamples: int, n1: int) -> list[int]:
     """

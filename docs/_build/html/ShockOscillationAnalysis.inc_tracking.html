@@ -18,6 +18,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -145,7 +146,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockTracking">
-<span class="sig-name descname"><span class="pre">InclinedShockTracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgSet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nSlices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nReview</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockTracking" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">InclinedShockTracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imgSet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nSlices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_thickness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nReview</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockTracking" title="Permalink to this definition"></a></dt>
 <dd><p>Track and analyze the shock angle in a sequence of images.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
@@ -153,7 +154,7 @@
 <li><p><strong>nSlices (int)</strong>: Number of slices to divide the image into for analysis.</p></li>
 <li><p><strong>Ref (list)</strong>: Reference points for slices [[x_1, x_2, y], …].</p></li>
 <li><p><strong>slice_thickness (int, optional)</strong>: Thickness of each slice. Default is 1.</p></li>
-<li><p><strong>nReview (int, optional)</strong>: Number of images to review. Default is 0.</p></li>
+<li><p><strong>nReview (int or list, optional)</strong>: Number or range of images to review. Default is 0.</p></li>
 <li><p><strong>output_directory (str, optional)</strong>: Directory to save the review images. Default is ‘’.</p></li>
 <li><dl class="simple">
 <dt><cite>**kwargs</cite>: Additional keyword arguments:</dt><dd><ul>
@@ -182,6 +183,8 @@
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>The function performs shock tracking across a series of images and calculates the average shock angle.</p></li>
+<li><p>If <cite>nReview</cite> is specified as number, the first n-images will be reviewd.</p></li>
+<li><p>If <cite>nReview</cite> is specified as list, A list specifying the start and end.</p></li>
 <li><p>If <cite>nReview</cite> is specified, it plots and optionally saves review images for inspection.</p></li>
 <li><p>It uses least squares method to fit the shock locations and calculates the corresponding angle.</p></li>
 </ul>
@@ -269,7 +272,7 @@ It operates over a specified vertical range within the images, serving as the co
 <li><p>For automation it is better to set <code class="docutils literal notranslate"><span class="pre">preview</span></code> to False.</p></li>
 <li><p>The plots from <code class="docutils literal notranslate"><span class="pre">review_inc_slice_tracking</span></code> give details of finding the shock location, such as local minima, shock location, last image shock location, etc.</p></li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">avg_preview_mode</span></code> the display of vertical least squares regression line of the tracked points: </dt><dd><ul>
+<dt><code class="docutils literal notranslate"><span class="pre">avg_preview_mode</span></code> the display of vertical least squares regression line of the tracked points:</dt><dd><ul>
 <li><p>‘avg_all’: Displays the average of all lines calculated from the tracked points across the entire image dataset.</p></li>
 <li><p>‘avg_ang’: Displays the line of the tracked points in each image</p></li>
 </ul>
@@ -424,9 +427,83 @@ It operates over a specified vertical range within the images, serving as the co
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.error_sum">
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">error_sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xloc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columnY</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nSlices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_yint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.error_sum" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the normalized sum of absolute errors between the actual x-coordinates and
+the x-coordinates predicted by the linear regression line.</p>
+<dl>
+<dt>Parameters:</dt><dd><ul class="simple">
+<li><p><strong>xloc (list[float])</strong>: List of actual x-coordinates.</p></li>
+<li><p><strong>columnY (list[float])</strong>: List of y-coordinates.</p></li>
+<li><p><strong>nSlices (int)</strong>: Number of data points.</p></li>
+<li><p><strong>l_slope (float)</strong>: Slope of the linear regression line.</p></li>
+<li><p><strong>l_yint (float)</strong>: y-intercept of the linear regression line.</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><p>float: Normalized sum of absolute errors.</p>
+</dd>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xloc</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">columnY</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.1</span><span class="p">,</span> <span class="mf">5.9</span><span class="p">,</span> <span class="mf">8.2</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nSlices</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l_slope</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">l_yint</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">e</span> <span class="o">=</span> <span class="n">error_sum</span><span class="p">(</span><span class="n">xloc</span><span class="p">,</span> <span class="n">columnY</span><span class="p">,</span> <span class="n">nSlices</span><span class="p">,</span> <span class="n">l_slope</span><span class="p">,</span> <span class="n">l_yint</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The function calculates the normalized sum of absolute errors by comparing the actual x-coordinates
+to the x-coordinates predicted by the linear regression line for each y-coordinate.</p></li>
+<li><p>It returns the average error per slice as a float.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.pearson_corr_coef">
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">pearson_corr_coef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xLoc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columnY</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nSlices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.pearson_corr_coef" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the Pearson correlation coefficient.</p>
+<dl>
+<dt>Parameters:</dt><dd><ul class="simple">
+<li><p><strong>xLoc (list[float])</strong>: List of x-coordinates of the points.</p></li>
+<li><p><strong>columnY (list[float])</strong>: List of y-coordinates of the points.</p></li>
+<li><p><strong>nSlices (int)</strong>: Number of slices or data points.</p></li>
+</ul>
+</dd>
+<dt>Returns:</dt><dd><p>float: Pearson correlation coefficient.</p>
+</dd>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">ShockOscillationAnalysis</span> <span class="kn">import</span> <span class="n">InclinedShockTracking</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">instance</span> <span class="o">=</span> <span class="n">InclinedShockTracking</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nSlices</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xLoc</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">columnY</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nSlices</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">pearson_corr_coef</span><span class="p">(</span><span class="n">xLoc</span><span class="p">,</span> <span class="n">columnY</span><span class="p">,</span> <span class="n">nSlices</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul>
+<li><p>The function calculates the Pearson correlation coefficient using the formula:</p>
+<div class="math notranslate nohighlight">
+\[r = \frac{n \sum (xy) - (\sum x)(\sum y)}{\sqrt{[n \sum x^2 - (\sum x)^2][n \sum y^2 - (\sum y)^2]}}\]</div>
+</li>
+<li><p>It returns the Pearson correlation coefficient as a float.</p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.shockDomain">
 <span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">shockDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HalfSliceWidth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LineSlope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgShape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preview_img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.shockDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Generate and visualize a shock domain based on the slice width and 
+<dd><p>Generate and visualize a shock domain based on the slice width and
 the drawn line parameters (one point and slope).</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">

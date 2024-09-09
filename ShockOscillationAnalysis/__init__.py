@@ -11,3 +11,6 @@ from .shocktracking import ShockTraking
 from .linedrawingfunctions import InclinedLine
 from .generateshocksignal import GenerateShockSignal
 from .decorators import calculate_running_time
+from .imgcleaningfunctions import (SliceListAverage,
+                                   CleanIlluminationEffects,
+                                   BrightnessAndContrast)

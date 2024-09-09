@@ -10,6 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ..linedrawingfunctions import InclinedLine
 from ..ShockOscillationAnalysis import BCOLOR, CVColor
+# from linedrawingfunctions import InclinedLine
+# from ShockOscillationAnalysis import BCOLOR, CVColor
 from scipy.interpolate import CubicSpline, PchipInterpolator
 
 def v_least_squares(xLoc: list[float], columnY:list[float], nSlices: int) -> list[float]:
@@ -70,9 +72,10 @@ def pearson_corr_coef(xLoc: list[float], columnY:list[float], nSlices: int) -> l
 
     .. note::
         - The function calculates the Pearson correlation coefficient using the formula:
-          \[
-          r = \frac{n \sum (xy) - (\sum x)(\sum y)}{\sqrt{[n \sum x^2 - (\sum x)^2][n \sum y^2 - (\sum y)^2]}}
-          \]
+
+          .. math::
+              r = \\frac{n \\sum (xy) - (\\sum x)(\\sum y)}{\\sqrt{[n \\sum x^2 - (\\sum x)^2][n \\sum y^2 - (\\sum y)^2]}}
+
         - It returns the Pearson correlation coefficient as a float.
     """
     xy = np.array(xLoc)*columnY; yy = columnY**2; xx = np.array(xLoc)**2
@@ -85,6 +88,52 @@ def pearson_corr_coef(xLoc: list[float], columnY:list[float], nSlices: int) -> l
     r = r_num/r_den
 
     return r
+
+
+def error_sum(xloc: list[float], columnY:list[float], nSlices: int,
+              l_slope: float, l_yint: float):
+    """
+    Calculate the normalized sum of absolute errors between the actual x-coordinates and
+    the x-coordinates predicted by the linear regression line.
+
+    Parameters:
+        - **xloc (list[float])**: List of actual x-coordinates.
+        - **columnY (list[float])**: List of y-coordinates.
+        - **nSlices (int)**: Number of data points.
+        - **l_slope (float)**: Slope of the linear regression line.
+        - **l_yint (float)**: y-intercept of the linear regression line.
+
+    Returns:
+        float: Normalized sum of absolute errors.
+
+    Example:
+        >>> xloc = [1.0, 2.0, 3.0, 4.0, 5.0]
+        >>> columnY = [2.0, 4.1, 5.9, 8.2, 10.0]
+        >>> nSlices = 5
+        >>> l_slope = 2.0
+        >>> l_yint = 0.0
+        >>> e = error_sum(xloc, columnY, nSlices, l_slope, l_yint)
+        >>> print(e)
+
+    .. note::
+        - The function calculates the normalized sum of absolute errors by comparing the actual x-coordinates
+          to the x-coordinates predicted by the linear regression line for each y-coordinate.
+        - It returns the average error per slice as a float.
+    """
+    error = []
+    e = 0
+    e2 = 0
+    for i in range(nSlices):
+        x_dash = (columnY[i] - l_yint)/l_slope
+        error.append(abs(xloc[i]-x_dash))
+        e += error[-1]
+    e /= nSlices
+    # for i in range(nSlices):
+    #     e2 += (error[i]-e)**2
+    # e2 /= nSlices
+    # print(f'{BCOLOR.OKGREEN}{e:0.2f}\t{BCOLOR.OKCYAN}{e2:0.2f}{BCOLOR.ENDC}')
+    # sigma = np.sqrt(e2)
+    return e
 
 def anglesInterpolation(pnts_y_list: list[int],                              # Generated points by class
                         flow_dir: list[float] = None, flow_Vxy:list[tuple] = None, # measured data (LDA, CFD, ... )

@@ -78,16 +78,19 @@ class BCOLOR:  # For coloring the text in terminal
 
 
 class SOA:
-    def __init__(self, f: int = 1, D: int = 1, pixelScale: float = 1):
-        self.f = f  # ----------------- sampling rate (fps)
-        self.D = D  # ----------------- refrence distance (mm)
+    def __init__(self, f: int = 1, D: int = 1, 
+                 pixelScale: float = 1, 
+                 univ_unit = {'freq':'fps','dis':'mm', 'angle': 'deg'}):
+        self.f = f  # ----------------- sampling rate (univ_unit: 'freq')
+        self.D = D  # ----------------- refrence distance (univ_unit: 'dis)
         self.pixelScale = pixelScale  # initialize scale of the pixels
+        self.univ_unit = univ_unit  # - universal units used in the analysis
         self.ClickCount = 0  # -------- initialize the mouse clicks
-        self.TempLine = []  # --- initialize the temporary line recording array
-        self.Temp = cv2.vconcat([])  # initialize the temporary image
+        self.TempLine = []  # --------- initialize the temporary line array
+        self.Temp = cv2.vconcat([])  #- initialize the temporary image
         self.clone = cv2.vconcat([])  # initialize the editable image copy
         self.Reference = []  # -------- initialize croping limits or line set
-        self.line_coordinates = []  # -- initialize Line coordinate
+        self.line_coordinates = []  # - initialize Line coordinate
         self.outputPath = ''  # ------- image output
 
     def extract_coordinates(self, event: int,  # call event
@@ -143,30 +146,30 @@ class SOA:
                 self.TempLine.append((x,y))
 
                 # Draw temprary line
-                cv2.line(self.Temp, self.TempLine[0], self.TempLine[1], 
+                cv2.line(self.Temp, self.TempLine[0], self.TempLine[1],
                          (0,0,255), 2)
                 if parameters[2] == 'V':
                     avg = int((self.TempLine[0][0]+self.TempLine[1][0])/2)
-                    cv2.line(self.Temp, (avg,0), (avg,parameters[1][0]), 
+                    cv2.line(self.Temp, (avg,0), (avg,parameters[1][0]),
                              CVColor.GREEN, 1)
                 elif parameters[2] == 'H':
                     avg = int((self.TempLine[0][1]+self.TempLine[1][1])/2)
-                    cv2.line(self.Temp, (0,avg), (parameters[1][1],avg), 
+                    cv2.line(self.Temp, (0,avg), (parameters[1][1],avg),
                              CVColor.YELLOW, 1)
                 elif parameters[2] == 'Inc':
                     P1,P2,m,a = InclinedLine(self.TempLine[0], self.TempLine[1],
                                              imgShape = parameters[1])
                     cv2.line(self.Temp, P1, P2, CVColor.BLUE, 1)
-                    
+
                 cv2.imshow(parameters[0], self.Temp)
             elif self.ClickCount == 2:
-                   
+
                 self.Temp = self.clone.copy()
                 cv2.imshow(parameters[0], self.clone)
                 # storing the vertical line
                 if parameters[2] == 'V':
                     avg = int((self.line_coordinates[0][0]+self.line_coordinates[1][0])/2)
-                    cv2.line(self.Temp, (avg,0), (avg,parameters[1][0]), 
+                    cv2.line(self.Temp, (avg,0), (avg,parameters[1][0]),
                              CVColor.GREEN, 1)
 
                 # storing the Horizontal line
@@ -174,7 +177,7 @@ class SOA:
                     avg = int((self.line_coordinates[0][1]+self.line_coordinates[1][1])/2)
                     cv2.line(self.Temp, (0,avg), (parameters[1][1],avg),
                              parameters[3], 1)
-                    
+
                 elif parameters[2] == 'Inc':
                     P1, P2, m, a = InclinedLine(self.line_coordinates[0],
                                                 self.line_coordinates[1],
@@ -187,7 +190,7 @@ class SOA:
                 cv2.imshow(parameters[0], self.clone)
                 print('registered line: {}'.format(avg))
 
-        # Delete draw line before storing    
+        # Delete draw line before storing
         elif event == cv2.EVENT_RBUTTONDOWN:
             self.TempLine = []
             if self.ClickCount>0: self.ClickCount -= 1
@@ -202,7 +205,7 @@ class SOA:
 
         Parameters:
             - **img (numpy.ndarray)**: A single OpenCV image.
-            - **lineType (str)**: 
+            - **lineType (str)**:
                 - 'V' for Vertical line (starts from top to bottom of the image),
                 - 'H' for Horizontal line (starts from the left to the right),
                 - 'Inc' for Inclined line (not averaging, takes the exact selected points).
@@ -231,7 +234,7 @@ class SOA:
 
         """
 
-        self.clone = img.copy(); 
+        self.clone = img.copy();
         self.Temp = self.clone.copy();
         self.TempLine = [];
         self.ClickCount = 0
@@ -253,17 +256,17 @@ class SOA:
             prams = [WindowHeader[LineNameInd], shp, lineType, line_color]
         elif lineType == 'Inc':
             prams = [WindowHeader[LineNameInd], shp, lineType]
-            
+
         cv2.imshow(WindowHeader[LineNameInd], self.clone)
-        cv2.setMouseCallback(WindowHeader[LineNameInd], 
+        cv2.setMouseCallback(WindowHeader[LineNameInd],
                              self.extract_coordinates,prams)
         # Wait until user press some key
         cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
         return self.Reference
 
     def DefineReferences(self, img: np.ndarray[int], shp: tuple[int],
-                         Ref_x0: list[int], scale_pixels: bool, 
-                         Ref_y0: int = -1, Ref_y1: int = -1, 
+                         Ref_x0: list[int], scale_pixels: bool,
+                         Ref_y0: int = -1, Ref_y1: int = -1,
                          slice_loc: int = 0) -> tuple[list[int],int,int]:
         """
         Define reference lines on an image for scalling and further processing.
@@ -324,7 +327,7 @@ class SOA:
 
         # Calculate the pixel scale if required
         if scale_pixels:  self.pixelScale = self.D / abs(Ref_x0[1]-Ref_x0[0])
-        print(f'Image scale: {self.pixelScale}')
+        print(f'Image scale: {self.pixelScale} {self.univ_unit["dis"]}/px')
 
         # --------------------------------------------------------------------
 
