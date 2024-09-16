@@ -8,11 +8,11 @@ import cv2
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from ..preview import residual_preview
 from ..linedrawingfunctions import InclinedLine
 from ..ShockOscillationAnalysis import BCOLOR, CVColor
-# from linedrawingfunctions import InclinedLine
-# from ShockOscillationAnalysis import BCOLOR, CVColor
 from scipy.interpolate import CubicSpline, PchipInterpolator
+
 
 def v_least_squares(xLoc: list[float], columnY:list[float], nSlices: int) -> list[float]:
     """
@@ -42,10 +42,11 @@ def v_least_squares(xLoc: list[float], columnY:list[float], nSlices: int) -> lis
     xy = np.array(xLoc)*columnY; yy = columnY**2
     x_sum = np.sum(xLoc)       ; y_sum = np.sum(columnY)
     xy_sum = np.sum(xy)        ; yy_sum = np.sum(yy)
+    if nSlices*yy_sum - y_sum**2 != 0 and nSlices*xy_sum - x_sum * y_sum != 0:
+        return 1/((nSlices*xy_sum - x_sum * y_sum)/(nSlices*yy_sum - y_sum**2))
+    else:
+        return np.inf
 
-    b = 1/((nSlices*xy_sum - x_sum * y_sum)/(nSlices*yy_sum - y_sum**2))
-
-    return b
 
 def pearson_corr_coef(xLoc: list[float], columnY:list[float], nSlices: int) -> list[float]:
 
@@ -90,11 +91,11 @@ def pearson_corr_coef(xLoc: list[float], columnY:list[float], nSlices: int) -> l
     return r
 
 
-def error_sum(xloc: list[float], columnY:list[float], nSlices: int,
-              l_slope: float, l_yint: float):
+def error_analysis(xloc: list[float], columnY:list[float], nSlices: int,
+              l_slope: float, l_yint: float, t: float, y_dp: list[float],
+              count = 0, output_directory= '',**kwargs):
     """
-    Calculate the normalized sum of absolute errors between the actual x-coordinates and
-    the x-coordinates predicted by the linear regression line.
+    Estimate confidence intervals for x-locations based on a linear model and calculate residuals.
 
     Parameters:
         - **xloc (list[float])**: List of actual x-coordinates.
@@ -104,36 +105,109 @@ def error_sum(xloc: list[float], columnY:list[float], nSlices: int,
         - **l_yint (float)**: y-intercept of the linear regression line.
 
     Returns:
-        float: Normalized sum of absolute errors.
+        list of tuple
+            A list of tuples, where each tuple contains:
+            - Predicted x-location (float)
+            - Corresponding 95% confidence interval (float)
+
+    Raises:
+        ValueError
+        If nSlices is less than 3 (as at least 2 degrees of freedom are required).
 
     Example:
-        >>> xloc = [1.0, 2.0, 3.0, 4.0, 5.0]
-        >>> columnY = [2.0, 4.1, 5.9, 8.2, 10.0]
-        >>> nSlices = 5
-        >>> l_slope = 2.0
-        >>> l_yint = 0.0
-        >>> e = error_sum(xloc, columnY, nSlices, l_slope, l_yint)
-        >>> print(e)
+        >>> xloc = [1.2, 2.3, 3.4, 4.5]
+        >>> columnY = [2.1, 3.2, 4.3, 5.4]
+        >>> nSlices = 4
+        >>> l_slope = 1.0
+        >>> l_yint = 1.0
+        >>> conf_est(xloc, columnY, nSlices, l_slope, l_yint)
+        [(1.1, 0.28), (2.1, 0.36), (3.2, 0.45), (4.3, 0.56)]
 
     .. note::
-        - The function calculates the normalized sum of absolute errors by comparing the actual x-coordinates
-          to the x-coordinates predicted by the linear regression line for each y-coordinate.
-        - It returns the average error per slice as a float.
+        This function calculates the residual sum of squares and confidence intervals
+        for the given x-locations based on a linear fit to the corresponding y-values. The
+        confidence interval is computed using the t-distribution for the specified number
+        of slices.
     """
-    error = []
-    e = 0
-    e2 = 0
-    for i in range(nSlices):
-        x_dash = (columnY[i] - l_yint)/l_slope
-        error.append(abs(xloc[i]-x_dash))
-        e += error[-1]
-    e /= nSlices
-    # for i in range(nSlices):
-    #     e2 += (error[i]-e)**2
-    # e2 /= nSlices
-    # print(f'{BCOLOR.OKGREEN}{e:0.2f}\t{BCOLOR.OKCYAN}{e2:0.2f}{BCOLOR.ENDC}')
-    # sigma = np.sqrt(e2)
-    return e
+    # Ensure that the number of slices is sufficient
+    if nSlices < 3:
+        raise ValueError("nSlices must be at least 3 to have enough degrees of freedom.")
+
+    # Convert to NumPy arrays for vectorized operations
+    xloc = np.array(xloc)
+    columnY = np.array(columnY)
+
+    # Calculate predicted x-locations from the linear model
+    x_dash = (columnY - l_yint) / l_slope if l_slope != np.inf else np.ones(nSlices)*np.mean(xloc)
+
+    error = xloc - x_dash
+
+    # Calculate the sum of squared errors
+    Se = np.sum(error ** 2)
+
+    e_median = np.median(error)
+
+    # Split the error array into two parts: below or equal to the median, and above
+    Q1_array, Q2_array = np.array_split(sorted(error), 2)
+
+    Q1 = np.median(Q1_array)
+    Q2 = np.median(Q2_array)
+    IQR = Q2 - Q1
+
+    outlier_p = [[e, i, count] for i, e in enumerate(error)
+                 if not (Q1 - 1.5 * IQR < e < Q2 + 1.5 * IQR)]
+
+    hi = [(1 / nSlices) + y_dp[i] for i, e in enumerate(error)
+          if not (Q1 - 1.5 * IQR < e < Q2 + 1.5 * IQR)]
+
+    if len(hi) > 0 and np.sum(hi) > (3*2)/nSlices:
+        f = open(fr"{output_directory}\outliers.txt", "a")
+        for p in outlier_p:
+            e, pos, count = p
+            f.write(f'outlier detected: {e}, {pos+1}, {count}\n')
+        f.write(f'outlier leverage: {np.sum(hi)}, H0 = {(3*2)/nSlices}\n')
+        f.close()
+        resid_preview = kwargs.get('resid_preview', False)
+        if resid_preview: residual_preview(error, (e_median,Q1,Q2,IQR), nSlices, count)
+    else:
+        outlier_p = []
+
+
+    # Standard error and t-statistics
+    df = nSlices - 2  # ........ Calculate degree of freedom
+    s = np.sqrt(Se / df)
+
+    # Compute confidence intervals for each slice
+    Sx = s * np.sqrt((1 / nSlices) + y_dp)
+
+    # Calculate xloc statistics
+    # xloc_avg = np.mean(xloc)
+    # Stx = np.sum((xloc - xloc_avg) ** 2)
+    # SR = Stx - Se
+
+    # if Stx > 0:
+    #     R2 = SR/Stx
+    #     R2a = 1-((nSlices-1)/Stx)*(s**2)
+    #     print(f'{count}, R²: {R2*100:0.2f}%, Rₐ²: {R2a*100:0.2f}%')
+
+    return list(zip(x_dash, Sx * t)), outlier_p, s
+
+def pop_outlier(indx, certainity, xloc, columnY, n_slice_new):
+    newxloc, newyloc = xloc, columnY
+    try:
+        if len(certainity) > 0 and columnY[indx] in certainity:
+            newxloc = np.delete(xloc, indx)
+            newyloc = np.delete(columnY, indx)
+            new_shock_slope = v_least_squares(newxloc, newyloc, n_slice_new - 1)
+            new_midxloc = np.mean(newxloc)
+            return new_shock_slope, new_midxloc, newxloc, newyloc, [xloc[indx], columnY[indx]]
+
+        # If outlier condition not met
+        return None, None, newxloc, newyloc, None
+    except Exception as e:
+        print(e)
+        return None, None, newxloc, newyloc, None
+
 
 def anglesInterpolation(pnts_y_list: list[int],                              # Generated points by class
                         flow_dir: list[float] = None, flow_Vxy:list[tuple] = None, # measured data (LDA, CFD, ... )

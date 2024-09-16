@@ -7,19 +7,17 @@ Created on Wed Feb 28 11:05:30 2024
 
 import cv2
 import numpy as np
-# from ShockOscillationAnalysis import CVColor
-# from linedrawingfunctions import InclinedLine, AngleFromSlope
+import matplotlib.pyplot as plt
 from .ShockOscillationAnalysis import CVColor
 from .linedrawingfunctions import InclinedLine, AngleFromSlope
 from matplotlib.patches import Arc, FancyArrowPatch
 
-
-
-def AvgAnglePlot(ax, img_shp:tuple , P: tuple, slope: float, angle: float, 
+def AvgAnglePlot(ax, img_shp:tuple , P: tuple, slope: float, angle: float,
                  txt: bool = True, lin_color = 'w', lin_opacity = 1, **kwargs) -> None:
     """
     Plot the average angle line and optional text annotation on a given axis.
-    This function uses the `InclinedLine` function to determine the end points of the line based on the given slope and image shape.
+    This function uses the `InclinedLine` function to determine the end points
+    of the line based on the given slope and image shape.
     It then plots the line and an optional text annotation indicating the angle.
 
     Parameters:
@@ -32,7 +30,7 @@ def AvgAnglePlot(ax, img_shp:tuple , P: tuple, slope: float, angle: float,
         - `**kwargs`: Additional keyword arguments for customization:
             - **avg_txt_Yloc (int, optional)**: Y location for the text annotation. Default is image height minus 100.
             - **avg_txt_size (int, optional)**: Font size of the text annotation. Default is 26.
-    
+
     Example:
         >>> fig, ax = plt.subplots()
         >>> img_shp = (600, 800)
@@ -43,36 +41,39 @@ def AvgAnglePlot(ax, img_shp:tuple , P: tuple, slope: float, angle: float,
         >>> plt.show()
     """
     # Handle optional parameter values from **kwargs
-    
-    
+
+
     avg_txt_Yloc = kwargs.get('avg_txt_Yloc', img_shp[0]-100)
     avg_txt_size = kwargs.get('avg_txt_size', 26)
-    
+
     # Calculate the inclined line end points
     P1,P2,_,a = InclinedLine(P,slope = slope ,imgShape = img_shp)
+
     # Calculate the X position for the text annotation
-    X = int((avg_txt_Yloc-a)/slope) if slope != 0 else avg_txt_Yloc
+    if slope != 0 and slope != np.inf: X = int((avg_txt_Yloc-a)/slope)
+    elif slope == np.inf: X = P[0]
+    else: X = avg_txt_Yloc
+
     # Plot the inclined line
     ax.plot([P1[0],P2[0]], [P1[1],P2[1]], lw = 2,
             color= lin_color, linestyle = (0, (20, 3, 5, 3)), alpha = lin_opacity)
-    
+
     # Plot the text annotation if enabled
     if txt:
         # Draw an arc to represent the angle
         avg_ang_arc = Arc((X, avg_txt_Yloc),80, 80, theta1= -angle , theta2 = 0, color = lin_color)
         ax.add_patch(avg_ang_arc);
-       
+
         # Add the text annotation for the angle
-        ax.text(X + 40 ,avg_txt_Yloc-10 , f'${{{angle:0.2f}}}^\circ$', 
+        ax.text(X + 40 ,avg_txt_Yloc-10 , f'${{{angle:0.2f}}}^\circ$',
                 color = lin_color, fontsize = avg_txt_size);
         # Plot a horizontal line at the text annotation location to compare the inclination angle
-        ax.plot([X-10,X+100], [avg_txt_Yloc,avg_txt_Yloc], lw = 1, 
+        ax.plot([X-10,X+100], [avg_txt_Yloc,avg_txt_Yloc], lw = 1,
                 color = lin_color, alpha = lin_opacity)
 
-
 def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope, avg_ang,
-                mid_loc = -1, y = -1, avg_preview_mode = None,Mach_ang_mode = None, **kwargs):
-    
+                mid_loc = -1, y = -1, avg_preview_mode = None, Mach_ang_mode = None, **kwargs):
+
     """
     Plot review function to visualize shock points and additional features on an image.
 
@@ -95,36 +96,54 @@ def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope
     Returns:
         None
     """
+    # tracking_std = kwargs.get('tracking_std', False)
     points_color = kwargs.get('points_color', 'yellow')
     points_opacity = kwargs.get('points_opacity', 1)
+    points_size = kwargs.get('points_size', 12)
     uncertain_point_color = kwargs.get('uncertain_point_color', 'red')
-    # tracking_std = kwargs.get('tracking_std', False)
-    
+
     ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.uint8))
-    ax.plot(x_loc, column_y, '-o', color=points_color, ms=12, alpha = points_opacity)
-    ax.plot(uncertain, uncertain_y, 'o', color=uncertain_point_color, ms=12, alpha = points_opacity)
-   
+
     if avg_preview_mode is not None:
         avg_lin_color = kwargs.get('avg_lin_color', 'w')
         avg_show_txt = kwargs.get('avg_show_txt', True)
         avg_lin_opacity = kwargs.get('avg_lin_opacity', 1)
-        AvgAnglePlot(ax, shp, (mid_loc,y), avg_slope, avg_ang, 
+
+        AvgAnglePlot(ax, shp, (mid_loc,y), avg_slope, avg_ang,
                      txt = avg_show_txt, lin_color = avg_lin_color, lin_opacity = avg_lin_opacity,
                      **kwargs)
-    
+
     osc_boundary = kwargs.get('osc_boundary', False)
     if osc_boundary:
         min_bound, max_bound = kwargs.get('osc_bound_line_info', np.zeros(len(column_y)))
         b_color = kwargs.get('b_color', 'tab:orange')
         b_lins_opacity = kwargs.get('b_lins_opacity', 1)
         osc_range_opacity = kwargs.get('osc_range_opacity', 0.3)
-        AvgAnglePlot(ax, shp, (min_bound[2],y), min_bound[1], AngleFromSlope(min_bound[1]), 
+        AvgAnglePlot(ax, shp, (min_bound[2],y), min_bound[1], AngleFromSlope(min_bound[1]),
                      txt= False, lin_color = b_color, lin_opacity = b_lins_opacity)
-        AvgAnglePlot(ax, shp, (max_bound[2],y), max_bound[1], AngleFromSlope(max_bound[1]), 
+        AvgAnglePlot(ax, shp, (max_bound[2],y), max_bound[1], AngleFromSlope(max_bound[1]),
                      txt= False, lin_color = b_color, lin_opacity = b_lins_opacity)
-        
-        # ax.fill_betweenx([column_y[0],column_y[-1]], min_bound[0],max_bound[0])
         ax.fill_betweenx(column_y, min_bound[0],max_bound[0], color = b_color, alpha = osc_range_opacity)
+
+    conf_interval = kwargs.get('conf_interval', 0)
+
+    if conf_interval > 0:
+        conf_info = kwargs.get('conf_info', np.zeros([len(column_y),2]))
+        conf_color = kwargs.get('conf_color', 'tab:green')
+        conf_range_opacity = kwargs.get('conf_range_opacity', 0.3)
+        true_outlier = kwargs.get('true_outlier', None)
+        x_new_loc, conf_value = zip(*conf_info)
+        x_new_loc = np.array(x_new_loc)
+        conf_value = np.array(conf_value)
+        for x, y in enumerate(column_y):
+            ax.plot([x_loc[x],x_new_loc[x]],[y,y],':', color = 'white')
+
+        ax.fill_betweenx(column_y, x_new_loc-conf_value, x_new_loc+conf_value,
+                         color = conf_color, alpha = conf_range_opacity)
+        if len(true_outlier) > 0:
+            for item in true_outlier:
+                ax.plot(item[0],item[1],'x', color = 'green', ms = points_size+2)
+
     if Mach_ang_mode =='Mach_num':
         inflow_dir_deg = kwargs.get('inflow_dir_deg', np.zeros(len(column_y)))
         inflow_dir_rad = kwargs.get('inflow_dir_rad', np.zeros(len(column_y)))
@@ -141,7 +160,7 @@ def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope
             ax.text(p1[0]+40 ,p1[1]- 5 , f'${{{inflow_ang:0.2f}}}^\circ$',
                     size = M1_txt_size, color = M1_color);
             ax.plot([p1[0]-arw_len*xlen,p1[0]+60*xlen], [p1[1]-arw_len*ylen,p1[1]+60*ylen],color = M1_color, lw = 1)
-            
+
             arc1 = Arc(p1,arc_dia, arc_dia, theta1=-local_ang, theta2=0+inflow_dir_deg[i], color = M1_color)
             ax.add_patch(arc1);
             M1 = 1/np.sin((inflow_ang)*np.pi/180)
@@ -153,7 +172,13 @@ def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope
                         xytext=(p1[0] - arw_len*xlen, p1[1] + arw_len*ylen),
                         horizontalalignment='right', verticalalignment='center')
 
-def PreviewCVPlots(img, Ref_x0 = [], Ref_y = [], 
+    ax.plot(x_loc, column_y, '-o',
+            color=points_color, ms=points_size, alpha=points_opacity)
+
+    ax.plot(uncertain, uncertain_y, 'o',
+            color=uncertain_point_color, ms=points_size, alpha=points_opacity)
+
+def PreviewCVPlots(img, Ref_x0 = [], Ref_y = [],
                    tk = [], avg_shock_loc = [], **kwargs):
     """
     PreviewCVPlots function is used to overlay various plot elements on an image for visualization purposes.
@@ -175,7 +200,7 @@ def PreviewCVPlots(img, Ref_x0 = [], Ref_y = [],
     Returns:
         **numpy.ndarray**: Image with overlaid plot elements.
     """
-    
+
     shp = img.shape;
     if len(Ref_x0):
         Ref_x0_color = kwargs.get('Ref_x0_color', CVColor.GREEN)
@@ -202,7 +227,30 @@ def PreviewCVPlots(img, Ref_x0 = [], Ref_y = [],
 
     return img
 
+def residual_preview(error, margins, nSlices, count):
+    fig, ax = plt.subplots(figsize=(10, 8))
+    e_median, Q1, Q2, IQR = margins
+    try:
+        # Plot histogram
+        ax.hist(error, bins=20, edgecolor='black')
 
+        # Update bar colors based on outlier range
+        for bar in ax.containers[0]:
+            x = bar.get_x() + 0.5 * bar.get_width()
+            color = 'red' if x < Q1 - 1.5 * IQR or x > Q2 + 1.5 * IQR else 'tab:blue'
+            bar.set_color(color)
+            bar.set_edgecolor('black')
+
+        # Draw vertical lines for median and IQR bounds
+        ax.vlines([e_median, Q1 - 1.5 * IQR, Q2 + 1.5 * IQR], 0, nSlices,
+                  colors=['tab:red', 'tab:orange', 'tab:orange'], linestyles=['-', '--', '--'])
+
+        # Add grid, labels, and title
+        ax.grid(True, axis='y', which='major', color='#D8D8D8', linestyle='-', alpha=0.3, lw=1.5)
+        ax.set_ylim([0, nSlices])
+        ax.set_title(f'Outliers have high impact at {count}')
+    except Exception as e:
+        print(f'Error during plotting: {e}')
 
 # -----------------------------| Draft code |----------------------------------
 # ploting the middle point as possible center of rotation

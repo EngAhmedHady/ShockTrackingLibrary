@@ -87,7 +87,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, alp
         
     if Plot: # to plot slice illumination values with location and Avg. line
         fig, ax = plt.subplots(figsize=(10,5))
-        ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
+        ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':')
         ax.plot(SnapshotSlice); 
         # ax.plot(AvgLocation,AvgIllumination,linestyle = '-.');
     

@@ -4,7 +4,6 @@ Created on Tue Dec 20 09:32:30 2022
 
 @author: Ahmed H. Hanfy
 """
-
 import cv2
 import sys
 import numpy as np
@@ -16,7 +15,7 @@ from .linedrawingfunctions import InclinedLine
 from .generateshocksignal import GenerateShockSignal
 
 px = 1/plt.rcParams['figure.dpi']
-plt.rcParams.update({'font.size': 25})
+plt.rcParams.update({'font.size': 10})
 plt.rcParams["text.usetex"] = True
 plt.rcParams["font.family"] = "serif"
 plt.rcParams['figure.max_open_warning'] = 0
@@ -78,13 +77,12 @@ class BCOLOR:  # For coloring the text in terminal
 
 
 class SOA:
-    def __init__(self, f: int = 1, D: int = 1, 
-                 pixelScale: float = 1, 
-                 univ_unit = {'freq':'fps','dis':'mm', 'angle': 'deg'}):
+    def __init__(self, f: int = 1, D: int = 1, pixelScale: float = 1):
         self.f = f  # ----------------- sampling rate (univ_unit: 'freq')
         self.D = D  # ----------------- refrence distance (univ_unit: 'dis)
         self.pixelScale = pixelScale  # initialize scale of the pixels
-        self.univ_unit = univ_unit  # - universal units used in the analysis
+        # - universal units used in the analysis
+        self.univ_unit = {'freq':'fps','dis':'mm', 'angle': 'deg'}
         self.ClickCount = 0  # -------- initialize the mouse clicks
         self.TempLine = []  # --------- initialize the temporary line array
         self.Temp = cv2.vconcat([])  #- initialize the temporary image
@@ -134,66 +132,61 @@ class SOA:
               to calculate the inclined line and display it on the image.
 
         """
+
+        window_name, img_shape, line_type, line_color = parameters
+        avg = None
+
+        # Unconfirmed line drawing functions
+        def draw_line(start, end, color, thickness=1):
+            # Draws a line on the image.
+            cv2.line(self.Temp, start, end, color, thickness)
+
+
+        def process_line():
+            # Processes the drawn line based on the line type.
+            if line_type == 'V':
+                avg = (self.TempLine[0][0] + self.TempLine[1][0]) // 2
+                draw_line((avg, 0), (avg, img_shape[0]), line_color)
+            elif line_type == 'H':
+                avg = (self.TempLine[0][1] + self.TempLine[1][1]) // 2
+                draw_line((0, avg), (img_shape[1], avg), line_color)
+            elif line_type == 'Inc':
+                avg = InclinedLine(self.TempLine[0], self.TempLine[1], imgShape=img_shape)
+                draw_line(avg[0], avg[1], line_color)
+            return avg
+
         if event == cv2.EVENT_LBUTTONDOWN:
             self.ClickCount += 1
             if len(self.TempLine) == 2:
                 self.line_coordinates = self.TempLine
-            elif len(self.TempLine) == 0: self.TempLine = [(x,y)]
+            elif len(self.TempLine) == 0:
+                self.TempLine = [(x,y)]
 
         # Record ending (x,y) coordintes on left mouse bottom release
         elif event == cv2.EVENT_LBUTTONUP:
             if len(self.TempLine) < 2:
                 self.TempLine.append((x,y))
-
                 # Draw temprary line
-                cv2.line(self.Temp, self.TempLine[0], self.TempLine[1],
-                         (0,0,255), 2)
-                if parameters[2] == 'V':
-                    avg = int((self.TempLine[0][0]+self.TempLine[1][0])/2)
-                    cv2.line(self.Temp, (avg,0), (avg,parameters[1][0]),
-                             CVColor.GREEN, 1)
-                elif parameters[2] == 'H':
-                    avg = int((self.TempLine[0][1]+self.TempLine[1][1])/2)
-                    cv2.line(self.Temp, (0,avg), (parameters[1][1],avg),
-                             CVColor.YELLOW, 1)
-                elif parameters[2] == 'Inc':
-                    P1,P2,m,a = InclinedLine(self.TempLine[0], self.TempLine[1],
-                                             imgShape = parameters[1])
-                    cv2.line(self.Temp, P1, P2, CVColor.BLUE, 1)
+                draw_line(self.TempLine[0], self.TempLine[1], (0, 0, 255), 2)
+                avg = process_line()
+                if avg is not None:
+                    cv2.imshow(window_name, self.Temp)
 
-                cv2.imshow(parameters[0], self.Temp)
             elif self.ClickCount == 2:
 
                 self.Temp = self.clone.copy()
-                cv2.imshow(parameters[0], self.clone)
-                # storing the vertical line
-                if parameters[2] == 'V':
-                    avg = int((self.line_coordinates[0][0]+self.line_coordinates[1][0])/2)
-                    cv2.line(self.Temp, (avg,0), (avg,parameters[1][0]),
-                             CVColor.GREEN, 1)
-
-                # storing the Horizontal line
-                elif parameters[2] == 'H':
-                    avg = int((self.line_coordinates[0][1]+self.line_coordinates[1][1])/2)
-                    cv2.line(self.Temp, (0,avg), (parameters[1][1],avg),
-                             parameters[3], 1)
-
-                elif parameters[2] == 'Inc':
-                    P1, P2, m, a = InclinedLine(self.line_coordinates[0],
-                                                self.line_coordinates[1],
-                                                imgShape = parameters[1])
-                    cv2.line(self.Temp, P1, P2, CVColor.BLUE, 1)
-                    avg = [P1, P2, m, a]
-
-                self.Reference.append(avg)
+                avg = process_line()
+                if avg:
+                    self.Reference.append(avg)
                 self.clone = self.Temp.copy()
-                cv2.imshow(parameters[0], self.clone)
-                print('registered line: {}'.format(avg))
+                cv2.imshow(window_name, self.clone)
+                print(f'Registered line: {avg}')
 
         # Delete draw line before storing
         elif event == cv2.EVENT_RBUTTONDOWN:
             self.TempLine = []
-            if self.ClickCount>0: self.ClickCount -= 1
+            if self.ClickCount>0:
+                self.ClickCount -= 1
             self.Temp = self.clone.copy()
             cv2.imshow(parameters[0], self.Temp)
 
@@ -210,7 +203,8 @@ class SOA:
                 - 'H' for Horizontal line (starts from the left to the right),
                 - 'Inc' for Inclined line (not averaging, takes the exact selected points).
             - **LineNameInd (int)**: Index of the window title from the list.
-            - **Initialize (bool, optional)**: To reset the values of Reference and line_coordinates for a new line set. True or False (Default: False).
+            - **Initialize (bool, optional)**: To reset the values of Reference and
+              line_coordinates for a new line set. True or False (Default: False).
 
         Returns:
             list: Cropping limits or (line set).
@@ -221,7 +215,8 @@ class SOA:
             >>> print(line_set)
 
         .. note::
-            - The function uses the `extract_coordinates` method to interactively draw lines on the image.
+            - The function uses the `extract_coordinates` method to interactively draw lines on the
+              image.
             - It waits until the user presses a key to close the drawing window.
 
         .. note::
@@ -234,9 +229,9 @@ class SOA:
 
         """
 
-        self.clone = img.copy();
-        self.Temp = self.clone.copy();
-        self.TempLine = [];
+        self.clone = img.copy()
+        self.Temp = self.clone.copy()
+        self.TempLine = []
         self.ClickCount = 0
         # Window titles
         WindowHeader = ["First Reference Line (left)",
@@ -248,20 +243,27 @@ class SOA:
             self.line_coordinates = []
         shp = img.shape
         # win_x, win_y = self.screenMidLoc(shp)
-
+        prams = ['new cv window', shp, lineType]
         if   lineType == 'V':
-            prams = [WindowHeader[LineNameInd], shp, lineType]
+            v_draw_color = kwargs.get('v_draw_color', CVColor.GREEN)
+            prams[0] = WindowHeader[LineNameInd]
+            prams.append(v_draw_color)
         elif lineType == 'H':
-            line_color = kwargs.get('line_color', CVColor.YELLOW)
-            prams = [WindowHeader[LineNameInd], shp, lineType, line_color]
+            h_draw_color = kwargs.get('h_draw_color', CVColor.YELLOW)
+            prams[0] = WindowHeader[LineNameInd]
+            prams.append(h_draw_color)
         elif lineType == 'Inc':
-            prams = [WindowHeader[LineNameInd], shp, lineType]
+            inc_draw_color = kwargs.get('inc_draw_color', CVColor.BLUE)
+            prams[0] = WindowHeader[LineNameInd]
+            prams.append(inc_draw_color)
 
         cv2.imshow(WindowHeader[LineNameInd], self.clone)
         cv2.setMouseCallback(WindowHeader[LineNameInd],
                              self.extract_coordinates,prams)
         # Wait until user press some key
-        cv2.waitKey(0); cv2.destroyAllWindows(); cv2.waitKey(1);
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        cv2.waitKey(1)
         return self.Reference
 
     def DefineReferences(self, img: np.ndarray[int], shp: tuple[int],
@@ -295,12 +297,15 @@ class SOA:
             >>> Ref_y0 = -1
             >>> Ref_y1 = -1
             >>> slice_loc = 50
-            >>> ref_x0, ref_y0, ref_y1 = instance.DefineReferences(img, shape, Ref_x0, scale_pixels, Ref_y0, Ref_y1, slice_loc)
+            >>> ref_x0, ref_y0, ref_y1 = instance.DefineReferences(img, shape, Ref_x0,
+                                                                   scale_pixels, Ref_y0,
+                                                                   Ref_y1, slice_loc)
             >>> print(ref_x0, ref_y0, ref_y1)
 
         .. note::
             - The function sets up vertical and horizontal reference lines on the image.
-            - It calculates the pixel scale if `scale_pixels` is True using horizontal distance between the reference vertical lines {Ref_x0}.
+            - It calculates the pixel scale if `scale_pixels` is True using horizontal distance
+              between the reference vertical lines {Ref_x0}.
         """
 
         # Ensure the vertical reference lines are sorted if they are provided
@@ -318,7 +323,7 @@ class SOA:
             Ref_x0.sort()  # to make sure that the limits are properly assigned
         else:
             # set the vertical reference lines if provided
-            self.clone = img.copy();
+            self.clone = img.copy()
             cv2.line(self.clone, (Ref_x0[0], 0), (Ref_x0[0], shp[0]),
                      CVColor.GREEN, 1)
             cv2.line(self.clone, (Ref_x0[1], 0), (Ref_x0[1], shp[0]),
@@ -346,12 +351,10 @@ class SOA:
             elif Ref_y1 != -1:
                 Ref_y0 = Ref_y1+round(slice_loc/self.pixelScale)
             self.Reference.append(Ref_y0)
-            cv2.line(self.clone, (0, Ref_y0), (shp[1], Ref_y0),
-                     CVColor.YELLOW, 1)
+            cv2.line(self.clone, (0, Ref_y0), (shp[1], Ref_y0), CVColor.YELLOW, 1)
         return Ref_x0, Ref_y0, Ref_y1
 
-    def CleanSnapshots(self, img: np.ndarray[int], *args,
-                       **kwargs) -> np.ndarray[int]:
+    def CleanSnapshots(self, img: np.ndarray[int], *args, **kwargs) -> np.ndarray[int]:
         """
         Clean and enhance snapshots based on specified corrections. This method takes an original image snapshot `img` and applies specified corrections based on the provided `*args`.
         Supported corrections include 'Brightness/Contrast', 'Average', and 'FFT'.
@@ -482,17 +485,3 @@ class SOA:
         V_avg = np.mean(dx_dt)  # Calculate the average velocity
         V = dx_dt - V_avg       # Subtract the average velocity from each point
         return V
-
-
-# ------------------------------| Draft code |--------------------------------
-"""
-import screeninfo
-
-def screenMidLoc(self, shp: tuple[int]) -> tuple[int]:
-    screen = screeninfo.get_monitors()[0]
-    screen_width, screen_height = screen.width, screen.height
-    x_pos = (screen_width - shp[1]) // 2
-    y_pos = (screen_height - shp[0]) // 2
-    return x_pos, y_pos
-
-"""

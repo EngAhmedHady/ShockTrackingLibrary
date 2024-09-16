@@ -83,12 +83,12 @@ def InclinedLine(P1: tuple[int], P2: tuple[int] = (), slope: float = None, imgSh
     elif len(P2) == 0 and slope is np.inf: dx = 0;
     else: dx = -1
 
-    if slope != 0 and slope is not None and slope is not np.inf:
+    if (slope != 0) and (slope is not None) and (slope != np.inf):
         a = P1[1] - slope*P1[0]
         try:
             Xmax = int((imgShape[0]-a)/slope)
         except Exception:
-            print(a,slope)
+            print(a,slope, type(slope))
         Xmin = int(-a/slope)
         if   Xmin >= 0 and Xmin <= imgShape[1]:
             p1 = (Xmin,0)
@@ -102,8 +102,8 @@ def InclinedLine(P1: tuple[int], P2: tuple[int] = (), slope: float = None, imgSh
             p1 = (0,y1)
             p2 = XCheck(Xmax,imgShape,slope,a)
         return p1, p2, slope, a
-    elif dx == 0:
-        return (P1[0],0), (P1[0],imgShape[0]), np.Inf, 0
+    elif dx == 0 or slope == np.inf:
+        return (P1[0],0), (P1[0],imgShape[0]), np.inf, 0
     else:
         return (0,P1[1]), (imgShape[1],P1[1]), 0, P1[1]
 

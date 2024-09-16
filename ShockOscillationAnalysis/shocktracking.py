@@ -44,9 +44,10 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
         ax.plot(SnapshotSlice, label = 'Light intensity at certain snapshot'); ax.axhline(avg,linestyle = ':',color = 'tab:green', label = 'Light intensity average line');
         # ax.set_ylim([0,255]);  ax.set_yticks(np.arange(0, 260, 51))
         # ax.plot(np.where(SnapshotSlice == MinimumPoint),MinimumPoint,'xr', label = 'Minimum point of local minimum');
-        ax.axhline(MinimumPoint,linestyle = '--',color = 'k');
+        ax.axhline(MinimumPoint,linestyle = '--',color = 'k')
         ax.set_ylim([-20,255]);  ax.set_yticks(np.arange(0, 260, 51))
-        ax.axhline(0,linestyle = ':', color = 'k', alpha = 0.2); ax.axhline(255,linestyle = ':', color = 'k', alpha = 0.2);
+        ax.axhline(0,linestyle = ':', color = 'k', alpha = 0.2); 
+        ax.axhline(255,linestyle = ':', color = 'k', alpha = 0.2)
         # ax.plot(AvgLocation,AvgIllumination,linestyle = '-.');
     
     # Initiating Variables 
@@ -92,7 +93,8 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
     except Exception as e:
         # By this way we can know about the type of error occurring
         fig, ax = plt.subplots(figsize=(10,5))
-        ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
+        ax.plot(SnapshotSlice)
+        ax.axhline(avg,linestyle = ':')
         ax.text(0.99, 0.99, f'Error: {e}',
                 ha = 'right', va ='top', transform = ax.transAxes,
                 color = 'red', fontsize=14)
@@ -111,7 +113,8 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
     for k in range(len(ShockRegion[1])):
         # check all pixels lays under the valley average line
         if ShockRegion[1][k] < LocMinAvg:
-            localmin2.append(ShockRegion[1][k]); LocMinI2.append(ShockRegion[0][k])
+            localmin2.append(ShockRegion[1][k])
+            LocMinI2.append(ShockRegion[0][k])
         elif ShockRegion[1][k] >= LocMinAvg and len(localmin2) > 1:
             SubLocalMinSets.append([LocMinI2,localmin2])
             n += 1; localmin2 = []; LocMinI2 = []
@@ -144,7 +147,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
                 MinDis = Distance;  ShockRegion = SubLocalMinSet
             if Plot: ax.fill_between(ShockRegion[0], ShockRegion[1],avg , hatch='\\')
     elif n > 1 and LastShockLoc < 0: 
-        n = 1;
+        n = 1
         certainLoc = False
         reason = 'First pexil slice, No shock location history'
     
@@ -157,7 +160,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
         ax.fill_between(ShockRegion[0], ShockRegion[1],avg, color = '#1F79B7', edgecolor='k',hatch='///', label = 'Largest local minimum') 
         # ax.plot(np.where(SnapshotSlice == min(ShockRegion[1])),min(ShockRegion[1]),'xr');
         
-    shockLoc = [];
+    shockLoc = []
     for elment in range(len(ShockRegion[1])):
         if ShockRegion[1][elment] <= LocMinRMS: shockLoc.append(ShockRegion[0][elment])
     minLoc = np.mean(shockLoc) 
@@ -200,10 +203,11 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
                 if MaxArea2 > 0: Ra = Area/MaxArea2
                 if Ra > 0.5 and Ra < 1 and certainLoc: certainLoc = False; reason = 'Almost equal sub-Valleys'   
                 if MaxArea2 !=  abs(np.trapz(LocMinAvg-ShockRegion[1])) and certainLoc: 
-                    certainLoc = False; reason = 'different sub-Valleys than smallest'
+                    certainLoc = False
+                    reason = 'different sub-Valleys than smallest'
         except Exception as e:
             fig, ax = plt.subplots(figsize=(10,5))
-            ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':');
+            ax.plot(SnapshotSlice); ax.axhline(avg,linestyle = ':')
             ax.text(0.99, 0.99, f'Error: {e}',
                     ha = 'right', va ='top', transform = ax.transAxes,
                     color = 'red', fontsize=14)
