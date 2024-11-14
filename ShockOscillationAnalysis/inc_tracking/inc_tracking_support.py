@@ -91,9 +91,74 @@ def pearson_corr_coef(xLoc: list[float], columnY:list[float], nSlices: int) -> l
     return r
 
 
+def save_data_txt(outlier_p, img_indx, count, hi, leverage_threshold, output_directory='', comment=''):
+    if len(output_directory) > 0:
+       log_file_path = f"{output_directory}/outliers_{comment}.txt"
+       with open(log_file_path, "a") as f:
+           for e, pos, _ in outlier_p:
+               img_index_info = img_indx[count] if img_indx is not None else "N/A"
+               f.write(f'Outlier detected: Error={e}, Position={pos + 1}, ImageIndex={img_index_info}\n')
+           f.write(f'Outlier leverage: {np.sum(hi)}, H0 = {leverage_threshold}\n')
+
+def IQR(error: list[float], y_dp: list[float], count: int=0, img_indx: list[int]=None,
+        output_directory: str='', comment: str='', **kwargs) -> list[tuple[float, int, int]]:
+
+    """
+    Identifies outliers in an error array using the Interquartile Range (IQR) method and
+    logs details if certain leverage conditions are met.
+
+    Parameters:
+        - **error (list[float])**: Array of error values to analyze.
+        - **y_dp (list[float])**: Array of associated data points to calculate leverage.
+        - **count (int)**: Current count index, used for logging purposes.
+        - **output_directory (str)**: Directory to save outlier logs. Defaults to an empty string.
+        - **comment (str)**: Comment to be added to the log file name. Defaults to an empty string.
+        - **img_indx (Optional[list[Any]])**: List of image indices for logging outliers. Defaults to None.
+
+    Keyword Arguments:
+        **residual_preview (bool)**: Whether to generate a preview of residuals. Defaults to False.
+
+    Returns:
+        list[tuple[float, int, int]]: List of tuples for outlier values, each containing:
+            - The error value.
+            - Position of the error in the array.
+            - The count index for the image.
+    """
+    # Number of slices and median of the error array
+    nSlices = len(error)
+    e_median = np.median(error)
+
+    # Calculate the first and third quartiles (Q1, Q2) of the sorted error array
+    Q1_array, Q2_array = np.array_split(sorted(error), 2)
+
+    Q1 = np.median(Q1_array)
+    Q2 = np.median(Q2_array)
+    # Interquartile range
+    IQR = Q2 - Q1
+
+    # Detect outliers based on the IQR range
+    outlier_p = [[e, i, count] for i, e in enumerate(error)
+                 if not (Q1 - 1.5 * IQR <= e <= Q2 + 1.5 * IQR)]
+
+    # Calculate leverage points for outliers
+    hi = [(1 / nSlices) + y_dp[i] for i, e in enumerate(error)
+          if not (Q1 - 1.5 * IQR <= e <= Q2 + 1.5 * IQR)]
+
+    # If the total leverage exceeds a threshold, log the outliers
+    if len(hi) > 0 and np.sum(hi) > (3*2)/nSlices:
+        lev_th = (3*2)/nSlices
+        save_data_txt(outlier_p, img_indx, count, hi, lev_th, output_directory, comment)
+        # If residual preview is requested, call the preview function
+        resid_preview = kwargs.get('residual_preview', False)
+        if resid_preview: residual_preview(error, (e_median,Q1,Q2,IQR), nSlices, count)
+    else:
+        outlier_p = [] # Clear outliers if leverage is below the threshold
+    return outlier_p
+
+
 def error_analysis(xloc: list[float], columnY:list[float], nSlices: int,
               l_slope: float, l_yint: float, t: float, y_dp: list[float],
-              count = 0, output_directory= '',**kwargs):
+              count = 0, output_directory= '', comment = '', img_indx = None, **kwargs):
     """
     Estimate confidence intervals for x-locations based on a linear model and calculate residuals.
 
@@ -131,7 +196,9 @@ def error_analysis(xloc: list[float], columnY:list[float], nSlices: int,
     """
     # Ensure that the number of slices is sufficient
     if nSlices < 3:
-        raise ValueError("nSlices must be at least 3 to have enough degrees of freedom.")
+        print(f'{BCOLOR.FAIL}Error:{BCOLOR.ENDC}{BCOLOR.ITALIC} nSlices must be at least 3 to have enough degrees of freedom.{BCOLOR.ENDC}')
+        return list(zip(xloc, np.zeros(nSlices))), [], 0
+
 
     # Convert to NumPy arrays for vectorized operations
     xloc = np.array(xloc)
@@ -145,33 +212,7 @@ def error_analysis(xloc: list[float], columnY:list[float], nSlices: int,
     # Calculate the sum of squared errors
     Se = np.sum(error ** 2)
 
-    e_median = np.median(error)
-
-    # Split the error array into two parts: below or equal to the median, and above
-    Q1_array, Q2_array = np.array_split(sorted(error), 2)
-
-    Q1 = np.median(Q1_array)
-    Q2 = np.median(Q2_array)
-    IQR = Q2 - Q1
-
-    outlier_p = [[e, i, count] for i, e in enumerate(error)
-                 if not (Q1 - 1.5 * IQR < e < Q2 + 1.5 * IQR)]
-
-    hi = [(1 / nSlices) + y_dp[i] for i, e in enumerate(error)
-          if not (Q1 - 1.5 * IQR < e < Q2 + 1.5 * IQR)]
-
-    if len(hi) > 0 and np.sum(hi) > (3*2)/nSlices:
-        f = open(fr"{output_directory}\outliers.txt", "a")
-        for p in outlier_p:
-            e, pos, count = p
-            f.write(f'outlier detected: {e}, {pos+1}, {count}\n')
-        f.write(f'outlier leverage: {np.sum(hi)}, H0 = {(3*2)/nSlices}\n')
-        f.close()
-        resid_preview = kwargs.get('resid_preview', False)
-        if resid_preview: residual_preview(error, (e_median,Q1,Q2,IQR), nSlices, count)
-    else:
-        outlier_p = []
-
+    outlier_p = IQR(error, y_dp, count, img_indx, output_directory, comment, **kwargs)
 
     # Standard error and t-statistics
     df = nSlices - 2  # ........ Calculate degree of freedom
@@ -179,16 +220,6 @@ def error_analysis(xloc: list[float], columnY:list[float], nSlices: int,
 
     # Compute confidence intervals for each slice
     Sx = s * np.sqrt((1 / nSlices) + y_dp)
-
-    # Calculate xloc statistics
-    # xloc_avg = np.mean(xloc)
-    # Stx = np.sum((xloc - xloc_avg) ** 2)
-    # SR = Stx - Se
-
-    # if Stx > 0:
-    #     R2 = SR/Stx
-    #     R2a = 1-((nSlices-1)/Stx)*(s**2)
-    #     print(f'{count}, R²: {R2*100:0.2f}%, Rₐ²: {R2a*100:0.2f}%')
 
     return list(zip(x_dash, Sx * t)), outlier_p, s
 

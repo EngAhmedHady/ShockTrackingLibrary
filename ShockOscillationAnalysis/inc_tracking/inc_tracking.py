@@ -90,7 +90,7 @@ class InclinedShockTracking(SOA):
             if CheckingHieght > 10:
                 Pnts = np.linspace(0, CheckingHieght, 10); nPnts = 10
             elif CheckingHieght > 2 and CheckingHieght <= 10:
-                Pnts = np.linspace(0,CheckingHieght, CheckingHieght);
+                Pnts = np.linspace(0,CheckingHieght, round(CheckingHieght));
                 nPnts = CheckingHieght
             else:
                 print(u'\u2717')
@@ -134,10 +134,10 @@ class InclinedShockTracking(SOA):
         return slices_info, nPnts, inclinationCheck
 
     @calculate_running_time
-    def InclinedShockTracking(self, img_set: list[np.ndarray],                         # image set for line tracking
+    def InclinedShockTracking(self, img_set: list[np.ndarray],                        # image set for line tracking
                               nSlices: int, Ref: list[int], slice_thickness: int = 1, # slices and tracking info.
                               nReview: int|list[int] = 0, output_directory: str = '', # Review parameters
-                              **kwargs) -> tuple:                                     # Other parameters
+                              comment: str = '', **kwargs) -> tuple:                  # Other parameters
 
         """
         Track and analyze the shock angle in a sequence of images.
@@ -174,7 +174,7 @@ class InclinedShockTracking(SOA):
         """
         # Initialize variables for tracking
         avg_ang_glob = 0         # Global average angle
-        count = 0                # Image counter
+        # count = 0                # Image counter
         midLocs =[]              # List to store mid-locations
         xLocs = []               # List to store all x-location lists of shocks
         avg_slope = 0            # visual average slope [float or list[float]]
@@ -182,7 +182,6 @@ class InclinedShockTracking(SOA):
         columnY = []             # List to store y-coordinates of the slices
         uncertain_list = []      # List to store uncertain x-locations
         uncertainY_list = []     # List to store y-coordinates of uncertain x-locations
-        shp = img_set[0].shape   # Shape of images in the image set from the first image
         m = []                   # list of slops from least square calculation
         # Optional keyword arguments
         avg_preview_mode = kwargs.get('avg_preview_mode', None)
@@ -214,7 +213,6 @@ class InclinedShockTracking(SOA):
             lower_bounds[i] = Ref[2][i] + Ht if slice_thickness%2 == 0 else Ref[2][i] + Ht + 1
             columnY.append(Ref[2][i])
         columnY = np.array(columnY)
-        # print(columnY)
 
         # Determine middle index for slices
         midIndx = nSlices // 2
@@ -226,6 +224,17 @@ class InclinedShockTracking(SOA):
         shock_deg = []
 
         print('Shock tracking started ...', end=" ")
+        if isinstance(img_set, dict):
+            # Shape of images in the image set from the first image
+            shp = next(iter(img_set.values())).shape
+            img_indx = list(img_set.keys())
+            img_set = list(img_set.values())
+            
+        elif isinstance(img_set, list):
+            # If img_set is a list
+            shp = img_set[0].shape
+            img_indx = np.arange(img_set_size)
+            
         for count, img in enumerate(img_set):
             xLocOld = xLoc.copy()
             xLoc = []; uncertain = []; uncertainY = []
@@ -234,7 +243,7 @@ class InclinedShockTracking(SOA):
                 Slice = np.sum(img[upper_bounds[i]-1:lower_bounds[i], x_i1:x_i2], axis=0) / slice_thickness
 
                 LastShockLoc = xLocOld[i]-Ref[0][i]
-                ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count, Plot = slice_ploting_array[count])
+                ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = img_indx[count], Plot = slice_ploting_array[count])
                 # ShockLoc, certainLoc, _  = ShockTraking(Slice, LastShockLoc = LastShockLoc, count = count)
                 xLoc.append(ShockLoc + Ref[0][i])
                 if not certainLoc: uncertain.append(xLoc[-1]); uncertainY.append(Ref[2][i])
@@ -278,12 +287,14 @@ class InclinedShockTracking(SOA):
 
         avg_midloc= np.mean(midLocs)
         avg_ang_glob = np.mean(shock_deg)
-        avg_angle_data = np.zeros(4)
+        avg_angle_data = np.zeros(5)
+        avg_midloc_data = np.zeros(3)
         avg_angle_data[0] = avg_ang_glob
+        avg_midloc_data[0] = avg_midloc
 
         # Initialize list of residual analysis
         e = np.zeros(img_set_size, dtype=np.ndarray)
-        pop_ylist = np.zeros(img_set_size, dtype=np.ndarray)
+        pop_ylist = np.empty(img_set_size, dtype=np.ndarray)
         Sm = np.zeros(img_set_size)
 
         # error integeration for each snapshot
@@ -301,8 +312,8 @@ class InclinedShockTracking(SOA):
             for n_count, xloc in enumerate(xLocs):
                 y_int = y-midLocs[n_count]*m[n_count]
                 e[n_count], outliers, s = error_analysis(xloc, columnY, nSlices, m[n_count], y_int,
-                                                         t, y_dp, n_count, output_directory)
-
+                                                         t, y_dp, n_count,
+                                                         output_directory, comment, img_indx)
 
                 pop_y = []
                 if len(outliers) > 0:
@@ -319,7 +330,7 @@ class InclinedShockTracking(SOA):
                             for outlier in outliers: outlier[1] = outlier[1]-1
                             pop_y.append(popy)
 
-                    if n_slope is not None:
+                    if n_slope is not None and n_slice_new > 3:
                         # print(f'outlier removed, slope and centroid readjasted @ {n_count}' )
                         # print(f'old angle was: {shock_deg[n_count]}, old xloc was: {midLocs[n_count]}')
                         m[n_count] = n_slope
@@ -328,30 +339,81 @@ class InclinedShockTracking(SOA):
                         avg_midloc= np.mean(midLocs)
                         avg_ang_glob = np.mean(shock_deg)
                         avg_angle_data[0] = avg_ang_glob
+                        avg_midloc_data [0] = avg_midloc
                         n_y_int = y-n_midxloc*n_slope
                         n_y_ss = (nyloc-y)**2
                         n_Sty = np.sum((nyloc - y) ** 2)
                         n_y_dp = n_y_ss/n_Sty
-                        _,_,s = error_analysis(nxloc, nyloc, n_slice_new,
-                                                              n_slope, n_y_int, t,
-                                                              n_y_dp, n_count, output_directory)
+                        n_e,_,n_s = error_analysis(nxloc, nyloc, n_slice_new,
+                                                 n_slope, n_y_int, t,
+                                                 n_y_dp, n_count, 
+                                                 output_directory, comment, img_indx)
+                        if s > 0:
+                            s = n_s
+                        else:
+                            fig, ax = plt.subplots(figsize=(int(shp[1]*2.25*px), int(shp[0]*2.25*px)))
+                            ax.set_ylim([shp[0],0]); ax.set_xlim([0,shp[1]])
+                            kwargs['conf_info'] = n_e
+                            kwargs['true_outlier'] = pop_y
+                            plot_review(ax, img_set[n_count], shp, xLocs[n_count], columnY,
+                                        uncertain_list[n_count], uncertainY_list[n_count],
+                                        n_slope, shock_deg[n_count], n_midxloc ,
+                                        y, **kwargs) 
+                            ax.set_title('error: n_s <= 0')
+
                 Sm[n_count] = s / np.sqrt(Sty)
                 pop_ylist[n_count] = pop_y
             df = img_set_size - 1
             t = stats.t.ppf(conf_interval, df)
-            if 0 not in Sm:
+            if 0 not in Sm and np.inf not in m:
                 m_avg = np.sum(m/(Sm**2))/np.sum(1/Sm**2)
                 Sm_avg = np.sqrt(1/np.sum(1/Sm**2))
-                m_conf_int = t * Sm_avg
                 w_avg_ang = AngleFromSlope(m_avg)
-                conf_ang = 180-AngleFromSlope(m_conf_int)
-                print(f'weighted average shock angle: {w_avg_ang:0.2f}\u00B1{conf_ang:0.2f} deg')
-                avg_angle_data[2] = w_avg_ang
-                avg_angle_data[3] = conf_ang
+            else:
+                zero_s = []
+                new_Sm = []
+                new_m = []
+                for indx, Smi in enumerate(Sm):
+                    if Smi == 0: zero_s.append(indx)
+                    elif Smi > 0 and m[indx] == np.inf: print(indx,  m[indx], Smi)
+                    else: 
+                        new_Sm.append(Smi)
+                        new_m.append(m[indx])
+                new_m = np.array(new_m)
+                new_Sm = np.array(new_Sm)
+                m_avg = np.sum(new_m/(new_Sm**2))/np.sum(1/new_Sm**2)
+                w_avg_ang = AngleFromSlope(m_avg)
+                # for indx in zero_s:
+                #     w_avg_ang += AngleFromSlope(m[indx])
+                # w_avg_ang /= (len(zero_s)+1)
+                zero_s_angles = np.array([AngleFromSlope(m[indx]) for indx in range(len(zero_s))])
+                w_avg_ang = w_avg_ang*(img_set_size-len(zero_s))+np.sum(zero_s_angles)
+                w_avg_ang /= img_set_size
+                Sm_avg = np.sqrt(1/np.sum(1/new_Sm**2))
+                
+            m_conf_int = t * Sm_avg
+            
+            conf_ang = 180-AngleFromSlope(m_conf_int)
+            print(f'weighted average shock angle: {w_avg_ang:0.2f}\u00B1{conf_ang:0.5f} deg', 
+                  end='')
+            print(f',\t \u03C3 = {Sm_avg}')
+            if w_avg_ang == 90:
+                avgwAvg = np.transpose([img_indx, shock_deg, m, Sm])
+                np.savetxt(fr'{output_directory}\w.avg{w_avg_ang:.2f}_t{conf_ang:.2f}deg.txt', 
+                            avgwAvg,  delimiter = ",")
+                
+                new_avgwAvg = np.transpose([new_m, new_Sm])
+                np.savetxt(fr'{output_directory}\w.avg{w_avg_ang:.2f}.txt', 
+                            new_avgwAvg,  delimiter = ",")
+            avg_angle_data[2] = w_avg_ang
+            avg_angle_data[3] = conf_ang
 
             std_mid_xloc = np.sqrt(np.sum((midLocs-avg_midloc)**2)/df)
+            avg_midloc_data [2] = std_mid_xloc
             mid_xloc_conf = t*np.sqrt(std_mid_xloc**2/img_set_size)
+            avg_midloc_data [1] = mid_xloc_conf
             std_mid_Avg = np.sqrt(np.sum((shock_deg-avg_ang_glob)**2)/df)
+            avg_angle_data[4] = std_mid_Avg
             avg_ang_conf = t*np.sqrt(std_mid_Avg**2/img_set_size)
             avg_angle_data[1] = avg_ang_conf
 
@@ -363,17 +425,18 @@ class InclinedShockTracking(SOA):
 
             # Add grid, labels, and title
             ax.grid(True, axis='y', which='major', color='#D8D8D8', linestyle='-', alpha=0.3, lw=1.5)
+            if len(output_directory) > 0:
+                fig.savefig(fr'{output_directory}\Hist_Ang{avg_ang_glob:.2f}_std{std_mid_Avg:.2f}.png',
+                            bbox_inches='tight', pad_inches=0.1)
 
         print(f'Angle range variation: [{min(shock_deg):0.2f}, {max(shock_deg):0.2f}],', end =' ')
         print(f'\u03C3 = {np.std(shock_deg):0.2f}')
         print(f'Average shock loc.: {avg_midloc:0.2f}\u00B1{mid_xloc_conf:0.2f} px')
         print(f'Average shock angle: {avg_ang_glob:0.2f}\u00B1{avg_ang_conf:0.2f} deg')
         
-
         if avg_preview_mode != 'avg_ang':
-            avg_slope = np.mean(m)*np.ones(n_review)
-            # avg_midLoc = avg_midloc*np.ones(n_review)
-            avg_midLoc = midLocs
+            avg_slope = np.tan(np.deg2rad(180-avg_ang_glob))*np.ones(n_review)
+            avg_midLoc = avg_midloc*np.ones(n_review)
             avg_ang = avg_ang_glob*np.ones(n_review)
         else:
             avg_slope = m; avg_midLoc = midLocs; avg_ang = shock_deg
@@ -400,20 +463,24 @@ class InclinedShockTracking(SOA):
                             avg_slope[i], avg_ang[i], avg_midLoc[i] , y, **kwargs)
 
                 if len(output_directory) > 0:
-                    fig.savefig(fr'{output_directory}\ShockAngleReview_Ang{avg_ang_glob:.2f}_{i:05d}.png', bbox_inches='tight', pad_inches=0.1)
+                    # SAR : Shock Angle Review
+                    fig.savefig(fr'{output_directory}\SAR_{comment}_Ang{avg_ang_glob:.2f}_{img_indx[i]:05d}.png',
+                                bbox_inches='tight', pad_inches=0.1)
 
                 if n > 20:
                     if len(output_directory) == 0:
                         plt.close(fig); n = n_review
                         sys.stdout.write('\r')
-                        sys.stdout.write("[%-20s] %d%%" % ('='*int((n)/(n_review/20)), int(5*(n)/(n_review/20))))
+                        sys.stdout.write("[%-20s] %d%%" % ('='*int((n)/(n_review/20)),
+                                                           int(5*(n)/(n_review/20))))
                         break
                     else: plt.close(fig)
                 sys.stdout.write('\r')
-                sys.stdout.write("[%-20s] %d%%" % ('='*int((n+1)/(n_review/20)), int(5*(n+1)/(n_review/20))))
+                sys.stdout.write("[%-20s] %d%%" % ('='*int((n+1)/(n_review/20)),
+                                                   int(5*(n+1)/(n_review/20))))
                 n += 1
             print()
-        return avg_angle_data, avg_midloc
+        return avg_angle_data, avg_midloc_data
 
 
     def ShockPointsTracking(self, path: str,
@@ -518,7 +585,9 @@ class InclinedShockTracking(SOA):
         files = sorted(glob.glob(path))
         n1 = len(files)
         # In case no file found end the progress and eleminate the program
-        if n1 < 1: print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}No files found!{BCOLOR.ENDC}'); sys.exit();
+        if n1 < 1: 
+            print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}No files found!{BCOLOR.ENDC}')
+            sys.exit()
         # Open first file and set the limits and scale
         Refimg = cv2.imread(files[0])
         Refimg = cv2.cvtColor(Refimg, cv2.COLOR_BGR2GRAY)
@@ -640,8 +709,6 @@ class InclinedShockTracking(SOA):
 
             cv2.imwrite(fr'{output_directory}\AnalysisDomain-Points.jpg',
                         self.clone)
-
-
 
         import_n_files = kwargs.get('n_files', 0)
         if import_n_files == 0:

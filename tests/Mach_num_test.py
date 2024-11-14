@@ -4,7 +4,9 @@ Created on Thu Feb 29 17:29:05 2024
 
 @author: Ahmed H. Hanfy
 """
+import sys
 import numpy as np
+sys.path.append(r'..\ShockOscillationAnalysis')
 from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
 
 if __name__ == '__main__':

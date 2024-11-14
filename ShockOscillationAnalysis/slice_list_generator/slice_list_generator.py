@@ -9,9 +9,9 @@ import cv2
 import glob
 import keyboard
 import numpy as np
-from ..ShockOscillationAnalysis import SOA
 from datetime import datetime as dt
 from ..preview import PreviewCVPlots
+from ..ShockOscillationAnalysis import SOA
 from ..ShockOscillationAnalysis import CVColor
 from ..ShockOscillationAnalysis import BCOLOR
 from ..linedrawingfunctions import InclinedLine
@@ -181,6 +181,7 @@ class SliceListGenerator(SOA):
         """
 
         inclinationCheck = False
+        avg_angle = 90
         # Find all files in the directory with the sequence and sorth them by name
         files = sorted(glob.glob(path))
         n1 = len(files)
@@ -221,20 +222,22 @@ class SliceListGenerator(SOA):
         cv2.line(self.clone, (0,upper_bounds), (shp[1],upper_bounds), CVColor.ORANGE, 1)
 
         avg_shock_angle = kwargs.get('avg_shock_angle', 90)
-        avg_shock_loc = kwargs.get('avg_shock_loc', 0)
+        avg_shock_loc = kwargs.get('avg_shock_loc', [0, 0])
         sat_vr = kwargs.get('sat_vr', slice_thickness) # Shock Angle Test Vertical Range
         if hasattr(sat_vr, "__len__"):
             start_vr, end_vr = sat_vr[:2]
             if len(sat_vr) > 2 and sat_vr[2] == 'mm':
-               sat_vr = [Ref_y1 + (start_vr/self.pixelScale), 
-                         Ref_y1 - (end_vr/self.pixelScale)]
+               sat_vr = [round(Ref_y1 - (start_vr/self.pixelScale)), 
+                         round(Ref_y1 - (end_vr/self.pixelScale))]
             else:
-                sat_vr = [Ref_y1 + start_vr, Ref_y1 - end_vr]
+                sat_vr = [round(Ref_y1 - start_vr), round(Ref_y1 - end_vr)]
             
             sat_vr.sort()
             if abs(end_vr-start_vr) == 0:
-                sat_vr = slice_thickness
+                sat_vr = [upper_bounds, lower_bounds]
         
+        print(f'Shock angle tracking vertical range starts from {sat_vr[0]*self.pixelScale:0.2f}mm to {sat_vr[1]*self.pixelScale:0.2f}mm above the reference')
+        print(f'in pixels from {sat_vr[0]:0}px to {sat_vr[1]:0}px')
         nPnts = kwargs.get('nPnts', 0)
         if not hasattr(inclination_est_info, "__len__"):
             self.LineDraw(self.clone, 'Inc', 3)
@@ -254,7 +257,7 @@ class SliceListGenerator(SOA):
                                                                                     shp, VMidPnt=Ref_y1,
                                                                                     preview_img=self.clone,
                                                                                     nPnts=nPnts)
-        elif avg_shock_angle != 90 and avg_shock_loc == 0: # in case the rotation angle only is provieded in working _range
+        elif avg_shock_angle != 90 and avg_shock_loc == [0, 0]: # in case the rotation angle only is provieded in working _range
             print(f'{BCOLOR.BGOKGREEN}Request: {BCOLOR.ENDC}{BCOLOR.ITALIC}Please, provide the rotation center...{BCOLOR.ENDC}')
             self.LineDraw(self.clone, 'Inc', 3)
             # find the rotation center
@@ -285,12 +288,12 @@ class SliceListGenerator(SOA):
 
             randomIndx = genratingRandomNumberList(shock_angle_samples, n1)
 
-            samplesList = []; k = 0
+            samplesList = {}; k = 0
             for indx in randomIndx:
                 Sample = cv2.imread(files[indx])
                 # check if the image on grayscale or not and convert if not
                 if len(Sample.shape) > 2: Sample = cv2.cvtColor(Sample, cv2.COLOR_BGR2GRAY)
-                samplesList.append(Sample)
+                samplesList[indx] = Sample
                 k += 1
                 sys.stdout.write('\r')
                 sys.stdout.write("[%-20s] %d%%" % ('='*int(k/(shock_angle_samples/20)), int(5*k/(shock_angle_samples/20))))
@@ -305,16 +308,17 @@ class SliceListGenerator(SOA):
                                                                                  nSlices, Ref,
                                                                                  nReview=NSamplingReview,
                                                                                  output_directory=output_directory,
+                                                                                 comment = comment,
                                                                                  **kwargs)
-            
-        M = cv2.getRotationMatrix2D((avg_shock_angle[2], Ref_y1), 90-avg_shock_angle[2], 1.0)
+            avg_angle = avg_shock_angle[0] if avg_shock_angle[2] > 0 else avg_shock_angle[0]
+        M = cv2.getRotationMatrix2D((avg_shock_loc[0], Ref_y1), 90-avg_angle, 1.0)
         new_img = cv2.warpAffine(img, M, (shp[1],shp[0]))
 
         new_img = PreviewCVPlots(new_img, Ref_x0, Ref_y = Ref_y1,
                                  tk = [lower_bounds,upper_bounds],
-                                 avg_shock_loc = avg_shock_loc)
+                                 avg_shock_loc = avg_shock_loc[0])
 
-        if avg_shock_angle[2] != 90 and preview:
+        if avg_angle != 90 and preview:
             cv2.imshow('Final investigation domain', new_img)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
@@ -330,8 +334,8 @@ class SliceListGenerator(SOA):
                 now = dt.now()
                 now = now.strftime("%d%m%Y%H%M")
                 outputPath =f'{output_directory}\\{self.f/1000:.1f}kHz_{slice_loc}mm_{self.pixelScale}mm-px_tk_{slice_thickness}px_{now}'
-            if avg_shock_angle[2] != 90:
-                print('RotatedImage:', u"stored \u2713" if cv2.imwrite(outputPath+f'-RefD{round(avg_shock_angle[2],2)}deg.png', new_img) else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}')
+            if avg_angle != 90:
+                print('RotatedImage:', u"stored \u2713" if cv2.imwrite(outputPath+f'-RefD{round(avg_angle,2)}deg.png', new_img) else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}')
                 print('DomainImage:' , u"stored \u2713" if cv2.imwrite(outputPath+'-RefD.png', self.clone)   else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}')
             else: print('DomainImage:',u"stored \u2713" if cv2.imwrite(outputPath+'-RefD.png', self.clone)   else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}')
 

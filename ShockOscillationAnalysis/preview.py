@@ -55,13 +55,13 @@ def AvgAnglePlot(ax, img_shp:tuple , P: tuple, slope: float, angle: float,
     else: X = avg_txt_Yloc
 
     # Plot the inclined line
-    ax.plot([P1[0],P2[0]], [P1[1],P2[1]], lw = 2,
-            color= lin_color, linestyle = (0, (20, 3, 5, 3)), alpha = lin_opacity)
+    ax.plot([P1[0],P2[0]], [P1[1],P2[1]], lw=2,
+            color=lin_color, linestyle=(0, (20, 3, 5, 3)), alpha=lin_opacity)
 
     # Plot the text annotation if enabled
     if txt:
         # Draw an arc to represent the angle
-        avg_ang_arc = Arc((X, avg_txt_Yloc),80, 80, theta1= -angle , theta2 = 0, color = lin_color)
+        avg_ang_arc = Arc((X, avg_txt_Yloc),80, 80, theta1=-angle , theta2=0, color=lin_color)
         ax.add_patch(avg_ang_arc);
 
         # Add the text annotation for the angle
@@ -72,7 +72,7 @@ def AvgAnglePlot(ax, img_shp:tuple , P: tuple, slope: float, angle: float,
                 color = lin_color, alpha = lin_opacity)
 
 def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope, avg_ang,
-                mid_loc = -1, y = -1, avg_preview_mode = None, Mach_ang_mode = None, **kwargs):
+                mid_loc=-1, y=-1, avg_preview_mode=None, Mach_ang_mode=None, **kwargs):
 
     """
     Plot review function to visualize shock points and additional features on an image.
@@ -140,7 +140,7 @@ def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope
 
         ax.fill_betweenx(column_y, x_new_loc-conf_value, x_new_loc+conf_value,
                          color = conf_color, alpha = conf_range_opacity)
-        if len(true_outlier) > 0:
+        if true_outlier is not None and len(true_outlier) > 0:
             for item in true_outlier:
                 ax.plot(item[0],item[1],'x', color = 'green', ms = points_size+2)
 
@@ -151,7 +151,7 @@ def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope
         M1_txt_size = kwargs.get('M1_txt_size', 26)
         arw_len = kwargs.get('arw_len', 50)
         arc_dia = kwargs.get('arc_dia', 80)
-        for i in range(1,len(column_y)):
+        for i in range(1,len(column_y)-1):
             p1 = (x_loc[i],column_y[i]); p2 = (x_loc[i-1],column_y[i-1]);
             _,_,m,_ = InclinedLine(p1,p2,imgShape = shp)
             xlen = np.cos(inflow_dir_rad[i]); ylen = np.sin(inflow_dir_rad[i])

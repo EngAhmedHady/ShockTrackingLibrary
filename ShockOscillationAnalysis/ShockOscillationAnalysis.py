@@ -15,7 +15,7 @@ from .linedrawingfunctions import InclinedLine
 from .generateshocksignal import GenerateShockSignal
 
 px = 1/plt.rcParams['figure.dpi']
-plt.rcParams.update({'font.size': 10})
+plt.rcParams.update({'font.size': 16})
 plt.rcParams["text.usetex"] = True
 plt.rcParams["font.family"] = "serif"
 plt.rcParams['figure.max_open_warning'] = 0

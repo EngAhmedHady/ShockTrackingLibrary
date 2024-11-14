@@ -6,6 +6,7 @@ Created on Fri Dec  1 15:27:54 2023
 """
 import numpy as np
 import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 16})
           
             
 def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alpha = 0.3):
@@ -39,7 +40,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
     avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice    
     MinimumPoint = min(SnapshotSlice) # ........... minimum (darkest) point
     if Plot: # to plot slice illumination values with location and Avg. line
-        fig, ax = plt.subplots(figsize=(10,5))
+        fig, ax = plt.subplots(figsize=(8,4))
         #Plot light intensity; Plot the average line
         ax.plot(SnapshotSlice, label = 'Light intensity at certain snapshot'); ax.axhline(avg,linestyle = ':',color = 'tab:green', label = 'Light intensity average line');
         # ax.set_ylim([0,255]);  ax.set_yticks(np.arange(0, 260, 51))
@@ -92,7 +93,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
         LocMinAvg = np.mean(ShockRegion[1])
     except Exception as e:
         # By this way we can know about the type of error occurring
-        fig, ax = plt.subplots(figsize=(10,5))
+        fig, ax = plt.subplots(figsize=(8,4))
         ax.plot(SnapshotSlice)
         ax.axhline(avg,linestyle = ':')
         ax.text(0.99, 0.99, f'Error: {e}',
@@ -172,7 +173,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
             ax.axvline(LastShockLoc,linestyle = '--',color = 'tab:red', label = 'Location shock on previous snapshot')
             handles, labels = plt.gca().get_legend_handles_labels()
             order = [0,1,2,3,6,5,4]
-            ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], bbox_to_anchor=(1.9, 0.5), loc='right')
+            ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], bbox_to_anchor=(1.9, 0.5), loc='right', fontsize=20)
             if abs(LastShockLoc - minLoc) > 15:
                 arrow_props = dict(arrowstyle='<|-|>', fc='k', ec='k')
                 ax.annotate('', xy=(LastShockLoc, -13.5) , xytext=(minLoc, -13.5), arrowprops=arrow_props)
