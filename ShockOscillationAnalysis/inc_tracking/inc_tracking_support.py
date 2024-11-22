@@ -6,9 +6,9 @@ Created on Wed Jun  5 10:15:04 2024
 """
 import cv2
 import sys
+import random
 import numpy as np
 import matplotlib.pyplot as plt
-from ..preview import residual_preview
 from ..linedrawingfunctions import InclinedLine
 from ..ShockOscillationAnalysis import BCOLOR, CVColor
 from scipy.interpolate import CubicSpline, PchipInterpolator
@@ -43,10 +43,53 @@ def v_least_squares(xLoc: list[float], columnY:list[float], nSlices: int) -> lis
     x_sum = np.sum(xLoc)       ; y_sum = np.sum(columnY)
     xy_sum = np.sum(xy)        ; yy_sum = np.sum(yy)
     if nSlices*yy_sum - y_sum**2 != 0 and nSlices*xy_sum - x_sum * y_sum != 0:
-        return 1/((nSlices*xy_sum - x_sum * y_sum)/(nSlices*yy_sum - y_sum**2))
+        return (nSlices*yy_sum - y_sum**2)/(nSlices*xy_sum - x_sum * y_sum)
     else:
         return np.inf
 
+def ransac(x, y, threshold, e=0.3, p=0.999,
+           n_samples=5, max_trials=0):
+
+    best_model = None
+    # best_inliers = []
+    best_score = 0
+    # e: estimated outlier ratio (n_outlaier/data_set_size)
+    # p: probability to select at least 1 outlier within a sample
+
+    N = len(x)
+
+    if N <= n_samples + 1:
+        m = v_least_squares(x, y, N)
+        return m, np.mean(x)
+
+    n_trials = round(np.log(1-p)/np.log(1-(1-e)**n_samples))
+    max_trials=n_trials if max_trials<1 else max_trials
+    for _ in range(max_trials):
+        # Randomly select n_samples points
+        sample_indices = random.sample(range(N), n_samples)
+
+        # Fit a linear model to the sample
+        x_sample, y_sample = x[sample_indices], y[sample_indices]
+        m = v_least_squares(x_sample, y_sample, 5)
+        c = np.mean(y_sample)-m*np.mean(x_sample)
+
+        # Calculate residuals (distance to the fitted line)
+        x_pred = (y - c)/m if m != np.inf else np.full_like(x, np.mean(x_sample))
+        residuals = np.abs(x - x_pred)
+
+        # Identify inliers (points with residuals below the threshold)
+        inliers = np.where(residuals < threshold)[0]
+
+        # Score based on the number of inliers
+        if len(inliers) > best_score:
+            best_score = len(inliers)
+            best_model = m
+            best_inliers = inliers
+    try:
+        return best_model, np.mean(x[best_inliers])
+    except Exception as e:
+        print(e, x, y, best_model, inliers)
+        
 
 def pearson_corr_coef(xLoc: list[float], columnY:list[float], nSlices: int) -> list[float]:
 
@@ -89,156 +132,6 @@ def pearson_corr_coef(xLoc: list[float], columnY:list[float], nSlices: int) -> l
     r = r_num/r_den
 
     return r
-
-
-def save_data_txt(outlier_p, img_indx, count, hi, leverage_threshold, output_directory='', comment=''):
-    if len(output_directory) > 0:
-       log_file_path = f"{output_directory}/outliers_{comment}.txt"
-       with open(log_file_path, "a") as f:
-           for e, pos, _ in outlier_p:
-               img_index_info = img_indx[count] if img_indx is not None else "N/A"
-               f.write(f'Outlier detected: Error={e}, Position={pos + 1}, ImageIndex={img_index_info}\n')
-           f.write(f'Outlier leverage: {np.sum(hi)}, H0 = {leverage_threshold}\n')
-
-def IQR(error: list[float], y_dp: list[float], count: int=0, img_indx: list[int]=None,
-        output_directory: str='', comment: str='', **kwargs) -> list[tuple[float, int, int]]:
-
-    """
-    Identifies outliers in an error array using the Interquartile Range (IQR) method and
-    logs details if certain leverage conditions are met.
-
-    Parameters:
-        - **error (list[float])**: Array of error values to analyze.
-        - **y_dp (list[float])**: Array of associated data points to calculate leverage.
-        - **count (int)**: Current count index, used for logging purposes.
-        - **output_directory (str)**: Directory to save outlier logs. Defaults to an empty string.
-        - **comment (str)**: Comment to be added to the log file name. Defaults to an empty string.
-        - **img_indx (Optional[list[Any]])**: List of image indices for logging outliers. Defaults to None.
-
-    Keyword Arguments:
-        **residual_preview (bool)**: Whether to generate a preview of residuals. Defaults to False.
-
-    Returns:
-        list[tuple[float, int, int]]: List of tuples for outlier values, each containing:
-            - The error value.
-            - Position of the error in the array.
-            - The count index for the image.
-    """
-    # Number of slices and median of the error array
-    nSlices = len(error)
-    e_median = np.median(error)
-
-    # Calculate the first and third quartiles (Q1, Q2) of the sorted error array
-    Q1_array, Q2_array = np.array_split(sorted(error), 2)
-
-    Q1 = np.median(Q1_array)
-    Q2 = np.median(Q2_array)
-    # Interquartile range
-    IQR = Q2 - Q1
-
-    # Detect outliers based on the IQR range
-    outlier_p = [[e, i, count] for i, e in enumerate(error)
-                 if not (Q1 - 1.5 * IQR <= e <= Q2 + 1.5 * IQR)]
-
-    # Calculate leverage points for outliers
-    hi = [(1 / nSlices) + y_dp[i] for i, e in enumerate(error)
-          if not (Q1 - 1.5 * IQR <= e <= Q2 + 1.5 * IQR)]
-
-    # If the total leverage exceeds a threshold, log the outliers
-    if len(hi) > 0 and np.sum(hi) > (3*2)/nSlices:
-        lev_th = (3*2)/nSlices
-        save_data_txt(outlier_p, img_indx, count, hi, lev_th, output_directory, comment)
-        # If residual preview is requested, call the preview function
-        resid_preview = kwargs.get('residual_preview', False)
-        if resid_preview: residual_preview(error, (e_median,Q1,Q2,IQR), nSlices, count)
-    else:
-        outlier_p = [] # Clear outliers if leverage is below the threshold
-    return outlier_p
-
-
-def error_analysis(xloc: list[float], columnY:list[float], nSlices: int,
-              l_slope: float, l_yint: float, t: float, y_dp: list[float],
-              count = 0, output_directory= '', comment = '', img_indx = None, **kwargs):
-    """
-    Estimate confidence intervals for x-locations based on a linear model and calculate residuals.
-
-    Parameters:
-        - **xloc (list[float])**: List of actual x-coordinates.
-        - **columnY (list[float])**: List of y-coordinates.
-        - **nSlices (int)**: Number of data points.
-        - **l_slope (float)**: Slope of the linear regression line.
-        - **l_yint (float)**: y-intercept of the linear regression line.
-
-    Returns:
-        list of tuple
-            A list of tuples, where each tuple contains:
-            - Predicted x-location (float)
-            - Corresponding 95% confidence interval (float)
-
-    Raises:
-        ValueError
-        If nSlices is less than 3 (as at least 2 degrees of freedom are required).
-
-    Example:
-        >>> xloc = [1.2, 2.3, 3.4, 4.5]
-        >>> columnY = [2.1, 3.2, 4.3, 5.4]
-        >>> nSlices = 4
-        >>> l_slope = 1.0
-        >>> l_yint = 1.0
-        >>> conf_est(xloc, columnY, nSlices, l_slope, l_yint)
-        [(1.1, 0.28), (2.1, 0.36), (3.2, 0.45), (4.3, 0.56)]
-
-    .. note::
-        This function calculates the residual sum of squares and confidence intervals
-        for the given x-locations based on a linear fit to the corresponding y-values. The
-        confidence interval is computed using the t-distribution for the specified number
-        of slices.
-    """
-    # Ensure that the number of slices is sufficient
-    if nSlices < 3:
-        print(f'{BCOLOR.FAIL}Error:{BCOLOR.ENDC}{BCOLOR.ITALIC} nSlices must be at least 3 to have enough degrees of freedom.{BCOLOR.ENDC}')
-        return list(zip(xloc, np.zeros(nSlices))), [], 0
-
-
-    # Convert to NumPy arrays for vectorized operations
-    xloc = np.array(xloc)
-    columnY = np.array(columnY)
-
-    # Calculate predicted x-locations from the linear model
-    x_dash = (columnY - l_yint) / l_slope if l_slope != np.inf else np.ones(nSlices)*np.mean(xloc)
-
-    error = xloc - x_dash
-
-    # Calculate the sum of squared errors
-    Se = np.sum(error ** 2)
-
-    outlier_p = IQR(error, y_dp, count, img_indx, output_directory, comment, **kwargs)
-
-    # Standard error and t-statistics
-    df = nSlices - 2  # ........ Calculate degree of freedom
-    s = np.sqrt(Se / df)
-
-    # Compute confidence intervals for each slice
-    Sx = s * np.sqrt((1 / nSlices) + y_dp)
-
-    return list(zip(x_dash, Sx * t)), outlier_p, s
-
-def pop_outlier(indx, certainity, xloc, columnY, n_slice_new):
-    newxloc, newyloc = xloc, columnY
-    try:
-        if len(certainity) > 0 and columnY[indx] in certainity:
-            newxloc = np.delete(xloc, indx)
-            newyloc = np.delete(columnY, indx)
-            new_shock_slope = v_least_squares(newxloc, newyloc, n_slice_new - 1)
-            new_midxloc = np.mean(newxloc)
-            return new_shock_slope, new_midxloc, newxloc, newyloc, [xloc[indx], columnY[indx]]
-
-        # If outlier condition not met
-        return None, None, newxloc, newyloc, None
-    except Exception as e:
-        print(e)
-        return None, None, newxloc, newyloc, None
-
 
 def anglesInterpolation(pnts_y_list: list[int],                              # Generated points by class
                         flow_dir: list[float] = None, flow_Vxy:list[tuple] = None, # measured data (LDA, CFD, ... )

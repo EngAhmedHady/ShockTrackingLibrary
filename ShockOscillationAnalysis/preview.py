@@ -47,7 +47,7 @@ def AvgAnglePlot(ax, img_shp:tuple , P: tuple, slope: float, angle: float,
     avg_txt_size = kwargs.get('avg_txt_size', 26)
 
     # Calculate the inclined line end points
-    P1,P2,_,a = InclinedLine(P,slope = slope ,imgShape = img_shp)
+    P1,P2,_,a = InclinedLine(P, slope=slope, imgShape=img_shp)
 
     # Calculate the X position for the text annotation
     if slope != 0 and slope != np.inf: X = int((avg_txt_Yloc-a)/slope)
@@ -128,18 +128,25 @@ def plot_review(ax, img, shp, x_loc, column_y, uncertain, uncertain_y, avg_slope
     conf_interval = kwargs.get('conf_interval', 0)
 
     if conf_interval > 0:
-        conf_info = kwargs.get('conf_info', np.zeros([len(column_y),2]))
+        conf_info = kwargs.get('conf_info', np.zeros([len(column_y),3]))
         conf_color = kwargs.get('conf_color', 'tab:green')
+        pred_color = kwargs.get('pred_color', 'tab:red')
         conf_range_opacity = kwargs.get('conf_range_opacity', 0.3)
+        pred_range_opacity = kwargs.get('pred_range_opacity', 0.3)
         true_outlier = kwargs.get('true_outlier', None)
-        x_new_loc, conf_value = zip(*conf_info)
+        x_new_loc, conf_value, pred_value = zip(*conf_info)
         x_new_loc = np.array(x_new_loc)
         conf_value = np.array(conf_value)
-        for x, y in enumerate(column_y):
-            ax.plot([x_loc[x],x_new_loc[x]],[y,y],':', color = 'white')
+        for y, x in enumerate(x_new_loc):
+            ax.plot([x_loc[y],x],[column_y[y],column_y[y]],':', color = 'white')
 
-        ax.fill_betweenx(column_y, x_new_loc-conf_value, x_new_loc+conf_value,
-                         color = conf_color, alpha = conf_range_opacity)
+        ax.fill_betweenx(column_y[:len(x_new_loc)], x_new_loc-pred_value, x_new_loc+pred_value,
+                         color=pred_color, alpha=pred_range_opacity)
+
+        ax.fill_betweenx(column_y[:len(x_new_loc)], x_new_loc-conf_value, x_new_loc+conf_value,
+                         color=conf_color, alpha=conf_range_opacity)
+
+
         if true_outlier is not None and len(true_outlier) > 0:
             for item in true_outlier:
                 ax.plot(item[0],item[1],'x', color = 'green', ms = points_size+2)
@@ -251,6 +258,43 @@ def residual_preview(error, margins, nSlices, count):
         ax.set_title(f'Outliers have high impact at {count}')
     except Exception as e:
         print(f'Error during plotting: {e}')
+
+
+def visualize_shock_angles(shock_deg: list[float], avg_ang_glob: float, std_mid_Avg: float,
+                           output_directory: str = '') -> None:
+    """
+    Plot a histogram of shock angles and overlay statistical indicators.
+
+    Parameters:
+        - **shock_deg (list[float])**: List of shock angles in degrees.
+        - **avg_ang_glob (float)**: Global average of the shock angles.
+        - **std_mid_Avg (float)**: Standard deviation of the shock angles.
+        - **output_directory (str, optional)**: Directory to save the plot.
+                                                If empty, the plot is not saved.
+
+    Returns:
+        None
+    """
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    # Plot histogram of shock angles
+    ax.hist(shock_deg, bins=20, edgecolor='black', alpha=0.8, color='skyblue')
+
+    # Plot average and standard deviation lines
+    y_limit = ax.get_ylim()[1]
+    ax.vlines([avg_ang_glob, avg_ang_glob - std_mid_Avg, avg_ang_glob + std_mid_Avg],
+              0, y_limit, colors=['tab:red', 'tab:orange', 'tab:orange'],
+              linestyles=['-', '--', '--'],
+              label=['Average Angle', '1-σ Deviation'])
+
+    # Add labels, and grid
+    ax.set_xlabel("Angle (deg)")
+    ax.set_ylabel("Frequency")
+    ax.grid(True, axis='y', which='major', color='#D8D8D8', linestyle='-', alpha=0.3, lw=1.5)
+    if output_directory:
+        fig.savefig(f"{output_directory}/Hist_Ang_{avg_ang_glob:.2f}_std_{std_mid_Avg:.2f}.png",
+                    bbox_inches='tight', pad_inches=0.1)
+    plt.close(fig)
 
 # -----------------------------| Draft code |----------------------------------
 # ploting the middle point as possible center of rotation
