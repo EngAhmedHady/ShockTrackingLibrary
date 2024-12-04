@@ -133,9 +133,10 @@ def pearson_corr_coef(xLoc: list[float], columnY:list[float], nSlices: int) -> l
 
     return r
 
-def anglesInterpolation(pnts_y_list: list[int],                              # Generated points by class
-                        flow_dir: list[float] = None, flow_Vxy:list[tuple] = None, # measured data (LDA, CFD, ... )
-                        **kwargs) -> list[float]:                                  # other parameters
+def anglesInterpolation(pnts_y_list: list[int],       # Generated points by class
+                        flow_dir: list[float] = None, # measured data (LDA, CFD, ... )
+                        flow_Vxy:list[tuple] = None,  # measured data (LDA, CFD, ... )
+                        **kwargs) -> list[float]:     # other parameters
     """
     Interpolate angles based on given y-coordinates and corresponding angles or velocity components.
 
@@ -174,6 +175,13 @@ def anglesInterpolation(pnts_y_list: list[int],                              # G
     .. _scipy.interpolate.PchipInterpolator: https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html#scipy.interpolate.PchipInterpolator
 
     """
+    angle_interp_kind = kwargs.get('angle_interp_kind', 'linear')
+    if angle_interp_kind not in ['linear', 'CubicSpline', 'PCHIP']:
+        warning = 'Interpolation method is not supported!;'
+        action = 'Linear interpolation will be used'
+        print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+        print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
+        angle_interp_kind = 'linear'
 
     if flow_dir is not None:
         # Unzip the angles_list into separate locs and angles lists
@@ -184,18 +192,23 @@ def anglesInterpolation(pnts_y_list: list[int],                              # G
         angles = np.arctan(np.array(Vy)/np.array(Vx))*180/np.pi
 
     if min(locs) > min(pnts_y_list) or max(locs) < max(pnts_y_list):
-        print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Provided y-domain is out of valid range{BCOLOR.ENDC}')
-
-    angle_interp_kind = kwargs.get('angle_interp_kind', 'linear')
+        warning = 'Provided y-domain is out of valid range!;'
+        match angle_interp_kind:
+            case 'linear': 
+                action = 'Only boundary angles will considered ...'
+            case _:
+                action = 'First derivative at curves ends will considered zero,'
+                action += 'overshooting is likely occurs ...'
+            
+        print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+        print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
+    
     if angle_interp_kind == 'linear':
-        print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Only boundary angles will considered ...{BCOLOR.ENDC}')
         intr_flow_dir = np.interp(pnts_y_list, locs, angles)
     elif angle_interp_kind == 'CubicSpline':
-        print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} First derivative at curves ends will considered zero, overshooting is likely occurs ...{BCOLOR.ENDC}')
         interp_fun = CubicSpline(locs, angles, bc_type = 'clamped')
         intr_flow_dir = interp_fun(pnts_y_list)
     elif angle_interp_kind == 'PCHIP':
-        print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} First derivative at curves ends will considered zero, overshooting is likely occurs ...{BCOLOR.ENDC}')
         interp_fun = PchipInterpolator(locs, angles, extrapolate = 'bool')
         intr_flow_dir = interp_fun(pnts_y_list)
 
@@ -241,9 +254,27 @@ def shockDomain(Loc: str, P1: tuple[int], HalfSliceWidth: int, LineSlope: float,
     if preview_img is not None: cv2.line(preview_img, P1new, P2new, CVColor.RED, 1)
     return anew
 
+def import_gray(img, resize_img):
+    # Resize the image if needed and convert to gray scale
+    img = cv2.cvtColor(cv2.resize(img.astype('float32'), resize_img), cv2.COLOR_BGR2GRAY)
+    return img
+
+def import_other(img, resize_img):
+    # Resize the image if needed
+    img = cv2.resize(img.astype('float32'), resize_img)
+    return img
+
+def rotate90(img):
+    img = cv2.transpose(img)
+    img = cv2.flip(img, 1)
+    return img
+
+def doNone(img):
+    return img
+
 def ImportingFiles(pathlist: list[str], indices_list: list[int], n_images: int, # Importing info.
-                   imgs_shp: tuple[int],                                              # Images info.
-                   **kwargs) -> tuple[list[np.ndarray], list[np.ndarray]]:            # Other parameters
+                   imgs_shp: tuple[int], import_type = 'other',            # Images info.
+                   **kwargs) -> tuple[list[np.ndarray], list[np.ndarray]]:      # Other parameters
     """
     Import images from the specified paths, optionally resize them, and remove the background if provided.
 
@@ -258,7 +289,7 @@ def ImportingFiles(pathlist: list[str], indices_list: list[int], n_images: int, 
 
     Returns:
         - tuple: A tuple containing:
-            - original_img_list (list[np.ndarray]): List of original images (resized if specified).
+            # - original_img_list (list[np.ndarray]): List of original images (resized if specified).
             - img_list (list[np.ndarray]): List of grayscale images with the background removed if provided.
 
     Example:
@@ -276,46 +307,36 @@ def ImportingFiles(pathlist: list[str], indices_list: list[int], n_images: int, 
         - The images can be resized if the `resize_img` parameter is provided in kwargs.
 
     """
-    print(f'Importing {n_images} images ...')
-    img_list=[]; n = 0; original_img_list=[]
+    print(f'Importing {n_images} images...')
+    img_list={}
 
     # Get additional parameters from kwargs
-    BG_path = kwargs.get('BG_path', '')
-    resize_img = kwargs.get('resize_img', (imgs_shp[1],imgs_shp[0]))
+    crop_y_img = kwargs.get('crop_y_img', (0, imgs_shp[1]))
+    crop_x_img = kwargs.get('crop_x_img', (0, imgs_shp[0]))
+    croped_img_shp = (crop_y_img[1]-crop_y_img[0], crop_x_img[1]-crop_x_img[0])
+    resize_img = kwargs.get('resize_img', (croped_img_shp[1], croped_img_shp[0]))
+    rotate90_img = kwargs.get('rotate90_img', 0)
+    if import_type == 'gray_scale':
+        import_func = import_gray
+    elif import_type == 'other':
+        import_func = import_other 
 
+    if rotate90_img:
+        oriant = rotate90
+    else:
+        oriant = doNone
     # Import images
-    for i in indices_list:
+    for n, i in enumerate(indices_list):
         img = cv2.imread(pathlist[i])
-        # original_img_list.append(cv2.resize(img.astype('float32'), resize_img))
-
-        # Resize and store the original image if needed, and Convert image to grayscale
-        img_list.append(cv2.cvtColor(cv2.resize(img.astype('float32'), resize_img), cv2.COLOR_BGR2GRAY))
+        # crop the original image if needed
+        img = img[crop_y_img[0]: crop_y_img[1],
+                  crop_x_img[0]: crop_x_img[1]]
+        img = import_func(img, resize_img)
+        img_list[i] = oriant(img)
 
         # Print progress
-        n += 1
         sys.stdout.write('\r')
         sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n_images/20)), int(5*n/(n_images/20))))
-    print('')
-
-    # Remove background if path is provided
-    if len(BG_path) > 0:
-        print('Removing background image ...', end=" ")
-        BG = cv2.imread(BG_path)
-        BG = cv2.cvtColor(BG, cv2.COLOR_BGR2GRAY).astype(np.float32)
-
-        BG_len , BG_Wid  = BG.shape
-        img_len, img_wid = imgs_shp
-
-        # Adjust background size if resizing is specified
-        if resize_img != imgs_shp:
-            BG_len = resize_img[0]; r = BG_Wid / BG_len
-            BG = BG[0:BG_len,0:r*BG_len]
-
-        if BG_len < img_len: img_len = BG_len; img_wid = BG_Wid
-        else: BG = BG[0:img_len,0:img_wid]
-
-        # Subtract the background from each image in the list
-        for img in img_list:
-            img = cv2.subtract(img[0:img_len,0:img_wid],BG)
-        print(u'\u2713')
-    return original_img_list, img_list
+    print()
+    return img_list
+    

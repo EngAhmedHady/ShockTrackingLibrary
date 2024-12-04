@@ -7,17 +7,18 @@ Created on Wed Feb 28 13:47:27 2024
 import cv2
 import sys
 import glob
-import keyboard
-import screeninfo  # .......................... To find the  monitor resolution
+import keyboard    # type: ignore
+import screeninfo  # To find the  monitor resolution
 import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
 from .tracking_accuracy import conf_lim
 from ..shocktracking import ShockTraking
+from ..support_func import bg_manipulation
 from ..decorators import calculate_running_time
-from ..preview import plot_review, visualize_shock_angles
 from ..ShockOscillationAnalysis import SOA, CVColor, BCOLOR
 from ..linedrawingfunctions import InclinedLine, AngleFromSlope
+from ..preview import plot_review, visualize_shock_angles, rotate_axes
 from ..slice_list_generator.list_generation_tools import GenerateIndicesList
 from .inc_tracking_support import (anglesInterpolation, v_least_squares, ransac,
                                    shockDomain, ImportingFiles)
@@ -40,7 +41,8 @@ class InclinedShockTracking(SOA):
                                  VMidPnt: int = 0, nPnts: int = 0,                             # define the slices parameters
                                  preview_img: np.ndarray = None) -> tuple[list, int, int]:     # preview parameters
         """
-        Setup shock inclination test, provids the test slices info. with aid of the estimated inclined shock line.
+        Setup shock inclination test, provids the test slices info. with aid of the estimated 
+        inclined shock line.
 
         Parameters:
             - **CheckingWidth (int)**: Width for shock domain checking (sliceWidth).
@@ -87,13 +89,17 @@ class InclinedShockTracking(SOA):
 
         if nPnts < 1:
             if CheckingHieght > 10:
-                Pnts = np.linspace(0, CheckingHieght, 10); nPnts = 10
+                Pnts = np.linspace(0, CheckingHieght, 10)
+                nPnts = 10
             elif CheckingHieght > 2 and CheckingHieght <= 10:
-                Pnts = np.linspace(0,CheckingHieght, round(CheckingHieght));
+                Pnts = np.linspace(0,CheckingHieght, round(CheckingHieght))
                 nPnts = CheckingHieght
             else:
                 print(u'\u2717')
-                print(f'{BCOLOR.BGOKCYAN}info.:{BCOLOR.ENDC}{BCOLOR.ITALIC}Escaping the shock angle checking... \nSlice thickness is not sufficient for check the shock angle{BCOLOR.ENDC}')
+                warning = ' Shock Angle Test Vertical Range is not sufficient!;'
+                action = 'Escaping the shock angle checking...'
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+                print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
                 return slices_info, 0, False
 
         # IncInfoIndx = len(self.Reference) - 1
@@ -120,14 +126,17 @@ class InclinedShockTracking(SOA):
         elif LineSlope == 0:
             # if the line is horizontal
             print(u'\u2717')
-            print(f'{BCOLOR.FAIL}Error:{BCOLOR.ENDC}{BCOLOR.ITALIC} Software is not supporting horizontal shock waves, aborting...{BCOLOR.ENDC}')
+            error = 'Software is not supporting horizontal shock waves, aborting...!'
+            print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
             sys.exit()
 
         # Optionally, preview the shock domain on the image
         if preview_img is not None:
             for pnt in range(len(Pnts)):
-                cv2.circle(preview_img, (x_i1[pnt],y_i[pnt]), radius=3, color=CVColor.RED, thickness=-1)
-                cv2.circle(preview_img, (x_i2[pnt],y_i[pnt]), radius=3, color=CVColor.RED, thickness=-1)
+                cv2.circle(preview_img, (x_i1[pnt],y_i[pnt]), 
+                           radius=3, color=CVColor.RED, thickness=-1)
+                cv2.circle(preview_img, (x_i2[pnt],y_i[pnt]), 
+                           radius=3, color=CVColor.RED, thickness=-1)
         slices_info = x_i1,x_i2,y_i
         print(u'\u2713')
         return slices_info, nPnts, inclinationCheck
@@ -135,7 +144,7 @@ class InclinedShockTracking(SOA):
     @calculate_running_time
     def InclinedShockTracking(self, img_set: list[np.ndarray],                        # image set for line tracking
                               nSlices: int, Ref: list[int], slice_thickness: int = 1, # slices and tracking info.
-                              nReview: int|list[int] = 0, output_directory: str = '', # Review parameters
+                              nReview: int|list[int] = 0, output_dirc: str = '', # Review parameters
                               comment: str = '', **kwargs) -> tuple:                  # Other parameters
 
         """
@@ -147,7 +156,7 @@ class InclinedShockTracking(SOA):
             - **Ref (list)**: Reference points for slices [[x_1, x_2, y], ...].
             - **slice_thickness (int, optional)**: Thickness of each slice. Default is 1.
             - **nReview (int or list, optional)**: Number or range of images to review. Default is 0.
-            - **output_directory (str, optional)**: Directory to save the review images. Default is ''.
+            - **output_dirc (str, optional)**: Directory to save the review images. Default is ''.
             - `**kwargs`: Additional keyword arguments:
                 - **avg_preview_mode (str)**: Mode for previewing average angle.
                 - **review_inc_slice_tracking (list or int)**: Slices to review for tracking.
@@ -173,7 +182,6 @@ class InclinedShockTracking(SOA):
         """
         # Initialize variables for tracking
         avg_ang_glob = 0         # Global average angle
-        # count = 0              # Image counter
         midLocs =[]              # List to store mid-locations
         xLocs = []               # List to store all x-location lists of shocks
         avg_slope = 0            # visual average slope [float or list[float]]
@@ -193,8 +201,10 @@ class InclinedShockTracking(SOA):
             try:
                 for i in range(start, end): slice_ploting_array[i] = 1
             except Exception:
-                data_set_range='Slices to review is out of the image set, only within the range are considered.'
-                print(f'{BCOLOR.WARNING}Warning: {BCOLOR.ENDC}{BCOLOR.ITALIC}{data_set_range}{BCOLOR.ENDC}')
+                warning = 'Slices to review is out of the image set!;'
+                action = 'Only within the range are considered.'
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+                print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
                 pass
 
         elif not hasattr(review_inc_slice_tracking, "__len__") and review_inc_slice_tracking > -1:
@@ -223,10 +233,11 @@ class InclinedShockTracking(SOA):
         xLoc = -1*np.ones(nSlices)
         shock_deg = []
         if nSlices < 5:
-            insufficient_N = 'Number of points is not sufficient for RANSAC,'
-            insufficient_N2 = ' normal least square will be performed.'
-            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}')
-            print(f'{BCOLOR.ITALIC}{insufficient_N}{insufficient_N2}{BCOLOR.ENDC}')
+            warning = 'Number of points is not sufficient for RANSAC!;'
+            action = 'Normal least square will be performed.'
+            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+            print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
+            
         
         print('Shock tracking started ...', end=" ")
         if isinstance(img_set, dict):
@@ -245,7 +256,7 @@ class InclinedShockTracking(SOA):
             xLoc = []; uncertain = []; uncertainY = []
             for i in range(nSlices):
                 x_i1, x_i2 = Ref[0][i], Ref[1][i]
-                Slice = np.sum(img[upper_bounds[i]-1:lower_bounds[i], x_i1:x_i2], axis=0) / slice_thickness
+                Slice = np.sum(img[upper_bounds[i]-1:lower_bounds[i], x_i1:x_i2], axis=0)/slice_thickness
 
                 LastShockLoc = xLocOld[i]-Ref[0][i]
                 ShockLoc, certainLoc, _ = ShockTraking(Slice, LastShockLoc=LastShockLoc,
@@ -300,13 +311,13 @@ class InclinedShockTracking(SOA):
 
         df = img_set_size-1
         if conf_interval > 0:
-            print('Calculating confidance limits ...', end='')
+            print('Calculating confidance limits...', end='')
             e, pop_ylist, m, shock_deg, midLocs, w_avg_ang, conf_ang=conf_lim(xLocs, midLocs,
                                                                               columnY, y, m,
                                                                               img_indx, shock_deg,
                                                                               e, pop_ylist,
                                                                               uncertainY_list,
-                                                                              output_directory,
+                                                                              output_dirc,
                                                                               comment,
                                                                               **kwargs)
             avg_angle_data[2:4] = [w_avg_ang, conf_ang]
@@ -332,7 +343,7 @@ class InclinedShockTracking(SOA):
 
         # Visualize
         print('Plotting tracked data ...')
-        visualize_shock_angles(shock_deg,avg_ang_glob, std_mid_Avg, output_directory)
+        visualize_shock_angles(shock_deg,avg_ang_glob, std_mid_Avg, output_dirc)
 
         if hasattr(nReview, "__len__"):
             r_range = [0,0,1] # review range
@@ -342,17 +353,15 @@ class InclinedShockTracking(SOA):
         else:
             r_range = (0,nReview,1)
             st,en,sp = r_range; n_review = nReview
-            
-        opBG = kwargs.get('opBG', None)
-        if opBG is not None:
-            pass
 
         if avg_preview_mode != 'avg_ang':
             avg_slope = np.tan(np.deg2rad(180-avg_ang_glob))*np.ones(n_review)
             avg_midLoc = avg_midloc*np.ones(n_review)
             avg_ang = avg_ang_glob*np.ones(n_review)
         else:
-            avg_slope = m; avg_midLoc = midLocs; avg_ang = shock_deg
+            avg_slope = m
+            avg_midLoc = midLocs
+            avg_ang = shock_deg
 
         if en > img_set_size:
             en = img_set_size
@@ -361,28 +370,67 @@ class InclinedShockTracking(SOA):
                    ' considered{BCOLOR.ENDC}')
 
         if n_review > 20:
-            n_image_display_lim = 'For memory reasons, only 20 images will be displayed.'
-            print(f'{BCOLOR.BGOKCYAN}info.: {BCOLOR.ENDC}{BCOLOR.ITALIC}{n_image_display_lim}')
+            info = 'For memory reasons, only 20 images will be displayed.'
+            print(f'{BCOLOR.BGOKCYAN}info.:{BCOLOR.ENDC}{BCOLOR.ITALIC} {info}')
             print(f'note: this will not be applied on images storing{BCOLOR.ENDC}')
+        
+        op_90rotate = kwargs.get('op_90rotate', False)
+        rotation_center=(shp[0]/2, shp[0]/2)
+        if op_90rotate:
+            fig_size = (int(shp[0]*2.25*px), int(shp[1]*2.25*px))
+            rotate_angle=90
+            img_width, img_height = shp[:2]
+            x_lim = [img_width, 0]
+            y_lim = [0, img_height]
+        else:
+            fig_size = (int(shp[1]*2.25*px), int(shp[0]*2.25*px))
+            rotate_angle=0
+            img_height, img_width = shp[:2]
+            x_lim = [0, img_width]
+            y_lim = [img_height, 0]
+            
+        # Output background images (different than which the analysis performed)
+        op_bg_path = kwargs.get('op_bg_path', None)
+        if op_bg_path is not None:
+            bg_files = sorted(glob.glob(op_bg_path))
+            bg_y_crop = kwargs.get('bg_y_crop', (0, shp[1]))
+            bg_x_crop = kwargs.get('bg_x_crop', (0, shp[0]))
+            bg_resize = kwargs.get('bg_resize', (shp[1],shp[0]))
+            bg_90rotate = kwargs.get('bg_90rotate', 0)
+            if len(bg_files) >= img_set_size:
+                img_set = ImportingFiles(bg_files, img_indx, img_set_size, shp,
+                                     crop_y_img=bg_y_crop, crop_x_img=bg_x_crop, 
+                                     resize_img=bg_resize, rotate90_img=bg_90rotate)
+                img_set = list(img_set.values())
+            else:
+                error = f'Files found are {len(bg_files)}; Files less than expected!'
+                action = 'Original file set well be used'
+                print(f'{BCOLOR.FAIL}Error:{BCOLOR.ENDC}', end= ' ')
+                print(f'{BCOLOR.ITALIC}{error} {action}{BCOLOR.ENDC}')
 
         if n_review > 0:
-            n = 0
+            n = 0            
             for i in range(st,en,sp):
-                fig, ax = plt.subplots(figsize=(int(shp[1]*2.25*px), int(shp[0]*2.25*px)))
-                ax.set_ylim([shp[0],0]); ax.set_xlim([0,shp[1]])
+                fig, ax = plt.subplots(figsize=fig_size)
+                # ax.set_ylim([shp[0],0])
+                # ax.set_xlim([0,shp[1]])
                 kwargs['conf_info'] = e[i]
                 kwargs['true_outlier'] = pop_ylist[i]
                 plot_review(ax, img_set[i], shp, xLocs[i], columnY,
                             uncertain_list[i], uncertainY_list[i],
                             avg_slope[i], avg_ang[i], avg_midLoc[i] , y, **kwargs)
+                rotate_axes(ax, rotate_angle, center=rotation_center)
+                ax.set_xlim(x_lim)
+                ax.set_ylim(y_lim)
 
-                if len(output_directory) > 0:
+                if len(output_dirc) > 0:
                     # SAR : Shock Angle Review
-                    fig.savefig(fr'{output_directory}\SAR_{comment}_Ang{avg_ang_glob:.2f}_{img_indx[i]:05d}.png',
+                    file_name = f'SAR_{comment}_Ang{avg_ang_glob:.2f}_{img_indx[i]:05d}'
+                    fig.savefig(fr'{output_dirc}\{file_name}.png',
                                 bbox_inches='tight', pad_inches=0.1)
 
                 if n > 20:
-                    if len(output_directory) == 0:
+                    if len(output_dirc) == 0:
                         plt.close(fig); n = n_review
                         sys.stdout.write('\r')
                         sys.stdout.write("[%-20s] %d%%" % ('='*int((n)/(n_review/20)),
@@ -398,11 +446,17 @@ class InclinedShockTracking(SOA):
 
 
     def ShockPointsTracking(self, path: str,
-                            tracking_V_range:list[int | float] = [0,0], inclination_info: int|list[int,tuple,tuple] = 0, nPnts: int = 0, scale_pixels = True,
+                            tracking_V_range:list[int | float] = [0,0], 
+                            inclination_info: int|list[int,tuple,tuple] = 0, 
+                            nPnts: int = 0, scale_pixels = True,
                             preview = True, output_directory = '',comment='', **kwargs):
         """
-        This function identifies shock points by slicing a predefined domain of the shock and tracking it at each slice based on the integral method of shock tracking outlined in this `article <https://dx.doi.org/10.2139/ssrn.4797840>`_.
-        It operates over a specified vertical range within the images, serving as the core function for inclination shock tracking. Additionally, all keyword arguments for output customization can be passed through this function.
+        This function identifies shock points by slicing a predefined domain of the shock and 
+        tracking it at each slice based on the integral method of shock tracking outlined in this 
+        `article <https://dx.doi.org/10.2139/ssrn.4797840>`_.
+        It operates over a specified vertical range within the images, serving as the core function
+        for inclination shock tracking. Additionally, all keyword arguments for output
+        customization can be passed through this function.
 
         Parameters:
             - **path (str)**: Path to the directory containing the image files.
@@ -495,24 +549,48 @@ class InclinedShockTracking(SOA):
             4. Run shock tracking function within the selected vertical range ``tracking_V_range``.
             5. The function will perform the tracking after dividing the vertical range into ``nPnts``.
         """
+        important_info = kwargs.get('important_info', 0)
+        dis_unit = self.univ_unit["dis"]
+        if important_info:
+            print(f'{BCOLOR.UNDERLINE}Notes:{BCOLOR.ENDC}{BCOLOR.ITALIC}')
+            draw_lin = '`one to define the line and one to confirm`'
+            print(f'\t- Draw a line requires 2 left clicks {draw_lin}')
+            print('\t- To delete a line press right click instead of second left click')
+            print('\t- Do not forget to press any key except `Esc` to close the image window')
+            print(f'\t- To terminating process press `Esc`{BCOLOR.ENDC}')
 
-        files = sorted(glob.glob(path))
-        n1 = len(files)
+        resize_img = kwargs.get('resize_img', None)
+        crop_y_img = kwargs.get('crop_y_img', None)
+        crop_x_img = kwargs.get('crop_x_img', None)
+        bg, n1 = bg_manipulation(path, resize_img,crop_y_img, crop_x_img)
         # In case no file found end the progress and eleminate the program
-        if n1 < 1:
-            print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}No files found!{BCOLOR.ENDC}')
-            sys.exit()
+        if n1 < 1: sys.exit()
+            
+        op_bg_path = kwargs.get('op_bg_path', None)
+        if op_bg_path is not None:
+            bg_y_crop = kwargs.get('bg_y_crop', None)
+            bg_x_crop = kwargs.get('bg_x_crop', None)
+            bg_resize = kwargs.get('bg_resize', None)
+            bg_rotate = kwargs.get('bg_90rotate', 0)
+            op_bg, n_bg = bg_manipulation(op_bg_path, bg_y_crop, bg_x_crop, 
+                                          bg_resize, bg_rotate, n=n1)
+            if n_bg < 1:
+                action = 'Original file set well be used'
+                print(f'{BCOLOR.ITALIC}{action}{BCOLOR.ENDC}')
+            
         # Open first file and set the limits and scale
-        Refimg = cv2.imread(files[0])
-        Refimg = cv2.cvtColor(Refimg, cv2.COLOR_BGR2GRAY)
-        Refimg = cv2.cvtColor(Refimg, cv2.COLOR_GRAY2BGR)
+        Refimg = op_bg if op_bg is not None else bg
+        # Refimg = cv2.imread(files[0])
+        # Refimg = cv2.cvtColor(Refimg, cv2.COLOR_BGR2GRAY)
+        # Refimg = cv2.cvtColor(Refimg, cv2.COLOR_GRAY2BGR)
         shp = Refimg.shape; print('Img Shape is:', shp)
         Ref_x0 = kwargs.get('Ref_x0', [0,0])
         Ref_y0 = kwargs.get('Ref_y0', -1)
         resize_img = kwargs.get('resize_img', (shp[1],shp[0]))
         Refimg = cv2.resize(Refimg, resize_img)
 
-        if scale_pixels: Ref_x0, Ref_y0, Ref_y1 = self.DefineReferences(Refimg, shp, Ref_x0, scale_pixels, Ref_y0)
+        if scale_pixels:
+            Ref_x0, Ref_y0, Ref_y1=self.DefineReferences(Refimg, shp, Ref_x0, scale_pixels, Ref_y0)
         else: self.clone = Refimg.copy()
 
         screen = screeninfo.get_monitors()[0]
@@ -531,17 +609,24 @@ class InclinedShockTracking(SOA):
                 Ref_y1 = self.LineDraw(self.clone, 'H', 2, line_color=CVColor.ORANGE)[-1]
             except Exception:
                 Ref_y1 = Ref_y0
-                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Nothing was drawn!{BCOLOR.ENDC} Ref_y1 value is {Ref_y1}')
+                warning = 'Nothing was drawn!;'
+                action = 'Ref_y1 value is {Ref_y1}'
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+                print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
             tracking_V_range.append((Ref_y0 - Ref_y1) * self.pixelScale)
             try:
                 Ref_y2 = self.LineDraw(self.clone, 'H', 2, line_color=CVColor.ORANGE)[-1]
             except Exception:
-                Ref_y2 = Ref_y1;
-                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC}Nothing was drawn!{BCOLOR.ENDC} Ref_y1 value is {Ref_y2}')
+                Ref_y2 = Ref_y1
+                warning = 'Nothing was drawn!;'
+                action = 'Ref_y2 value is {Ref_y2}'
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+                print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
 
             tracking_V_range.append((Ref_y0 - Ref_y2) * self.pixelScale)
             if Ref_y1 == Ref_y2:
-                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Vertical range of tracking is not sufficient!{BCOLOR.ENDC}')
+                error='Vertical range of tracking is not sufficient!'
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
                 sys.exit()
 
             tracking_V_range.sort()
@@ -553,10 +638,17 @@ class InclinedShockTracking(SOA):
 
         else:
             tracking_V_range.sort() if Ref_y0 > -1 else tracking_V_range.sort(reverse=True)
-            Ref_y2, Ref_y1 = [round(Ref_y0 - (x / self.pixelScale)) for x in tracking_V_range] if Ref_y0 > -1 else tracking_V_range
+            if Ref_y0 > -1:
+                Ref_y2, Ref_y1 = [round(Ref_y0 - (x / self.pixelScale)) for x in tracking_V_range]
+            else:
+                tracking_V_range
 
             if Ref_y1 < 0 or Ref_y2 > shp[0]:
-                print('Vertical range of tracking is not sufficient!')
+                v_range_lim = [-(shp[0]-Ref_y0)*self.pixelScale, Ref_y0*self.pixelScale]
+                v_range_lim = [ round(elem, 2) for elem in v_range_lim ]
+                v_range_lim = f'{v_range_lim}{dis_unit}'
+                error=f'Vertical range of tracking is not sufficient!; v_range_lim = {v_range_lim}'
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
                 sys.exit()
 
             cv2.line(self.clone, (0, Ref_y1), (shp[1], Ref_y1),
@@ -564,23 +656,35 @@ class InclinedShockTracking(SOA):
             cv2.line(self.clone, (0, Ref_y2), (shp[1], Ref_y2),
                      CVColor.ORANGE, 1)
 
-        print(f'Vertical range of tracking points starts from {tracking_V_range[0]:0.2f}mm to {tracking_V_range[1]:0.2f}mm')
-        print(f'in pixels from {Ref_y1}px to {Ref_y2}px')
+        print('Vertical range of tracking points is:')
+        v1, v2 = tracking_V_range
+        print(f'\t- In ({dis_unit})s from {v1:0.2f}{dis_unit} to {v2:0.2f}{dis_unit}')
+        print(f'\t- In pixels from {Ref_y1}px to {Ref_y2}px')
 
         # estemat shock domain
         if not hasattr(inclination_info, "__len__"):
             CheckingWidth = inclination_info
             if CheckingWidth < 10:
-                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference width is not sufficient!{BCOLOR.ENDC}');
-                CheckingWidth = int(input(f'{BCOLOR.BGOKGREEN}Request: {BCOLOR.ENDC}{BCOLOR.ITALIC}Please provide reference width >10px: {BCOLOR.ENDC}'))
+                warning = 'Reference width should not be less than 10px!'
+                action = ''
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+                print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
+                request = 'Please provide reference width >10px: '
+                print(f'{BCOLOR.BGOKGREEN}Request:{BCOLOR.ENDC}', end=' ')
+                CheckingWidth = int(input(f'{BCOLOR.ITALIC}{request}{BCOLOR.ENDC}'))
             inclined_ref_line = []
             try:
                 inclined_ref_line = self.LineDraw(self.clone, 'Inc', 3)[-1]
             except Exception:
-                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Nothing was drawn!{BCOLOR.ENDC} inclined_ref_line value is {inclined_ref_line}')
+                warning = 'Nothing was drawn!;'
+                action = 'inclined_ref_line value is {inclined_ref_line}'
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+                print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
 
             if not hasattr(inclined_ref_line, "__len__") or len(inclined_ref_line) < 4:
-                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference lines are not sufficient!{BCOLOR.ENDC}'); sys.exit()
+                error = 'Reference lines are not sufficient!'
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
+                sys.exit()
 
         elif len(inclination_info) > 2:
             P1,P2,m,a = InclinedLine(inclination_info[1],inclination_info[2],imgShape = shp)
@@ -590,9 +694,12 @@ class InclinedShockTracking(SOA):
 
         if nPnts == 0:
             while nPnts == 0:
-                nPnts = int(input(f'{BCOLOR.BGOKGREEN}Request: {BCOLOR.ENDC}{BCOLOR.ITALIC}Please provide number of points to be tracked: {BCOLOR.ENDC}'))
+                request = 'Please provide number of points to be tracked: '
+                print(f'{BCOLOR.BGOKGREEN}Request:{BCOLOR.ENDC}', end=' ')
+                nPnts = int(input(f'{BCOLOR.ITALIC}{request}{BCOLOR.ENDC}'))
                 if nPnts > abs(Ref_y1-Ref_y2):
-                    print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}insufficient number of points{BCOLOR.ENDC}')
+                    error = 'Insufficient number of points!'
+                    print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
                     nPnts = 0
 
         Ref, nSlices, inclinationCheck = self.InclinedShockDomainSetup(CheckingWidth,
@@ -613,7 +720,7 @@ class InclinedShockTracking(SOA):
             kwargs['inflow_dir_rad'] = np.array(kwargs['inflow_dir_deg'])*np.pi/180
 
         if preview:
-            cv2.imshow('investigation domain before rotating', self.clone)
+            cv2.imshow('Investigation domain before rotating', self.clone)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
             if keyboard.read_key() == "esc":
@@ -621,8 +728,7 @@ class InclinedShockTracking(SOA):
                 sys.exit()
             cv2.waitKey(1)
 
-            cv2.imwrite(fr'{output_directory}\AnalysisDomain-Points.jpg',
-                        self.clone)
+            cv2.imwrite(fr'{output_directory}\AnalysisDomain-Points.jpg', self.clone)
 
         import_n_files = kwargs.get('n_files', 0)
         if import_n_files == 0:
@@ -630,23 +736,20 @@ class InclinedShockTracking(SOA):
             if abs(import_n_files[0]-import_n_files[1]) > n1:
                 import_n_files[import_n_files.index(max(import_n_files))] = n1
         import_step = kwargs.get('every_n_files', 1)
-        indices_list, n_images = GenerateIndicesList(n1, import_n_files,
-                                                     import_step)
+        indices_list, n_images = GenerateIndicesList(n1, import_n_files, import_step)
 
         if inclinationCheck:
-            original_img_list, img_list = ImportingFiles(files, indices_list,
-                                                         n_images, shp,
-                                                         **kwargs)
+            files = sorted(glob.glob(path))
+            img_list = ImportingFiles(files, indices_list, n_images, shp, **kwargs)
 
         store_n_files = kwargs.get('store_n_files', n_images)
+
         avg_shock_angle, avg_shock_loc = self.InclinedShockTracking(img_list,
                                                                     nSlices,
                                                                     Ref,
                                                                     nReview=store_n_files,
-                                                                    output_directory=output_directory,
+                                                                    output_dirc=output_directory,
                                                                     **kwargs)
-
-        # print('Average inclination angle {:.2f} deg'.format(avg_shock_angle))
 
         return avg_shock_angle, avg_shock_loc
 

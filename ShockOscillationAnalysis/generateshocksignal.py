@@ -8,7 +8,7 @@ import cv2
 import sys
 import numpy as np
 from scipy import signal
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from .shocktracking import ShockTraking
 from .decorators import calculate_running_time
 
@@ -180,11 +180,14 @@ def GenerateShockSignal(img, method = 'integral',
     elif method == 'maxGrad':
         ksize = kwargs.get('ksize', 3)
         ShockRegion = GradientGenerator(ShockRegion, KernalDim = ksize)
+        if ploting and plotingInterval > 1:
+            fig, ax = plt.subplots(figsize=(10,100))
+            ax.imshow(ShockRegion[start:end], cmap = 'gray')
         TrakingMethod = GradShocktracking
 
 
     nShoots = img.shape[0] # .................... total number of snapshots
-    print('Processing the shock location ...')
+    print(f'Processing the shock location using {method} method...')
 
     for SnapshotSlice in ShockRegion:
         Plot = ploting and start <= count < end

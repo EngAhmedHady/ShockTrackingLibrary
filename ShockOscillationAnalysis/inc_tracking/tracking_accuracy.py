@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Nov 5 10:15:04 2024
+
+@author: Ahmed H. Hanfy
+"""
 import numpy as np
 from scipy import stats
 from ..preview import residual_preview
@@ -6,8 +12,9 @@ from ..linedrawingfunctions import AngleFromSlope
 from .inc_tracking_support import ransac
 
 def save_data_txt(outlier_p, hi, leverage_lim, img_indx=None, output_directory='', comment=''):
+    if len(comment) > 0: comment=f'_{comment}'
     if len(output_directory) > 0:
-       log_file_path = f"{output_directory}/outliers_{comment}.txt"
+       log_file_path = f"{output_directory}/outliers{comment}.txt"
        with open(log_file_path, "a") as f:
            for e, pos, _ in outlier_p:
                img_index_info = img_indx if img_indx is not None else "N/A"

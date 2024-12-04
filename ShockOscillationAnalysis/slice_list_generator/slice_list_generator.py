@@ -11,6 +11,7 @@ import keyboard
 import numpy as np
 from datetime import datetime as dt
 from ..preview import PreviewCVPlots
+from ..support_func import bg_manipulation
 from ..ShockOscillationAnalysis import SOA
 from ..ShockOscillationAnalysis import CVColor
 from ..ShockOscillationAnalysis import BCOLOR
@@ -67,7 +68,10 @@ class SliceListGenerator(SOA):
             Xint = Ref[1][0]
             Yint = M[0] * Xint + A[0]
         else:
-            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC}Lines are parallel{BCOLOR.ENDC}')
+            warning = 'Lines are parallel!;'
+            action = ''
+            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+            print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
 
         Pint = (round(Xint), round(Yint))
         return Pint
@@ -95,25 +99,25 @@ class SliceListGenerator(SOA):
             - Requires the OpenCV (cv2) and NumPy libraries.
             - Assumes the input images are RGB.
         """
-        img_list=[]; # List to store processed images
-        n = 0; #       Counter for the number of processed images
+        img_list=[] # List to store processed images
         slice_thickness =  tk[1]-tk[0]  # Calculate slice thickness from `tk`
 
         # Loop through indices to import and process images
-        for i in indices_list:
-            img = cv2.imread(pathlist[i]) # Read image from specified path
-            img = cv2.warpAffine(img, M, (imgs_shp[1],imgs_shp[0])) # Rotate the image with M matrix
-            cropped_image = np.zeros([1,x_range[1]-x_range[0],3])   # cropped image to the region of interest
+        for n, i in enumerate(indices_list):
+            # Read image from specified path
+            img = cv2.imread(pathlist[i]) 
+            # Rotate the image with M matrix
+            img = cv2.warpAffine(img, M, (imgs_shp[1],imgs_shp[0]))
+            # cropped image to the region of interest
+            cropped_image = np.zeros([1,x_range[1]-x_range[0],3])
 
             # Average the cropped image to creeat one slice
             for j in range(tk[0],tk[1]):
-                cropped_image += img[j-1 : j,
-                                      x_range[0]: x_range[1]]
+                cropped_image += img[j-1 : j, x_range[0]: x_range[1]]
             cropped_image /= slice_thickness
             img_list.append(cropped_image.astype('float32'))
 
             # Increment counter and display progress
-            n += 1
             sys.stdout.write('\r')
             sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n_images/20)), int(5*n/(n_images/20))))
         print('')
@@ -177,46 +181,85 @@ class SliceListGenerator(SOA):
             6. Import files, slice them, and store the generated slices list into an image.
 
         Example:
-            img_list, n, working_range, pixel_scale = GenerateSlicesArray('/path/to/`*`.ext', slice_loc=10, slice_thickness=5)
+            >>> img_list, n, working_range, pixel_scale = GenerateSlicesArray(r'/path/to/`*`.ext', 
+                                                                              slice_loc=10, 
+                                                                              slice_thickness=5)
         """
-
+        important_info = kwargs.get('important_info', 0)
+        if important_info:
+            print(f'{BCOLOR.UNDERLINE}Notes:{BCOLOR.ENDC}{BCOLOR.ITALIC}')
+            draw_lin = '`one to define the line and one to confirm`'
+            print(f'\t- Draw a line requires 2 left clicks {draw_lin}')
+            print('\t- To delete a line press right click instead of second left click')
+            print('\t- Do not forget to press any key except `Esc` to close the image window')
+            print(f'\t- To terminating process press `Esc`{BCOLOR.ENDC}')
+        
         inclinationCheck = False
         avg_angle = 90
+        dis_unit = self.univ_unit["dis"]
         # Find all files in the directory with the sequence and sorth them by name
-        files = sorted(glob.glob(path))
-        n1 = len(files)
-
+        resize_img = kwargs.get('resize_img', None)
+        crop_y_img = kwargs.get('crop_y_img', None)
+        crop_x_img = kwargs.get('crop_x_img', None)
+        bg, n1 = bg_manipulation(path, crop_y_img, crop_x_img, resize_img)
         # In case no file found end the progress and eleminate the program
-        if n1 < 1: 
-            print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}No files found!{BCOLOR.ENDC}'); 
-            sys.exit();
+        if n1 < 1: sys.exit()
+        op_bg_path = kwargs.get('op_bg_path', None)
+        if op_bg_path is not None:
+            bg_y_crop = kwargs.get('bg_y_crop', None)
+            bg_x_crop = kwargs.get('bg_x_crop', None)
+            bg_resize = kwargs.get('bg_resize', None)
+            bg_90rotate = kwargs.get('bg_90rotate', 0)
+            op_bg, n_bg = bg_manipulation(op_bg_path, bg_y_crop, bg_x_crop, 
+                                          bg_resize, bg_90rotate, n=n1)
+            if n_bg < 1:
+                action = 'Original file set well be used'
+                print(f'{BCOLOR.ITALIC}{action}{BCOLOR.ENDC}')
 
         # Open first file and set the limits and scale
-        img = cv2.imread(files[0])
+        img = op_bg if op_bg_path is not None else bg
 
-        shp = img.shape; print('Img Shape is:', shp)
+        shp = img.shape
+        print('Image Shape is:', shp)
         Ref_x0 = kwargs.get('Ref_x0', [0,0])
-        Ref_y0 = kwargs.get('Ref_y0', -1);    Ref_y1 = kwargs.get('Ref_y1', -1)
-
-        Ref_x0, Ref_y0, Ref_y1 = self.DefineReferences(img, shp,
-                                                       Ref_x0, scale_pixels,
-                                                       Ref_y0, Ref_y1, slice_loc)
-        print(f'Slice center is located at: {Ref_y1}px ~ {abs(Ref_y1-Ref_y0)*self.pixelScale:0.2f}{self.univ_unit["dis"]} from reference')
+        Ref_y0 = kwargs.get('Ref_y0', -1)
+        Ref_y1 = kwargs.get('Ref_y1', -1)
+        if scale_pixels:
+            Ref_x0, Ref_y0, Ref_y1 = self.DefineReferences(img, shp,
+                                                           Ref_x0, scale_pixels,
+                                                           Ref_y0, Ref_y1, slice_loc)
+        else: 
+            self.clone = img.copy()
+            self.Reference=[Ref_x0, Ref_y0]
+            try:
+                Ref_y1 = self.LineDraw(self.clone, 'H', 2, line_color=CVColor.ORANGE)[-1]
+            except Exception:
+                warning = 'Nothing was drawn!;'
+                action = 'Ref_y1 value is {Ref_y1}'
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+                print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
+            
+        print('Slice center is located at:' )
+        print(f'\t- {Ref_y1}px in absolute reference')
+        if scale_pixels:
+            dis_in_unit = f'{abs(Ref_y1-Ref_y0)*self.pixelScale:0.2f}{dis_unit}'
+            print(f'\t- {dis_in_unit} ({abs(Ref_y1-Ref_y0)}px) from reference `Ref_y0`')
         if Ref_y1 > 0 and Ref_y1 != Ref_y0: 
             cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), CVColor.RED, 1)
 
         if hasattr(slice_thickness, "__len__"):        
-            if slice_thickness[1] == 'mm' and self.pixelScale > 0: 
+            if slice_thickness[1] == dis_unit and self.pixelScale > 0: 
                 slice_thickness = int(slice_thickness[0]/self.pixelScale)
             elif slice_thickness[1] == 'px':
                 slice_thickness = int(slice_thickness[0])
             else: 
-                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}insufficient scale/unit!{BCOLOR.ENDC}');
-                sys.exit();
+                error = 'Insufficient scale/unit!'
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
+                sys.exit()
         if slice_thickness > 0: Ht = int(slice_thickness/2)  # Half Thickness
-        else: Ht = 1;
+        else: Ht = 1
 
-        upper_bounds =  Ref_y1 - Ht;
+        upper_bounds =  Ref_y1 - Ht
         lower_bounds =  Ref_y1 + Ht if slice_thickness%2 == 0 else  Ref_y1 + Ht + 1
         cv2.line(self.clone, (0,lower_bounds), (shp[1],lower_bounds), CVColor.ORANGE, 1)
         cv2.line(self.clone, (0,upper_bounds), (shp[1],upper_bounds), CVColor.ORANGE, 1)
@@ -226,7 +269,7 @@ class SliceListGenerator(SOA):
         sat_vr = kwargs.get('sat_vr', slice_thickness) # Shock Angle Test Vertical Range
         if hasattr(sat_vr, "__len__"):
             start_vr, end_vr = sat_vr[:2]
-            if len(sat_vr) > 2 and sat_vr[2] == 'mm':
+            if len(sat_vr) > 2 and sat_vr[2] ==  dis_unit:
                sat_vr = [round(Ref_y1 - (start_vr/self.pixelScale)), 
                          round(Ref_y1 - (end_vr/self.pixelScale))]
             else:
@@ -236,29 +279,39 @@ class SliceListGenerator(SOA):
             if abs(end_vr-start_vr) == 0:
                 sat_vr = [upper_bounds, lower_bounds]
         
-        print(f'Shock angle tracking vertical range starts from {sat_vr[0]*self.pixelScale:0.2f}mm to {sat_vr[1]*self.pixelScale:0.2f}mm above the reference')
-        print(f'in pixels from {sat_vr[0]:0}px to {sat_vr[1]:0}px')
+        print('Shock angle tracking vertical range above the reference `Ref_y0` is:')
+        v1, v2 = [f'{v:0.2f}{dis_unit}' for v in (Ref_y0-np.array(sat_vr))*self.pixelScale]
+        if scale_pixels: print(f'\t- In ({dis_unit})s from {v1} to {v2}')
+        print(f'\t- In pixels from {Ref_y0-sat_vr[0]:0}px to {Ref_y0-sat_vr[1]:0}px')
         nPnts = kwargs.get('nPnts', 0)
+        Inc_shock_setup = self.inc_trac.InclinedShockDomainSetup
         if not hasattr(inclination_est_info, "__len__"):
             self.LineDraw(self.clone, 'Inc', 3)
-            if len(self.Reference) < 4: print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference lines are not sufficient!{BCOLOR.ENDC}'); sys.exit()
+            if len(self.Reference) < 4:
+                error = 'Reference lines are not sufficient!'
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
+                sys.exit()
             P1,P2,m,a = self.Reference[3]
-            Ref, nSlices, inclinationCheck = self.inc_trac.InclinedShockDomainSetup(inclination_est_info,
-                                                                                    sat_vr, [P1,P2,m,a],
-                                                                                    shp, VMidPnt=Ref_y1,
-                                                                                    preview_img=self.clone,
-                                                                                    nPnts=nPnts)
+            Ref, nSlices, inclinationCheck = Inc_shock_setup(inclination_est_info,
+                                                             sat_vr, [P1,P2,m,a],
+                                                             shp, VMidPnt=Ref_y1,
+                                                             preview_img=self.clone,
+                                                             nPnts=nPnts)
         elif len(inclination_est_info) > 2:
-            P1,P2,m,a = InclinedLine(inclination_est_info[1],inclination_est_info[2],imgShape = shp)
+            P1, P2, m, a = InclinedLine(inclination_est_info[1], 
+                                        inclination_est_info[2], imgShape=shp)
             cv2.line(self.clone, P1, P2, CVColor.GREEN, 1)
             self.Reference.append([P1, P2, m,a])
-            Ref, nSlices, inclinationCheck = self.inc_trac.InclinedShockDomainSetup(inclination_est_info[0],
-                                                                                    sat_vr, [P1,P2,m,a],
-                                                                                    shp, VMidPnt=Ref_y1,
-                                                                                    preview_img=self.clone,
-                                                                                    nPnts=nPnts)
-        elif avg_shock_angle != 90 and avg_shock_loc == [0, 0]: # in case the rotation angle only is provieded in working _range
-            print(f'{BCOLOR.BGOKGREEN}Request: {BCOLOR.ENDC}{BCOLOR.ITALIC}Please, provide the rotation center...{BCOLOR.ENDC}')
+            Ref, nSlices, inclinationCheck = Inc_shock_setup(inclination_est_info[0],
+                                                             sat_vr, [P1,P2,m,a],
+                                                             shp, VMidPnt=Ref_y1,
+                                                             preview_img=self.clone,
+                                                             nPnts=nPnts)
+        # in case the rotation angle only is provieded in working _range
+        elif avg_shock_angle != 90 and avg_shock_loc == [0, 0]:
+            request = 'Please, provide the rotation center...'
+            print(f'{BCOLOR.BGOKGREEN}Request:{BCOLOR.ENDC}', end=' ')    
+            print(f'{BCOLOR.ITALIC}{request}{BCOLOR.ENDC}')
             self.LineDraw(self.clone, 'Inc', 3)
             # find the rotation center
             avg_shock_loc = self.IntersectionPoint([0,         self.Reference[-1][2]],
@@ -266,7 +319,7 @@ class SliceListGenerator(SOA):
                                                    [(0,Ref_y1),self.Reference[-1][0]])
 
         if preview:
-            cv2.imshow('investigation domain before rotating', self.clone)
+            cv2.imshow('Investigation domain before rotating', self.clone)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
             if keyboard.read_key() == "esc":
@@ -275,6 +328,7 @@ class SliceListGenerator(SOA):
             cv2.waitKey(1)
 
         # number of files to be imported
+        files = sorted(glob.glob(path))
         import_n_files = kwargs.get('n_files', 0)
         if import_n_files == 0:
             import_n_files = kwargs.get('within_range', [0, 0])
@@ -284,11 +338,12 @@ class SliceListGenerator(SOA):
                                                      import_step)
 
         if inclinationCheck:
-            print('Shock inclination estimation ... ')
+            print('Shock inclination estimation... ')
 
             randomIndx = genratingRandomNumberList(shock_angle_samples, n1)
 
-            samplesList = {}; k = 0
+            samplesList = {}
+            k = 0
             for indx in randomIndx:
                 Sample = cv2.imread(files[indx])
                 # check if the image on grayscale or not and convert if not
@@ -296,27 +351,30 @@ class SliceListGenerator(SOA):
                 samplesList[indx] = Sample
                 k += 1
                 sys.stdout.write('\r')
-                sys.stdout.write("[%-20s] %d%%" % ('='*int(k/(shock_angle_samples/20)), int(5*k/(shock_angle_samples/20))))
+                sys.stdout.write("[%-20s] %d%%" % ('='*int(k/(shock_angle_samples/20)),
+                                                       int(5*k/(shock_angle_samples/20))))
             print('')
 
             if angle_samples_review < shock_angle_samples: NSamplingReview = angle_samples_review
             else:
                 NSamplingReview = shock_angle_samples
-                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} Number of samples is larger than requested to review!, all samples will be reviewed{BCOLOR.ENDC}')
+                warning = 'Number of samples is larger than requested to review!;'
+                action = 'All samples will be reviewed'
+                print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+                print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
                     
-            avg_shock_angle, avg_shock_loc = self.inc_trac.InclinedShockTracking(samplesList,
-                                                                                 nSlices, Ref,
-                                                                                 nReview=NSamplingReview,
-                                                                                 output_directory=output_directory,
-                                                                                 comment = comment,
-                                                                                 **kwargs)
+            inc_track = self.inc_trac.InclinedShockTracking
+            avg_shock_angle, avg_shock_loc = inc_track(samplesList, nSlices, Ref, 
+                                                       nReview=NSamplingReview,
+                                                       output_dirc=output_directory, 
+                                                       comment=comment,**kwargs)
             avg_angle = avg_shock_angle[0] if avg_shock_angle[2] > 0 else avg_shock_angle[0]
         M = cv2.getRotationMatrix2D((avg_shock_loc[0], Ref_y1), 90-avg_angle, 1.0)
         new_img = cv2.warpAffine(img, M, (shp[1],shp[0]))
 
-        new_img = PreviewCVPlots(new_img, Ref_x0, Ref_y = Ref_y1,
-                                 tk = [lower_bounds,upper_bounds],
-                                 avg_shock_loc = avg_shock_loc[0])
+        new_img = PreviewCVPlots(new_img, Ref_x0, Ref_y=Ref_y1,
+                                 tk=[lower_bounds,upper_bounds],
+                                 avg_shock_loc=avg_shock_loc[0])
 
         if avg_angle != 90 and preview:
             cv2.imshow('Final investigation domain', new_img)
@@ -328,16 +386,27 @@ class SliceListGenerator(SOA):
             cv2.waitKey(1)
 
         if len(output_directory) > 0:
+            
+            file_info = f'{self.f/1000:.1f}kHz_'             # Sampling rate info
+            file_info += f'{slice_loc}{dis_unit}_'           # Slice location from `Ref_y0`
+            file_info += f'{self.pixelScale}{dis_unit}-px_'  # Image scale
+            file_info += f'tk_{slice_thickness}px'           # Slice generated from avg. n-pixels 
             if len(comment) > 0:
-                outputPath = f'{output_directory}\\{self.f/1000:.1f}kHz_{slice_loc}mm_{self.pixelScale}mm-px_tk_{slice_thickness}px_{comment}'
+                outputPath = fr'{output_directory}\{file_info}_{comment}'
             else:
                 now = dt.now()
                 now = now.strftime("%d%m%Y%H%M")
-                outputPath =f'{output_directory}\\{self.f/1000:.1f}kHz_{slice_loc}mm_{self.pixelScale}mm-px_tk_{slice_thickness}px_{now}'
+                outputPath =f'{output_directory}\\{file_info}_{now}'
             if avg_angle != 90:
-                print('RotatedImage:', u"stored \u2713" if cv2.imwrite(outputPath+f'-RefD{round(avg_angle,2)}deg.png', new_img) else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}')
-                print('DomainImage:' , u"stored \u2713" if cv2.imwrite(outputPath+'-RefD.png', self.clone)   else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}')
-            else: print('DomainImage:',u"stored \u2713" if cv2.imwrite(outputPath+'-RefD.png', self.clone)   else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}')
+                error = f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}'
+                if cv2.imwrite(f'{outputPath}-RefD{avg_angle:0.2f}deg.png', new_img):
+                    txt = u"stored \u2713"
+                else: txt = error
+                print('RotatedImage:', txt)
+            if cv2.imwrite(f'{outputPath}-RefD.png', self.clone):
+                txt = u"stored \u2713"
+            else: txt = error
+            print('DomainImage:' , txt)
 
         if full_img_width:
             x_range = [0, shp[1]]
@@ -358,6 +427,9 @@ class SliceListGenerator(SOA):
                                           x_range, [upper_bounds, lower_bounds], M)
 
         if len(output_directory) > 0:
-            print('ImageList write:', f"File was stored: {outputPath}.png" if cv2.imwrite(f'{outputPath}.png', img_list) else f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Failed!{BCOLOR.ENDC}')
+            if cv2.imwrite(f'{outputPath}.png', img_list):
+                txt = f"Image list was stored at: {outputPath}.png"
+            else: txt = error
+            print('ImageList write:', txt)
 
         return img_list, n, working_range, self.pixelScale

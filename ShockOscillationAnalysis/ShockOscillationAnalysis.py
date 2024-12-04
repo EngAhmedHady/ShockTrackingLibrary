@@ -77,7 +77,7 @@ class BCOLOR:  # For coloring the text in terminal
 
 
 class SOA:
-    def __init__(self, f: int = 1, D: int = 1, pixelScale: float = 1):
+    def __init__(self, f: int = 1, D: int = 1, pixelScale: float=1):
         self.f = f  # ----------------- sampling rate (univ_unit: 'freq')
         self.D = D  # ----------------- refrence distance (univ_unit: 'dis)
         self.pixelScale = pixelScale  # initialize scale of the pixels
@@ -318,7 +318,8 @@ class SOA:
             self.LineDraw(self.clone, 'V', 1)
             Ref_x0 = self.Reference
             if len(Ref_x0) < 2:
-                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference lines are not sufficient!{BCOLOR.ENDC}')
+                error = 'Reference lines are not sufficient!'
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
                 sys.exit()
             Ref_x0.sort()  # to make sure that the limits are properly assigned
         else:
@@ -340,7 +341,8 @@ class SOA:
         if Ref_y0 == -1 and Ref_y1 == -1:
             self.LineDraw(self.clone, 'H', 2)  # to draw the reference line
             if len(self.Reference) < 3:
-                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}Reference lines are not sufficient!{BCOLOR.ENDC}')
+                error = 'Reference lines are not sufficient!'
+                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
                 sys.exit()
             Ref_y0 = self.Reference[-1]
             Ref_y1 = self.Reference[-1]-round(slice_loc/self.pixelScale)
@@ -356,7 +358,8 @@ class SOA:
 
     def CleanSnapshots(self, img: np.ndarray[int], *args, **kwargs) -> np.ndarray[int]:
         """
-        Clean and enhance snapshots based on specified corrections. This method takes an original image snapshot `img` and applies specified corrections based on the provided `*args`.
+        Clean and enhance snapshots based on specified corrections. This method takes an original 
+        image snapshot `img` and applies specified corrections based on the provided `*args`.
         Supported corrections include 'Brightness/Contrast', 'Average', and 'FFT'.
 
         Parameters:

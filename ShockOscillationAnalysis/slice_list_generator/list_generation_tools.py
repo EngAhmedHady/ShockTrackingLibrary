@@ -6,7 +6,6 @@ Created on Wed Feb 28 12:28:27 2024
 """
 import random
 from ..ShockOscillationAnalysis import BCOLOR
-# from ShockOscillationAnalysis import BCOLOR
 
 def genratingRandomNumberList(ShockAngleSamples: int, n1: int) -> list[int]:
     """
@@ -31,13 +30,18 @@ def genratingRandomNumberList(ShockAngleSamples: int, n1: int) -> list[int]:
     """
     if n1 < ShockAngleSamples:
         ShockAngleSamples = n1
-        print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC} ShockAngleSamples should not be more than the number of files; the number of files will be the only considered.{BCOLOR.ENDC}')
+        warning = 'ShockAngleSamples should not be more than the number of files;'
+        action = 'the number of files will be the only considered.'
+        print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+        print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
+        
 
     randomIndx = random.sample(range(n1), min(ShockAngleSamples, n1))
     return randomIndx
 
 
-def GenerateIndicesList(total_n_files: int, files: list[int,int] = [0,0], every_n_files: int = 1) -> tuple[range, int]:
+def GenerateIndicesList(total_n_files:int, files:list[int,int]=[0,0], 
+                        every_n_files:int=1) -> tuple[range, int]:
     """
     Generate a list of indices based on the specified range and step.
 
@@ -66,10 +70,17 @@ def GenerateIndicesList(total_n_files: int, files: list[int,int] = [0,0], every_
     start_file = 0; end_file = total_n_files
     if hasattr(files, "__len__"):
         files.sort(); start, end = files
-        if abs(end-start) > 0: start_file = start; end_file = end;
+        if abs(end-start) > 0: 
+            start_file = start 
+            end_file = end
     elif files > 0: 
-        if files <= total_n_files:  end_file = files
-        else: print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}{BCOLOR.ITALIC}Requested files are more than available files, only available files will be imported{BCOLOR.ENDC}')
+        if files <= total_n_files:  
+            end_file = files
+        else: 
+            warning = 'Requested files are more than available files;'
+            action = 'Only available files will be imported'
+            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+            print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
 
     n_images = int((end_file-start_file)/every_n_files)
     return range(start_file,end_file,every_n_files), n_images
