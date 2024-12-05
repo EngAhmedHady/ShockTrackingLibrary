@@ -160,17 +160,26 @@ class SliceListGenerator(SOA):
                 - float: Pixel scale.
 
         .. note ::
-            - Requires the OpenCV (cv2) and NumPy libraries.
             - The function assumes the input images are in RGB format.
             - The `kwargs` parameter can include:
                 - **Ref_x0 (list[int, int])**: Reference x boundaries.for scaling
                 - **Ref_y0 (int)**: Reference y datum (zero y location)
                 - **Ref_y1 (int)**: slice location (The scanning line, y-center of rotation)
-                - **avg_shock_angle (float)**: Average shock angle.(if known, to skip average shock inc check)
-                - **avg_shock_loc (int)**: Average shock location.(if known, x-center of rotation)
+                - **avg_shock_angle (float)**: Average shock angle. (if known, to skip average shock inc check)
+                - **avg_shock_loc (int)**: Average shock location. (if known, x-center of rotation)
+                - **sat_vr (int | list[int,'str'])**: Shock Angle Test Vertical Range 
+                  (If not provided the vertical renge will be equal to the ``slice_thickness``, could be
+                  provided as number then value will be added equally to upper and lower the traking
+                  location in pixels, it also can be added as list `[upper bound, lower bound, unit(optional)]` 
+                  in current version unit should match the universal units ``'px'``, etc. if the unit not 
+                  provided the defualt ``'px'`` will be considered)
                 - **n_files (int)**: Number of files to import
-                - **within_range (tuple[int, int])**: Range of files to import (start, end)
+                - **within_range (tuple[int, int])**: Range of files to import `(start, end)`
                 - **every_n_files (int)**: Step for file import.
+                - :func:`Inclind angle tracking parameters <ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockTracking>`:
+                    - **Confidance**: ``nPnts``, ``conf_interval``, ``residual_preview``
+                    - **Preview**: ``avg_preview_mode``, ``points_opacity``, ``points_size``, ``avg_lin_color``
+                    - **Output Background**: ``op_bg_path``, ``bg_x_crop``, ``bg_y_crop``, ``bg_90rotate``, ``bg_resize``
 
         Steps:
             1. Define reference vertical boundaries (for scaling).
@@ -181,7 +190,7 @@ class SliceListGenerator(SOA):
             6. Import files, slice them, and store the generated slices list into an image.
 
         Example:
-            >>> img_list, n, working_range, pixel_scale = GenerateSlicesArray(r'/path/to/`*`.ext', 
+            >>> img_list, n, working_range, pixel_scale = GenerateSlicesArray(r'/path/to/*.ext', 
                                                                               slice_loc=10, 
                                                                               slice_thickness=5)
         """
@@ -274,10 +283,13 @@ class SliceListGenerator(SOA):
                          round(Ref_y1 - (end_vr/self.pixelScale))]
             else:
                 sat_vr = [round(Ref_y1 - start_vr), round(Ref_y1 - end_vr)]
-            
-            sat_vr.sort()
-            if abs(end_vr-start_vr) == 0:
-                sat_vr = [upper_bounds, lower_bounds]
+        elif not hasattr(sat_vr, "__len__"):
+              sat_vr = [Ref_y1 - sat_vr, Ref_y1 + sat_vr]
+        
+        sat_vr.sort()
+        if abs(end_vr-start_vr) == 0:
+            sat_vr = [upper_bounds, lower_bounds]
+
         
         print('Shock angle tracking vertical range above the reference `Ref_y0` is:')
         v1, v2 = [f'{v:0.2f}{dis_unit}' for v in (Ref_y0-np.array(sat_vr))*self.pixelScale]
@@ -338,12 +350,13 @@ class SliceListGenerator(SOA):
                                                      import_step)
 
         if inclinationCheck:
-            print('Shock inclination estimation... ')
+           
 
             randomIndx = genratingRandomNumberList(shock_angle_samples, n1)
 
             samplesList = {}
             k = 0
+            print(f'Import {len(randomIndx)} images for inclination Check... ')
             for indx in randomIndx:
                 Sample = cv2.imread(files[indx])
                 # check if the image on grayscale or not and convert if not
@@ -362,12 +375,14 @@ class SliceListGenerator(SOA):
                 action = 'All samples will be reviewed'
                 print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
                 print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
-                    
+            
+            print('Shock inclination estimation... ')
             inc_track = self.inc_trac.InclinedShockTracking
             avg_shock_angle, avg_shock_loc = inc_track(samplesList, nSlices, Ref, 
                                                        nReview=NSamplingReview,
                                                        output_dirc=output_directory, 
                                                        comment=comment,**kwargs)
+
             avg_angle = avg_shock_angle[0] if avg_shock_angle[2] > 0 else avg_shock_angle[0]
         M = cv2.getRotationMatrix2D((avg_shock_loc[0], Ref_y1), 90-avg_angle, 1.0)
         new_img = cv2.warpAffine(img, M, (shp[1],shp[0]))

@@ -15,6 +15,8 @@ from .decorators import calculate_running_time
 def GradientGenerator(img:np.ndarray[int], KernalDim: int = 3)-> np.ndarray[int]:
     """
     Generate the gradient magnitude of an image using Sobel operators.
+    This function applies Sobel operators to compute the gradient magnitude of the input image.
+    The `KernalDim` parameter specifies the dimension of the Sobel kernel used for gradient calculation.
 
     Parameters:
         - **img (numpy.ndarray)**: Input image (grayscale).
@@ -25,11 +27,8 @@ def GradientGenerator(img:np.ndarray[int], KernalDim: int = 3)-> np.ndarray[int]
 
     Example:
         >>> gradient = GradientGenerator(image, KernalDim=3)
-
-    This function applies Sobel operators to compute the gradient magnitude of the input image.
-    The `KernalDim` parameter specifies the dimension of the Sobel kernel used for gradient calculation.
-
-    Note:
+        
+    .. note::
         - The input image should be in grayscale.
         - The function returns the gradient magnitude of the input image.
     """
@@ -119,18 +118,17 @@ def DarkestSpotShocktracking(SnapshotSlice: list[int],
         - **uncertain (list)**: A list to store any uncertain shock locations.
 
     Returns:
-        A tuple containing the updated ShockLocation list and the uncertain list.
+        - A tuple containing the updated ShockLocation list and the uncertain list.
 
-    Example:
-        >>>
     """
     ShockLocation.append(np.argmin(SnapshotSlice))
     return ShockLocation, uncertain
 
+
 @calculate_running_time
-def GenerateShockSignal(img, method = 'integral',
+def GenerateShockSignal(img, method='integral',
                         signalfilter=None, review_slice_tracking = -1,
-                        CheckSolutionTime = True, **kwargs) -> tuple[list, list]:
+                        **kwargs) -> tuple[list, list]:
     """
     Find the shockwave locations in a series of snapshots with optional signal processing filters.
 
@@ -145,13 +143,12 @@ def GenerateShockSignal(img, method = 'integral',
         - uncertain (list): List of uncertain shock locations with additional information.
 
     Examples:
-        # Create an instance of the class
-        instance = SOA(f,D)
+        >>> # Create an instance of the class
+        >>> instance = SOA(f,D)
+        >>> # Load a series of snapshots (assuming 'snapshots' is a NumPy array)
+        >>> shock_locations, uncertain_locations = instance.FindTheShockwaveImproved(snapshots)
 
-        # Load a series of snapshots (assuming 'snapshots' is a NumPy array)
-        shock_locations, uncertain_locations = instance.FindTheShockwaveImproved(snapshots)
-
-    Note:
+    .. note:
         - Ensure that 'ShockTrackingModule' is properly defined and imported.
 
     """

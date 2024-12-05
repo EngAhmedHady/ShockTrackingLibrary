@@ -5,6 +5,7 @@ Created on Sun May 28 13:49:58 2024
 @author: Ahmed H. Hanfy
 """
 import time
+from functools import wraps
 
 def TimeCalculation(timeInSec: float):
         """
@@ -36,7 +37,7 @@ def TimeCalculation(timeInSec: float):
             print("Processing time: %s Min, %s Sec" % (round(timeInMin), round(sec)))
         else:
             print("Processing time: %s Sec" % round(timeInSec))
-    
+
 def calculate_running_time(func):
     """
     Decorator to calculate the running time of a function.
@@ -59,6 +60,7 @@ def calculate_running_time(func):
         In this example, the running time of the `my_function` will be calculated and printed to the console.
 
     """
+    @wraps(func)
     def wrapper(*args, **kwargs):
         start_time = time.time()
         result = func(*args, **kwargs)

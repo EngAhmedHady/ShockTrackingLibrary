@@ -24,32 +24,118 @@ def v_least_squares(xLoc: list[float], columnY:list[float], nSlices: int) -> lis
         - **nSlices (int)**: Number of slices or data points.
 
     Returns:
-        list[float]: List containing the slope of the best-fit line.
+        float: The slope of the best-fit line. 
+        Returns `inf` if the slope cannot be determined (e.g., division by zero).
 
     Example:
-        >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
-        >>> instance = IncTrac(f)
         >>> xLoc = [1, 2, 3, 4, 5]
         >>> columnY = [2, 4, 6, 8, 10]
         >>> nSlices = 5
-        >>> slope = instance.v_least_squares(xLoc, columnY, nSlices)
-        >>> print(slope)
+        >>> slope = v_least_squares(xLoc, columnY, nSlices)
+        >>> print(slope)  # Output: 2.0
 
     .. note::
         - The function calculates the slope of the best-fit line using the vertical least squares method.
-        - It returns the slope as a single-element list.
+        - If the denominator in the formula is zero, the function returns ``np.inf``.
+    
+    Equations:
+        - The slope :math:`m` is calculated using the formula:
+          
+          .. math::
+            m = \\frac{n \\cdot \\sum (y^2) - (\\sum y)^2}{n \\cdot \\sum (x \\cdot y) - (\sum x)(\sum y)}
+
+          where :math:`n` is the number of points (slices).
     """
+    # Compute the required summations
     xy = np.array(xLoc)*columnY; yy = columnY**2
     x_sum = np.sum(xLoc)       ; y_sum = np.sum(columnY)
     xy_sum = np.sum(xy)        ; yy_sum = np.sum(yy)
-    if nSlices*yy_sum - y_sum**2 != 0 and nSlices*xy_sum - x_sum * y_sum != 0:
-        return (nSlices*yy_sum - y_sum**2)/(nSlices*xy_sum - x_sum * y_sum)
+
+    # Compute the denominator of the slope formula
+    denominator = nSlices * xy_sum - x_sum * y_sum
+
+    # Compute the numerator of the slope formula
+    numerator = nSlices * yy_sum - y_sum ** 2
+
+    # Check for division by zero or undefined conditions
+    if denominator != 0:
+        # Return the slope as a float
+        return numerator / denominator
     else:
+        # Return infinity if the slope cannot be determined
         return np.inf
 
-def ransac(x, y, threshold, e=0.3, p=0.999,
-           n_samples=5, max_trials=0):
+def ransac(x:np.ndarray, y:np.ndarray, threshold:float, 
+           e:float=0.3, p:float=0.999, n_samples:int=5, 
+           max_trials:int=0) -> tuple[float]:
+    """
+    Perform RANSAC (Random Sample Consensus) algorithm for robust linear model fitting.
 
+    This function identifies the best linear model for a dataset with potential outliers 
+    by iteratively fitting models to random subsets of the data and evaluating their inlier scores.
+
+    Parameters:
+        - **x (np.ndarray)**: Array of independent variable values.
+        - **y (np.ndarray)**: Array of dependent variable values.
+        - **threshold (float)**: Threshold for classifying points as inliers based on their residuals.
+        - **e (float, optional)**: Estimated outlier ratio. Defaults to 0.3.
+          Represents the proportion of outliers in the dataset.
+        - **p (float, optional)**: Desired probability of selecting at least one outlier-free subset. Defaults to 0.999.
+        - **n_samples (int, optional)**: Number of random points to select for model fitting in each iteration. Defaults to 5.
+        - **max_trials (int, optional)**: Maximum number of RANSAC iterations. Defaults to 0, where the number of trials 
+          is automatically computed based on `e` and `p`.
+
+    Returns:
+        - tuple:
+            - **best_model (float)**: The slope of the best-fitting linear model.
+            - **best_inlier_mean (float)**: Mean of the x-coordinates of the inliers corresponding to the best model.
+
+    Raises:
+        - Exception: If the algorithm fails to find a valid model, the function will print debugging information.
+    
+    Equations:
+        - The number of iterations :math:`n_{tries}`; however, can be roughly determined as a function of the desired probability of success :math:`p` as shown below.
+          
+          .. math::
+            n_{tries} = \\frac{\\log(1 - p)}{\\log(1 - (1 - e)^{n_s})}
+
+          where: :math:`e` is number of inliers in data to number of points in data. 
+          here assumed to be 30% of the points are inlier and :math:`n_s` is the 
+          sample size among the existed points
+        
+        - The outliers are estimated based on the distance between the existing points and predected line as follow:
+          
+          .. math::
+            e = |x - x_{pred}|
+            
+          where:
+          
+          .. math::
+            x_{pred} =             
+                \\begin{cases}
+                    \\frac{y - c}{m} \\ \\forall m != \\infty \\
+
+                    
+                    \\overline{x} \\ \\forall m = \\infty
+                \\end{cases}
+            
+
+    Example:
+        >>> import numpy as np
+        >>> x = np.array([1, 2, 3, 4, 5])
+        >>> y = np.array([2.1, 4.2, 6.1, 8.0, 10.2])
+        >>> threshold = 0.5
+        >>> slope, inlier_mean = ransac(x, y, threshold)
+        >>> print("Slope:", slope)
+        >>> print("Inlier mean:", inlier_mean)
+
+    .. note::
+        - The number of tracking points should be more than the sample size :math:`n_s` by 1 at least
+        - This function relies on the :func:`v_least_squares <ShockOscillationAnalysis.inc_tracking.inc_tracking_support.v_least_squares>` function for linear model fitting.
+        - Outliers are automatically excluded based on the residual threshold.
+        - The function is designed to handle datasets with a moderate proportion of outliers.
+
+    """
     best_model = None
     # best_inliers = []
     best_score = 0
@@ -265,33 +351,62 @@ def import_other(img, resize_img):
     return img
 
 def rotate90(img):
+    """
+    Rotate an image 90 degrees clockwise.
+
+    This function transposes the image matrix (swaps rows and columns) and 
+    flips it horizontally to achieve a 90-degree clockwise rotation.
+
+    Parameters:
+        - **img (numpy.ndarray)**: Input image as a NumPy array. The image should be in a standard format 
+          (e.g., grayscale or RGB) compatible with OpenCV operations.
+
+    Returns:
+        - **numpy.ndarray**: Rotated image with the same format as the input.
+
+    Example:
+        >>> import cv2
+        >>> img = cv2.imread('example.jpg')  # Load an image
+        >>> rotated_img = rotate90(img)     # Rotate it 90 degrees
+        >>> cv2.imshow('Rotated Image', rotated_img)  # Display the rotated image
+        >>> cv2.waitKey(0)
+        >>> cv2.destroyAllWindows()
+    """
     img = cv2.transpose(img)
     img = cv2.flip(img, 1)
     return img
 
-def doNone(img):
-    return img
+def doNone(img): return img
 
 def ImportingFiles(pathlist: list[str], indices_list: list[int], n_images: int, # Importing info.
-                   imgs_shp: tuple[int], import_type = 'other',            # Images info.
-                   **kwargs) -> tuple[list[np.ndarray], list[np.ndarray]]:      # Other parameters
+                   imgs_shp: tuple[int], import_type = 'gray_scale',            # Images info.
+                   **kwargs) -> dict[int, np.ndarray]:      # Other parameters
     """
-    Import images from the specified paths, optionally resize them, and remove the background if provided.
+    Import images from specified paths, optionally crop, resize or rotate them.
 
     Parameters:
-        - **pathlist (list[str])**: List of paths to the images.
-        - **indices_list (list[int])**: List of indices specifying which images to import from the pathlist.
+        - **pathlist (list[str])**: List of paths to the image files to be imported.
+        - **indices_list (list[int])**: List of indices indicating which images from `pathlist` should be imported.
         - **n_images (int)**: Number of images to import.
-        - **imgs_shp (tuple[int])**: Shape of the images (height, width).
-        - `**kwargs`: Additional parameters.
-            - **BG_path (str)**: Path to the background image to be subtracted. Default is ''.
-            - **resize_img (tuple[int])**: Tuple specifying the dimensions to resize the images to (width, height). Default is the original image shape.
+        - **imgs_shp (tuple[int])**: Desired shape of the images (height, width).
+        - **import_type (str, optional)**: Type of image import. Can be 'gray_scale' for grayscale images or 'other' for other types. Default is 'other'.
+        - **kwargs (dict, optional)**: Additional parameters:
+            - **resize_img (tuple[int], optional)**: Tuple specifying the desired dimensions for resizing the images (width, height). Default is the original shape of the images.
+            - **crop_y_img (tuple[int], optional)**: Tuple specifying the cropping range along the y-axis (min, max). Default is to crop the entire image along y.
+            - **crop_x_img (tuple[int], optional)**: Tuple specifying the cropping range along the x-axis (min, max). Default is to crop the entire image along x.
+            - **rotate90_img (int, optional)**: If set to 1, rotates the images 90 degrees clockwise. Default is 0 (no rotation).
 
     Returns:
-        - tuple: A tuple containing:
-            # - original_img_list (list[np.ndarray]): List of original images (resized if specified).
-            - img_list (list[np.ndarray]): List of grayscale images with the background removed if provided.
-
+        - tuple:
+            - **img_list (dict[int, np.ndarray])**: Dictionary where the keys are indices from `indices_list` and the values are the corresponding processed images.
+    
+    Example Flow:
+        1. Import images from the list of paths specified in `pathlist` based on the indices in `indices_list`.
+        2. Apply cropping if specified in `kwargs`.
+        3. Resize the images based on `resize_img` parameter if provided.
+        4. Rotate the images 90 degrees if `rotate90_img` is set to ``1``.
+        5. Return a dictionary of images, indexed by the values in `indices_list`.
+        
     Example:
         >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
         >>> instance = IncTrac(f)
@@ -302,17 +417,20 @@ def ImportingFiles(pathlist: list[str], indices_list: list[int], n_images: int, 
         >>> original_imgs, processed_imgs = instance.ImportingFiles(pathlist, indices, n_images, shape)
         >>> print(original_imgs, processed_imgs)
 
-    .. note ::
-        - The function reads images from the specified paths, converts them to grayscale, and optionally removes a background image.
-        - The images can be resized if the `resize_img` parameter is provided in kwargs.
-
+    .. note::
+        - The function uses different import functions based on the `import_type` parameter. 
+            - If the type is 'gray_scale', the `import_gray` function is used to convert the images to grayscale. 
+            - Otherwise, the `other` function is used for other image types.
+        - Images are resized to the specified dimensions if `resize_img` is provided in the keyword arguments.
+        - Cropping is applied to the images based on `crop_x_img` and `crop_y_img` parameters, and the images can optionally be rotated by 90 degrees.
+        - Progress is displayed on the console while the images are being imported.
     """
     print(f'Importing {n_images} images...')
     img_list={}
 
     # Get additional parameters from kwargs
-    crop_y_img = kwargs.get('crop_y_img', (0, imgs_shp[1]))
-    crop_x_img = kwargs.get('crop_x_img', (0, imgs_shp[0]))
+    crop_y_img = kwargs.get('crop_y_img', (0, imgs_shp[0]))
+    crop_x_img = kwargs.get('crop_x_img', (0, imgs_shp[1]))
     croped_img_shp = (crop_y_img[1]-crop_y_img[0], crop_x_img[1]-crop_x_img[0])
     resize_img = kwargs.get('resize_img', (croped_img_shp[1], croped_img_shp[0]))
     rotate90_img = kwargs.get('rotate90_img', 0)
@@ -328,9 +446,12 @@ def ImportingFiles(pathlist: list[str], indices_list: list[int], n_images: int, 
     # Import images
     for n, i in enumerate(indices_list):
         img = cv2.imread(pathlist[i])
+        # print(img.shape)
         # crop the original image if needed
         img = img[crop_y_img[0]: crop_y_img[1],
                   crop_x_img[0]: crop_x_img[1]]
+        
+        # print(img.shape, resize_img)
         img = import_func(img, resize_img)
         img_list[i] = oriant(img)
 

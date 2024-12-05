@@ -37,18 +37,24 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
     """
     
     # Start processing the slice
-    avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice    
-    MinimumPoint = min(SnapshotSlice) # ........... minimum (darkest) point
+    try:
+        avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice 
+        MinimumPoint = min(SnapshotSlice) # ........... minimum (darkest) point
+    except Exception as e:
+        print(count, SnapshotSlice, e)
+        Plot = True
     if Plot: # to plot slice illumination values with location and Avg. line
         fig, ax = plt.subplots(figsize=(8,4))
         #Plot light intensity; Plot the average line
-        ax.plot(SnapshotSlice, label = 'Light intensity at certain snapshot'); ax.axhline(avg,linestyle = ':',color = 'tab:green', label = 'Light intensity average line');
+        ax.plot(SnapshotSlice, label='Light intensity at certain snapshot')
+        ax.axhline(avg, linestyle=':', color='tab:green', label='Light intensity average line')
         # ax.set_ylim([0,255]);  ax.set_yticks(np.arange(0, 260, 51))
         # ax.plot(np.where(SnapshotSlice == MinimumPoint),MinimumPoint,'xr', label = 'Minimum point of local minimum');
-        ax.axhline(MinimumPoint,linestyle = '--',color = 'k')
-        ax.set_ylim([-20,255]);  ax.set_yticks(np.arange(0, 260, 51))
-        ax.axhline(0,linestyle = ':', color = 'k', alpha = 0.2); 
-        ax.axhline(255,linestyle = ':', color = 'k', alpha = 0.2)
+        ax.axhline(MinimumPoint, linestyle='--', color='k')
+        ax.set_ylim([-20, 255])
+        ax.set_yticks(np.arange(0, 260, 51))
+        ax.axhline(0, linestyle=':', color='k', alpha=0.2); 
+        ax.axhline(255, linestyle=':', color='k', alpha=0.2)
         # ax.plot(AvgLocation,AvgIllumination,linestyle = '-.');
     
     # Initiating Variables 

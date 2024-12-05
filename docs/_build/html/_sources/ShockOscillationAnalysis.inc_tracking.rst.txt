@@ -21,6 +21,14 @@ ShockOscillationAnalysis.inc\_tracking.inc\_tracking\_support module
    :undoc-members:
    :show-inheritance:
 
+ShockOscillationAnalysis.inc\_tracking.tracking\_accuracy module
+--------------------------------------------------------------------
+
+.. automodule:: ShockOscillationAnalysis.inc_tracking.tracking_accuracy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. Module contents
 .. ---------------
 

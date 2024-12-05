@@ -11,7 +11,44 @@ from ..ShockOscillationAnalysis import BCOLOR
 from ..linedrawingfunctions import AngleFromSlope
 from .inc_tracking_support import ransac
 
-def save_data_txt(outlier_p, hi, leverage_lim, img_indx=None, output_directory='', comment=''):
+def save_data_txt(outlier_p:list[tuple[float, int]], hi:np.ndarray,
+                  leverage_lim:float, img_indx:int=None, 
+                  output_directory:str='', comment:str=''):
+    """
+    Save outlier data and leverage information to a text file.
+
+    This function logs detected outliers and leverage information into a text file 
+    for analysis and review.
+
+    Parameters:
+        - **outlier_p (list[tuple[float, int, any]])**: List of detected outliers.
+            Each entry is a tuple containing:
+                - **Error (float)**: Magnitude of the error for the outlier.
+                - **Position (int)**: Position of the detected outlier.
+                - **Index (int)**: Image index.
+        - **hi (np.ndarray)**: Array of leverage values for the dataset.
+        - **leverage_lim (float)**: Leverage limit for identifying influential points.
+        - **img_indx (int, optional)**: Index or identifier for the image being analyzed.
+          Default is `None`, which records "N/A" in the log.
+        - **output_directory (str, optional)**: Directory to save the output file.
+          Default is an empty string, which saves to the current working directory.
+        - **comment (str, optional)**: Additional comment to append to the output file name.
+          Default is an empty string.
+
+    Returns:
+        - None
+
+    Example:
+        >>> outliers = [(0.12, 3, None), (0.15, 7, None)]
+        >>> leverage_values = np.array([0.1, 0.2, 0.15, 0.08])
+        >>> leverage_limit = 0.2
+        >>> save_data_txt(outliers, leverage_values, leverage_limit, img_indx=5, output_directory='logs', comment='test')
+    
+    .. note::
+        - The output file is named `outliers_<comment>.txt`, where `<comment>` is an optional user-provided string.
+        - Appends data to the file if it already exists; otherwise, creates a new file.
+        - Uses leverage values to summarize data points that might have significant influence.
+    """
     if len(comment) > 0: comment=f'_{comment}'
     if len(output_directory) > 0:
        log_file_path = f"{output_directory}/outliers{comment}.txt"
@@ -27,25 +64,66 @@ def IQR(error: list[float], y_dp: list[float],
         output_directory: str='', comment: str='', **kwargs) -> list[tuple[float, int, int]]:
 
     """
-    Identifies outliers in an error array using the Interquartile Range (IQR) method and
-    logs details if certain leverage conditions are met.
+    Detect outliers in a dataset using the Interquartile Range (IQR) method, calculate leverage, 
+    and log significant results if leverage exceeds a specified threshold.
 
     Parameters:
         - **error (list[float])**: Array of error values to analyze.
-        - **y_dp (list[float])**: Array of associated data points to calculate leverage.
-        - **count (int)**: Current count index, used for logging purposes.
-        - **output_directory (str)**: Directory to save outlier logs. Defaults to an empty string.
-        - **comment (str)**: Comment to be added to the log file name. Defaults to an empty string.
-        - **img_indx (Optional[list[Any]])**: List of image indices for logging outliers. Defaults to None.
+        - **y_dp (list[float])**: Data points used to calculate leverage values for each error.
+        - **columnY (list[int])**: Indexes corresponding to the vertical axis or other tracking information.
+        - **uncertain_y (list[int])**: Y-values or column indexes considered uncertain.
+        - **count (int, optional)**: Index counter for the current dataset or image. Default is `0`.
+        - **img_indx (list[int], optional)**: List of image indices for reference in logs. Default is `None`.
+        - **output_directory (str, optional)**: Directory to save outlier logs. Default is an empty string.
+        - **comment (str, optional)**: Comment to append to log filenames. Default is an empty string.
 
     Keyword Arguments:
-        **residual_preview (bool)**: Whether to generate a preview of residuals. Defaults to False.
+        - **residual_preview (bool, optional)**: If `True`, generates a residuals preview plot for visualization. Default is `False`.
 
     Returns:
-        list[tuple[float, int, int]]: List of tuples for outlier values, each containing:
-            - The error value.
-            - Position of the error in the array.
-            - The count index for the image.
+        - **list[tuple[float, int, int]]**: List of detected outliers as tuples:
+            - **float**: The error value.
+            - **int**: Position (index) of the error in the dataset.
+            - **int**: The count index of the current dataset.
+
+    Example:
+        >>> errors = [1.2, 0.5, 3.6, 2.1, 1.8]
+        >>> y_dp = [0.1, 0.05, 0.2, 0.15, 0.12]
+        >>> colY = [1, 2, 3, 4, 5]
+        >>> uncertain_y = [2, 3, 4]
+        >>> outliers = IQR(errors, y_dp, colY, uncertain_y, count=1, output_directory='logs', comment='test')
+        >>> print(outliers)
+
+    .. note::
+        - Leverage threshold :math:`H_0 = \\frac{3(p+1)}{n_s}` where :math:`p` is the number of
+          independant variable (which is ``1`` in this condition). That ensures that significant 
+          points influencing the model are flagged.
+        - Uses the IQR method to identify outliers robustly, focusing on uncertain data columns.
+        - Relies on :func:`save_data_txt <ShockOscillationAnalysis.inc_tracking.tracking_accuracy.save_data_txt>`
+          to log outlier details to a text file.
+        - Visualization of residuals requires enabling `residual_preview`.
+
+    .. image:: _static/img/IQR.png
+        :width: 400
+        :align: center
+
+    Equations:
+        - Median:
+          :math:`e_{median} = \\text{median}(e^2)` where :math:`e = x - x_{pred}` 
+          and :math:`x` the detected shock location and :math:`x_{pred}` is the 
+          loction on the fitted line with :func:`RANSAC <ShockOscillationAnalysis.inc_tracking.inc_tracking_support.ransac>`
+          or :func:`least square <ShockOscillationAnalysis.inc_tracking.inc_tracking_support.v_least_squares>`
+        - Quartiles:
+          :math:`Q1, Q2 = \\text{median of lower and upper halves of sorted}(e^2)`
+        - Interquartile Range:
+          :math:`\\text{IQR} = Q2 - Q1`
+        - Outlier Detection:
+          :math:`outlier < Q1-1.5IQR < IQR < Q2+1.5IQR < outlier`
+        - Leverage of each point:
+          :math:`H_i = \\frac{1}{n_{Slices}} + y_{dp[i]}` 
+          where :math:`y_{dp[i]} = \\frac{(y_i - \\overline{y})^2}{\\sum{(y_i - \\overline{y})^2}}`
+          and :math:`y` is independant variable represents the vertical location of the slice and
+          :math:`i` is the point index
     """
     # Number of slices and median of the error array
     nSlices = len(error)
@@ -94,29 +172,66 @@ def error_analysis(xloc: list[float], columnY:list[float], nSlices: int,
         - **l_yint (float)**: y-intercept of the linear regression line.
 
     Returns:
-        list of tuple
-            A list of tuples, where each tuple contains:
-            - Predicted x-location (float)
-            - Corresponding confidence interval (float)
+        tuple:
+            - **list of tuples**: Each tuple contains:
+                - Predicted x-location (float)
+                - Confidence interval (float)
+                - Prediction interval (float)
+            - **float**: Standard error of the residuals.
 
     Raises:
         ValueError
         If nSlices is less than 3 (as at least 2 degrees of freedom are required).
 
     Example:
-        >>> xloc = [1.2, 2.3, 3.4, 4.5]
+       >>> xloc = [1.2, 2.3, 3.4, 4.5]
         >>> columnY = [2.1, 3.2, 4.3, 5.4]
         >>> nSlices = 4
         >>> l_slope = 1.0
         >>> l_yint = 1.0
-        >>> conf_est(xloc, columnY, nSlices, l_slope, l_yint)
-        [(1.1, 0.28), (2.1, 0.36), (3.2, 0.45), (4.3, 0.56)]
+        >>> t = 2.776  # t-statistic for 95% confidence with 2 degrees of freedom
+        >>> y_dp = [0.1, 0.2, 0.3, 0.4]
+        >>> intervals, std_error = error_analysis(xloc, columnY, nSlices, l_slope, l_yint, t, y_dp)
+        >>> print(intervals)
+        [(1.1, 0.28, 0.38), (2.1, 0.36, 0.47), (3.2, 0.45, 0.56), (4.3, 0.56, 0.68)]
+        >>> print(std_error)
+        0.134
 
     .. note::
         This function calculates the residual sum of squares and confidence intervals
         for the given x-locations based on a linear fit to the corresponding y-values. The
         confidence interval is computed using the t-distribution for the specified number
         of slices.
+
+    .. image:: _static/img/CIandPI.png
+        :width: 400
+        :align: center
+    
+    Equations:
+        - **Residuals** are calculated as:
+          
+          .. math::
+            e_i = x_i - x_{pred [i]}
+
+          where :math:`x_{pred [i]}` is the predicted x-location based on the fitted line.
+        - **Confidence Interval**:
+          
+          .. math::
+            CI_i = t_{\\alpha/2} \\cdot s \\cdot \\sqrt{\\frac{1}{n_s} + y_{\\text{dp[i]}}}
+            
+          where:
+            - :math:`t_{\\alpha/2}` is the t-distribution value for a given confidence level.
+            - :math:`s = \\sqrt{SSE/dof}` is the standard error where :math:`SSE = \\sum{e_i^2}` 
+              is the sum of the squre error and :math:`dof` is the degree of freedom,
+              in case of line analysis :math:`dof = n_s - 2` and :math:`n_s` is number of slices. 
+            - :math:`y_{dp[i]} = \\frac{(y_i - \\overline{y})^2}{\\sum{(y_i - \\overline{y})^2}}`
+              and :math:`y` is independant variable represents the vertical location of the slice
+
+        - **Prediction Interval**:
+          
+          .. math::
+            PI_i = t_{\\alpha/2} \\cdot \\sqrt{s^2 + \\text{CI}^2}
+
     """
     # Convert to NumPy arrays for vectorized operations
     xloc = np.array(xloc)
@@ -138,8 +253,9 @@ def error_analysis(xloc: list[float], columnY:list[float], nSlices: int,
     Sx = s * np.sqrt((1 / nSlices) + y_dp)
 
     # Compute prediction interval for each slice
-    Spre= np.sqrt(s**2+Sx**2)
-
+    Spre= np.sqrt(s**2 + Sx**2)
+    
+    # Package results as a list of tuples
     return list(zip(x_dash, Sx * t, Spre * t)), s
 
 def pop_outlier(indx, xloc, columnY, n_slice_new):
@@ -150,7 +266,7 @@ def pop_outlier(indx, xloc, columnY, n_slice_new):
     
     # new_midxloc = np.mean(newxloc)
     return new_shock_slope, new_midxloc, newxloc, newyloc, [xloc[indx], columnY[indx]], len(newyloc)
-# 
+
 def outlier_correction(outliers_set: list[list[float, int, int]],
                        xlocs: list[list[float]], columnY: list[int],
                        t: float) -> list[list[float, float, list[int], float, float]]:
@@ -166,7 +282,7 @@ def outlier_correction(outliers_set: list[list[float, int, int]],
 
     Returns:
         - correction: List of corrected parameters:
-        [new_slope, new_midpoint, removed_outliers, new_Sm, new_Sty].
+            [new_slope, new_midpoint, removed_outliers, new_Sm, new_Sty].
     """
     nSlices = len(columnY)
     corrections = []
@@ -208,10 +324,43 @@ def compute_weighted_average(slope: np.ndarray, Sm: np.ndarray, img_set_size: in
         - **img_set_size (int)**: Total number of images in the dataset.
 
     Returns:
-        tuple[float, float, float]: A tuple containing:
-            - m_avg (float): Weighted average slope.
+        tuple[float, float]: A tuple containing:
             - Sm_avg (float): Combined uncertainty of the average slope.
             - w_avg_ang (float): Weighted average angle in degrees, considering zero-uncertainty cases.
+    
+    .. note::
+        - Handles cases where uncertainties are zero by considering their corresponding angles directly in the weighted average.
+            
+    Equations:
+        - Weighted Average Slope:
+
+          .. math::
+            m_{avg} = \\frac{\\sum_{i} \\frac{m_i}{\\sigma_i^2}}{\\sum_{i} \\frac{1}{\\sigma_i^2}}
+
+          where :math:`m_i` are the slopes and :math:`\\sigma_i` are their respective standard deviations.
+
+        - Combined Uncertainty of the Weighted Average Slope:
+
+          .. math::
+            \\sigma_{m_{avg}} = \\sqrt{\\frac{1}{\\sum_{i} \\frac{1}{\\sigma_i^2}}}
+
+        - Weighted Average Angle (including zero-uncertainty cases):
+
+          .. math::
+            w_{avg\\_ang} = \\frac{\\left(m_{avg\\_ang} \\cdot (N - N_{zero}) + \\sum_{j} \\theta_j \\right)}{N}
+
+        
+        - Uses the relationship between slope and angle:
+          
+          .. math::
+            \\theta_j = \\arctan(w_j) \\cdot \\frac{180}{\\pi}
+        
+        where:
+            - :math:`m_{avg\\_ang} = \\arctan(m_{avg}) \\cdot \\frac{180}{\\pi}`
+            - :math:`N` is the total number of images.
+            - :math:`N_{zero}` is the count of zero-uncertainty slopes.
+            - :math:`\\theta_j` are the angles computed from slopes with zero uncertainty
+
     """
 
     zero_indices = []
@@ -325,7 +474,7 @@ def conf_lim(xlocs: list[list[float]], midLocs: list[float],
         e[i], s[i] = error_analysis(xloc, columnY, nSlices, slope[i], y_int, t, y_dp)
         error, _, _ = zip(*e[i])
         error = np.array(error)-xloc
-        outliers = IQR(error, y_dp, columnY, uncertainY_list[i], i, img_indx[i], output_directory, comment, **kwargs)
+        outliers = IQR(error**2, y_dp, columnY, uncertainY_list[i], i, img_indx[i], output_directory, comment, **kwargs)
         if outliers != []: outliers_set.append(outliers)
 
     correction = outlier_correction(outliers_set, xlocs, columnY, t)

@@ -441,8 +441,7 @@ class SOA:
                                                        Signalfilter=filter_function,
                                                        CheckSolutionTime=True)
         """
-        return GenerateShockSignal(img, method, Signalfilter, reviewInterval,
-                                   CheckSolutionTime, **kwargs)
+        return GenerateShockSignal(img, method, Signalfilter, reviewInterval, **kwargs)
 
     def VelocitySignal(self, Signal: list[float], TotalTime: float) -> list[float]:
         """

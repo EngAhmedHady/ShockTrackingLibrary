@@ -142,28 +142,75 @@ class InclinedShockTracking(SOA):
         return slices_info, nPnts, inclinationCheck
 
     @calculate_running_time
-    def InclinedShockTracking(self, img_set: list[np.ndarray],                        # image set for line tracking
-                              nSlices: int, Ref: list[int], slice_thickness: int = 1, # slices and tracking info.
-                              nReview: int|list[int] = 0, output_dirc: str = '', # Review parameters
-                              comment: str = '', **kwargs) -> tuple:                  # Other parameters
+    def InclinedShockTracking(self, img_set: list[np.ndarray],
+                              nSlices: int, Ref: list[int], slice_thickness: int = 1,
+                              nReview: int|list[int] = 0, output_dirc: str = '',
+                              comment: str = '', **kwargs) -> tuple:
 
         """
         Track and analyze the shock angle in a sequence of images.
+        This function analyzes a series of images to track and calculate the shock angle
+        by fitting a line to the shock locations and computing the corresponding shock angle. 
+        The analysis utilizes the :func:`RANSAC (Random Sample Consensus) <ShockOscillationAnalysis.inc_tracking.inc_tracking_support.ransac>`
+        or :func:`least squares <ShockOscillationAnalysis.inc_tracking.inc_tracking_support.v_least_squares>`
+        methods to fit the shock locations and calculate the angle. The function optionally 
+        visualizes the tracking results and saves the figures.
 
         Parameters:
-            - **img_set (list)**: List of images for shock tracking, the images should be formated as numpy array.
-            - **nSlices (int)**: Number of slices to divide the image into for analysis.
-            - **Ref (list)**: Reference points for slices [[x_1, x_2, y], ...].
-            - **slice_thickness (int, optional)**: Thickness of each slice. Default is 1.
-            - **nReview (int or list, optional)**: Number or range of images to review. Default is 0.
-            - **output_dirc (str, optional)**: Directory to save the review images. Default is ''.
-            - `**kwargs`: Additional keyword arguments:
-                - **avg_preview_mode (str)**: Mode for previewing average angle.
-                - **review_inc_slice_tracking (list or int)**: Slices to review for tracking.
-                - **osc_boundary (bool)**: To display the oscilliation domain depending on the analyised image set.
+            - **img_set (list):** List of images for shock tracking, the images should be formated as numpy array.
+            - **nSlices (int):** Number of slices to divide the image into for analysis.
+            - **Ref (list):** Reference points for slices [[x_1, x_2, y], ...].
+            - **slice_thickness (int, optional):** Thickness of each slice. Default is 1.
+            - **nReview (int or list, optional):** Number or range of images to review. Default is 0.
+            - **output_dirc (str, optional):** Directory to save the review images. Default is ''.
+            - **comment (str):** Comment to include in the output filename. Default is an empty string.
+            - `**kwargs`: Additional keyword.
+            
+        Additional keyword arguments `**kwargs` may include:
+            Output background image options:
+                - **op_bg_path (str):** Output background image file path pattern. Supports wildcards.
+                - **bg_x_crop (tuple[int]):** A tuple (y_start, y_end) defining the vertical cropping range. 
+                  Defaults to the full height of the image.
+                - **bg_x_crop (tuple[int]):** A tuple (x_start, x_end) defining the horizontal cropping range. 
+                  Defaults to the full width of the image.
+                - **bg_resize (tuple[int]):** A tuple (width, height) defining the new dimensions for resizing. 
+                  Defaults to the dimensions after cropping.
+                - **bg_90rotate (bool):** Whether to rotate the image 90 degrees clockwise. Defaults to 0 (no rotation).
+
+            Review and results options:
+                - **avg_preview_mode (str):** Mode for previewing average angle. 'avg_all', 'avg_ang' and None (default is None).
+                - **review_inc_slice_tracking (list or int)**: Specific slices to track and review.
+                - **store_n_files (int|list[int]):** Specify the first n output results to be stored, 
+                  or provide a range of output image indices to be stored in the format [start, end].
+            
+            Confidance:
+                - **conf_interval (float, optional):** Confidence level required for error estimation Ex. 0.95 etc.
+                  Default is 0, to not compute the confidance parameters 
+                - **residual_preview (bool):** If `True`, generates a residuals preview plot for visualization. Default is `False`.
+                - **osc_boundary (bool):** To display the maximum oscilliation domain depending on the analyised image set.
+
+            Results display options:
+                - **op_90rotate**: To rotate the output axes by 90 degrees clockwise 
+                - **points_opacity (float)**: The transperancy of the tracking points from 0 to 1 (default is 1).
+                - **points_color (str)**: The color of the tracking points (default is 'yellow')
+                - **uncertain_point_color (str)**: The color of the uncertain tracked points (default is 'red')
+                - **avg_lin_color (str)**: The average line color when the `avg_preview_mode` is not None (default is 'white')
+                - **avg_lin_opacity (float)**: The transperancy of the average line from 0 to 1 (default is 1)
+                - **avg_show_txt (bool)**: To display the angle value or not when the `avg_preview_mode` is not None (default is True)
+                - **avg_txt_Yloc (int)**: y-location of the angle value text in pixels (default is image height minus 100.)
+                - **avg_txt_size (float)**: Font size of the Angle value (default is 26pt)
+                - **M1_color (str)**: The calculated values of Mach  when the `avg_preview_mode` is not None (default is 'orange')
+                - **M1_txt_size (float)**: Font size of the Mach number and inflow Angle values (default is 26pt)
+                - **arc_dia (float)**: inflow angle arc diameter (default is 80px)
+                - **arw_len (float)**: inflow arrow length (default is 50px)
+                - **b_color (str)**: boundary domain and lines color for the active ``osc_boundary`` (default is 'tab:orange')
+                - **osc_range_opacity (float)**: The transperancy of the boundary domain from 0 to 1 (default is 0.3)
+                - **b_lins_opacity (float)**: The transperancy of the boundary lines from 0 to 1 (default is 1)
 
         Returns:
-            tuple: Average global angle (float) and average midpoint location (float).
+            tuple: A tuple containing two elements:
+                - **avg_angle_data (np.ndarray)**: Contains average shock angle, confidence, and standard deviation.
+                - **avg_midloc_data (np.ndarray)**: Contains average mid-location of the shock with confidence and standard deviation.
 
         Example:
             >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
@@ -175,11 +222,31 @@ class InclinedShockTracking(SOA):
 
         .. note ::
             - The function performs shock tracking across a series of images and calculates the average shock angle.
-            - If `nReview` is specified as number, the first n-images will be reviewd.
-            - If `nReview` is specified as list, A list specifying the start and end.
-            - If `nReview` is specified, it plots and optionally saves review images for inspection.
-            - It uses least squares method to fit the shock locations and calculates the corresponding angle.
+            - The function optionally computes the confidence interval and standard deviation for shock location and angle.
+            - If `nReview` is specified as a number, the first `nReview` images will be reviewed.
+            - If `nReview` is specified as a list, it defines a range of images to review (start, end, step).
+            - It uses RANSAC or least squares method to fit the shock locations and calculates the corresponding angle.
+
+        Equations:
+            The shock angle is calculated using the slope :math:`m` obtained from the RANSAC or least squares fit:
+        
+            .. math::
+                \\theta = \\arctan(m)
+
+            where :math:`m` is the slope of the shock location vs. the slice's vertical position.
+
+            The confidence interval for the shock angle is calculated as:
+            
+            .. math::
+                CI_{\\theta} = t_{\\alpha/2} \\cdot \\frac{\\sigma_{\\theta}}{\\sqrt{dof}}
+
+            where:
+                - :math:`t_{\\alpha/2}` is the t-distribution value for a given confidence level.
+                - :math:`\\sigma_{\\theta}` is the standard deviation of the angle.
+                - :math:`dof` is the degrees of freedom, in case of line analysis :math:`dof = n_s - 2` where :math:`n_s` number of images. 
+                  But for statistical analysis :math:`dof = n_s - 1`
         """
+
         # Initialize variables for tracking
         avg_ang_glob = 0         # Global average angle
         midLocs =[]              # List to store mid-locations
@@ -257,7 +324,7 @@ class InclinedShockTracking(SOA):
             for i in range(nSlices):
                 x_i1, x_i2 = Ref[0][i], Ref[1][i]
                 Slice = np.sum(img[upper_bounds[i]-1:lower_bounds[i], x_i1:x_i2], axis=0)/slice_thickness
-
+                # print(upper_bounds[i]-1, lower_bounds[i], x_i1,x_i2, img.shape)
                 LastShockLoc = xLocOld[i]-Ref[0][i]
                 ShockLoc, certainLoc, _ = ShockTraking(Slice, LastShockLoc=LastShockLoc,
                                                        count=img_indx[count],
@@ -284,7 +351,8 @@ class InclinedShockTracking(SOA):
 
         osc_boundary = kwargs.get('osc_boundary', False)
         if osc_boundary:
-            max_b = np.zeros(nSlices); min_b = shp[1]*np.ones(nSlices)
+            max_b = np.zeros(nSlices)
+            min_b = shp[1]*np.ones(nSlices)
             for xloc_list in xLocs:
                 for n_count, xloc in enumerate(xloc_list):
                     if xloc > max_b[n_count]: max_b[n_count] = xloc
@@ -475,7 +543,6 @@ class InclinedShockTracking(SOA):
                 - **every_n_files (int, optional)**: To import files with a step (default is 1).
                 - **within_range (list[int], optional)**: To import files within range [start, end]
                 - **resize_img (tuple[int], optional)**: Tuple specifying the dimensions to resize the images to (width, height). Default is the original image shape.
-                - **BG_path (str, optional)**: Path to the background image to be subtracted. Default is ''.
 
             Inflow data options:
                 - **flow_dir (list, optional)**: List of tuples containing the measured y-coordinates and the corresponding angles [(y_loc, angle),...].
@@ -565,7 +632,7 @@ class InclinedShockTracking(SOA):
         bg, n1 = bg_manipulation(path, resize_img,crop_y_img, crop_x_img)
         # In case no file found end the progress and eleminate the program
         if n1 < 1: sys.exit()
-            
+        op_bg = None
         op_bg_path = kwargs.get('op_bg_path', None)
         if op_bg_path is not None:
             bg_y_crop = kwargs.get('bg_y_crop', None)
@@ -658,7 +725,8 @@ class InclinedShockTracking(SOA):
 
         print('Vertical range of tracking points is:')
         v1, v2 = tracking_V_range
-        print(f'\t- In ({dis_unit})s from {v1:0.2f}{dis_unit} to {v2:0.2f}{dis_unit}')
+        if scale_pixels: 
+            print(f'\t- In ({dis_unit})s from {v1:0.2f}{dis_unit} to {v2:0.2f}{dis_unit}')
         print(f'\t- In pixels from {Ref_y1}px to {Ref_y2}px')
 
         # estemat shock domain
