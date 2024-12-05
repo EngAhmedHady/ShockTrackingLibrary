@@ -5,16 +5,17 @@ with open("README.md", "r") as f:
 
 setup(
     name='ShockOscillationAnalysis',
-    version='2.0.0',
+    version='2.15.0',
     packages=find_packages(),
     install_requires=[
-        'opencv-python == 4.5.5.64',
-        'numpy>=1.25.2',
+        'opencv-python >= 4.10.0',
+        'numpy>=2.1.2',
         'scipy>=1.11.4',
         'matplotlib>=3.8.0',
         'Pillow>=10.3.0',
         'datetime',
         'screeninfo',
+        'keyboard'
     ],
     
     long_description = description,

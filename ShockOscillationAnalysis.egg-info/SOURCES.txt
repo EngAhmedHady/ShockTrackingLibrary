@@ -9,7 +9,9 @@ ShockOscillationAnalysis/imgcleaningfunctions.py
 ShockOscillationAnalysis/linedrawingfunctions.py
 ShockOscillationAnalysis/preview.py
 ShockOscillationAnalysis/shocktracking.py
+ShockOscillationAnalysis/shocktracking_opt.py
 ShockOscillationAnalysis/shocktrackingoptimized.py
+ShockOscillationAnalysis/support_func.py
 ShockOscillationAnalysis.egg-info/PKG-INFO
 ShockOscillationAnalysis.egg-info/SOURCES.txt
 ShockOscillationAnalysis.egg-info/dependency_links.txt
@@ -18,6 +20,7 @@ ShockOscillationAnalysis.egg-info/top_level.txt
 ShockOscillationAnalysis/inc_tracking/__init__.py
 ShockOscillationAnalysis/inc_tracking/inc_tracking.py
 ShockOscillationAnalysis/inc_tracking/inc_tracking_support.py
+ShockOscillationAnalysis/inc_tracking/tracking_accuracy.py
 ShockOscillationAnalysis/slice_list_generator/__init__.py
 ShockOscillationAnalysis/slice_list_generator/list_generation_tools.py
 ShockOscillationAnalysis/slice_list_generator/slice_list_generator.py
