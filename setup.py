@@ -8,7 +8,7 @@ setup(
     version='2.0.0',
     packages=find_packages(),
     install_requires=[
-        'opencv-python == 4.5.5.64',
+        'opencv-python == 4.8.1.78',
         'numpy>=1.25.2',
         'scipy>=1.11.4',
         'matplotlib>=3.8.0',
