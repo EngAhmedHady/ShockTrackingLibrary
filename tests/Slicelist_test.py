@@ -4,7 +4,10 @@ Created on Wed Jun 12 09:51:35 2024
 
 @author: Ahmed H. Hanfy
 """
-from ShockOscillationAnalysis import SliceListGenerator 
+import sys
+sys.path.append(r'..\ShockOscillationAnalysis')
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'ShockOscillationAnalysis')))
+from slice_list_generator import SliceListGenerator 
 
 if __name__ == '__main__':
     # Define the snapshots path with glob[note the extention of imported files]

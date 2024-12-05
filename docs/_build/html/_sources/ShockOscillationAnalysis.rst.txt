@@ -78,6 +78,15 @@ ShockOscillationAnalysis.shocktrackingoptimized module
    :undoc-members:
    :show-inheritance:
 
+ShockOscillationAnalysis.support_func module
+------------------------------------------------------
+
+.. automodule:: ShockOscillationAnalysis.support_func
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
 .. Module contents
 .. ---------------
 
