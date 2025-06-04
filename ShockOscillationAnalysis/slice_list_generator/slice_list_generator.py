@@ -126,11 +126,11 @@ class SliceListGenerator(SOA):
         img_list = cv2.vconcat(img_list)
         return img_list, n
 
-    def GenerateSlicesArray(self, path: str, scale_pixels:bool = True , full_img_width: bool = False,   # Domain info.
-                            slice_loc:int = 0, slice_thickness: int | list[int, str]= 0,                # Slice properties
-                            shock_angle_samples = 30, inclination_est_info: list[int,tuple,tuple] = [], # Angle estimation
-                            preview: bool = True, angle_samples_review = 10,                            # preview options
-                            output_directory: str = '', comment: str ='',                               # Data store
+    def GenerateSlicesArray(self, path:str, scale_pixels:bool=True , full_img_width:bool=False,   # Domain info.
+                            slice_loc:int=0, slice_thickness:int|list[int, str]=0,                # Slice properties
+                            shock_angle_samples=30, inclination_est_info:list[int,tuple,tuple]=[], # Angle estimation
+                            preview:bool=True, angle_samples_review = 10,                            # preview options
+                            output_directory:str='', comment:str='',                               # Data store
                             **kwargs) -> tuple[np.ndarray[int], int, dict, float]:                      # Other
         """
         Generate a sequence of image slices for single horizontal line shock wave analysis.
@@ -254,7 +254,7 @@ class SliceListGenerator(SOA):
             dis_in_unit = f'{abs(Ref_y1-Ref_y0)*self.pixelScale:0.2f}{dis_unit}'
             print(f'\t- {dis_in_unit} ({abs(Ref_y1-Ref_y0)}px) from reference `Ref_y0`')
         if Ref_y1 > 0 and Ref_y1 != Ref_y0: 
-            cv2.line(self.clone, (0,Ref_y1), (shp[1],Ref_y1), CVColor.RED, 1)
+            cv2.line(self.clone, (0, Ref_y1), (shp[1], Ref_y1), CVColor.RED, 1)
 
         if hasattr(slice_thickness, "__len__"):        
             if slice_thickness[1] == dis_unit and self.pixelScale > 0: 
@@ -285,6 +285,7 @@ class SliceListGenerator(SOA):
                 sat_vr = [round(Ref_y1 - start_vr), round(Ref_y1 - end_vr)]
         elif not hasattr(sat_vr, "__len__"):
               sat_vr = [Ref_y1 - sat_vr, Ref_y1 + sat_vr]
+              start_vr, end_vr = sat_vr[:2]
         
         sat_vr.sort()
         if abs(end_vr-start_vr) == 0:
@@ -305,7 +306,7 @@ class SliceListGenerator(SOA):
                 sys.exit()
             P1,P2,m,a = self.Reference[3]
             Ref, nSlices, inclinationCheck = Inc_shock_setup(inclination_est_info,
-                                                             sat_vr, [P1,P2,m,a],
+                                                             sat_vr, [P1, P2, m, a],
                                                              shp, VMidPnt=Ref_y1,
                                                              preview_img=self.clone,
                                                              nPnts=nPnts)
@@ -313,9 +314,9 @@ class SliceListGenerator(SOA):
             P1, P2, m, a = InclinedLine(inclination_est_info[1], 
                                         inclination_est_info[2], imgShape=shp)
             cv2.line(self.clone, P1, P2, CVColor.GREEN, 1)
-            self.Reference.append([P1, P2, m,a])
+            self.Reference.append([P1, P2, m, a])
             Ref, nSlices, inclinationCheck = Inc_shock_setup(inclination_est_info[0],
-                                                             sat_vr, [P1,P2,m,a],
+                                                             sat_vr, [P1, P2, m, a],
                                                              shp, VMidPnt=Ref_y1,
                                                              preview_img=self.clone,
                                                              nPnts=nPnts)
@@ -326,9 +327,9 @@ class SliceListGenerator(SOA):
             print(f'{BCOLOR.ITALIC}{request}{BCOLOR.ENDC}')
             self.LineDraw(self.clone, 'Inc', 3)
             # find the rotation center
-            avg_shock_loc = self.IntersectionPoint([0,         self.Reference[-1][2]],
-                                                   [Ref_y1,    self.Reference[-1][3]],
-                                                   [(0,Ref_y1),self.Reference[-1][0]])
+            avg_shock_loc = self.IntersectionPoint([0, self.Reference[-1][2]],
+                                                   [Ref_y1, self.Reference[-1][3]],
+                                                   [(0, Ref_y1), self.Reference[-1][0]])
 
         if preview:
             cv2.imshow('Investigation domain before rotating', self.clone)
@@ -385,10 +386,10 @@ class SliceListGenerator(SOA):
 
             avg_angle = avg_shock_angle[0] if avg_shock_angle[2] > 0 else avg_shock_angle[0]
         M = cv2.getRotationMatrix2D((avg_shock_loc[0], Ref_y1), 90-avg_angle, 1.0)
-        new_img = cv2.warpAffine(img, M, (shp[1],shp[0]))
+        new_img = cv2.warpAffine(img, M, (shp[1], shp[0]))
 
         new_img = PreviewCVPlots(new_img, Ref_x0, Ref_y=Ref_y1,
-                                 tk=[lower_bounds,upper_bounds],
+                                 tk=[lower_bounds, upper_bounds],
                                  avg_shock_loc=avg_shock_loc[0])
 
         if avg_angle != 90 and preview:
@@ -421,7 +422,7 @@ class SliceListGenerator(SOA):
             if cv2.imwrite(f'{outputPath}-RefD.png', self.clone):
                 txt = u"stored \u2713"
             else: txt = error
-            print('DomainImage:' , txt)
+            print('DomainImage:', txt)
 
         if full_img_width:
             x_range = [0, shp[1]]

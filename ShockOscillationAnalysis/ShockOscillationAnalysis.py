@@ -266,10 +266,9 @@ class SOA:
         cv2.waitKey(1)
         return self.Reference
 
-    def DefineReferences(self, img: np.ndarray[int], shp: tuple[int],
-                         Ref_x0: list[int], scale_pixels: bool,
-                         Ref_y0: int = -1, Ref_y1: int = -1,
-                         slice_loc: int = 0) -> tuple[list[int],int,int]:
+    def DefineReferences(self, img: np.ndarray[int], shp:tuple[int],
+                         Ref_x0:list[int], scale_pixels:bool, Ref_y0:int=-1, Ref_y1:int=-1,
+                         slice_loc:int=0) -> tuple[list[int],int,int]:
         """
         Define reference lines on an image for scalling and further processing.
 
@@ -278,9 +277,12 @@ class SOA:
             - **shp (tuple)**: Shape of the image (height, width).
             - **Ref_x0 (list[int])**: List of x-coordinates for vertical reference lines.
             - **scale_pixels (bool)**: Whether to scale pixels based on the reference lines.
-            - **Ref_y0 (int, optional)**: y-coordinate of the top horizontal reference line. Default is -1.
-            - **Ref_y1 (int, optional)**: y-coordinate of the bottom horizontal reference line. Default is -1.
-            - **slice_loc (int, optional)**: Location of the slice for horizontal reference lines. Default is 0.
+            - **Ref_y0 (int, optional)**: y-coordinate of the top horizontal reference line. 
+              Default is -1.
+            - **Ref_y1 (int, optional)**: y-coordinate of the bottom horizontal reference line. 
+              Default is -1.
+            - **slice_loc (int, optional)**: Location of the slice for horizontal reference lines. 
+              Default is 0.
 
         Returns:
             - tuple: A tuple containing:
@@ -329,7 +331,7 @@ class SOA:
                      CVColor.GREEN, 1)
             cv2.line(self.clone, (Ref_x0[1], 0), (Ref_x0[1], shp[0]),
                      CVColor.GREEN, 1)
-            self.Reference = Ref_x0[0:2].copy()
+            self.Reference = Ref_x0[0: 2].copy()
 
         # Calculate the pixel scale if required
         if scale_pixels:  self.pixelScale = self.D / abs(Ref_x0[1]-Ref_x0[0])
@@ -356,7 +358,7 @@ class SOA:
             cv2.line(self.clone, (0, Ref_y0), (shp[1], Ref_y0), CVColor.YELLOW, 1)
         return Ref_x0, Ref_y0, Ref_y1
 
-    def CleanSnapshots(self, img: np.ndarray[int], *args, **kwargs) -> np.ndarray[int]:
+    def CleanSnapshots(self, img:np.ndarray[int], *args, **kwargs) -> np.ndarray[int]:
         """
         Clean and enhance snapshots based on specified corrections. This method takes an original 
         image snapshot `img` and applies specified corrections based on the provided `*args`.
@@ -371,22 +373,29 @@ class SOA:
                     - **filterCenter (list)**: Overrides the default filter center if provided.
                     - **D (int)**: Overrides the default cut-off frequency if provided.
                     - **n (int)**: Overrides the default filter order if provided.
-                    - **ShowIm (bool)**: Overrides the default value for displaying images if provided.
+                    - **ShowIm (bool)**: Overrides the default value for displaying images if 
+                      provided.
                 Brightness/Contrast:
-                    - **Brightness (float, optional)**: Brightness adjustment factor (default: 1). Valid range: 0 (min) to 2 (max).
-                    - **Contrast (float, optional)**: Contrast adjustment factor (default: 1). Valid range: 0 (min) to 2 (max).
-                    - **Sharpness (float, optional)**: Sharpness adjustment factor (default: 1). Valid range: 0 (min) to 3 (max).
+                    - **Brightness (float, optional)**: Brightness adjustment factor (default: 1). 
+                      Valid range: 0 (min) to 2 (max).
+                    - **Contrast (float, optional)**: Contrast adjustment factor (default: 1). 
+                      Valid range: 0 (min) to 2 (max).
+                    - **Sharpness (float, optional)**: Sharpness adjustment factor (default: 1). 
+                      Valid range: 0 (min) to 3 (max).
 
         Returns:
             - numpy.ndarray: Corrected image snapshot.
 
         Example:
-            >>> cleaned_image = instance.CleanSnapshots(original_image, 'Brightness/Contrast', 'FFT', Brightness=1.5, D=20)
+            >>> cleaned_image = instance.CleanSnapshots(original_image, 'Brightness/Contrast', 
+                                                        'FFT', Brightness=1.5, D=20)
 
         .. note::
-            - If 'Brightness/Contrast' is in `*args`, the image undergoes brightness and contrast adjustments.
+            - If 'Brightness/Contrast' is in `*args`, the image undergoes brightness and contrast 
+              adjustments.
             - If 'Average' is in `*args`, the average illumination effect is removed.
-            - If 'FFT' is in `*args`, the illumination effects are corrected using FFT-based filtering.
+            - If 'FFT' is in `*args`, the illumination effects are corrected using FFT-based 
+              filtering.
         """
 
         CorrectedImg = img.copy()
@@ -402,32 +411,41 @@ class SOA:
                 CorrectedImg = BrightnessAndContrast(CorrectedImg, **kwargs)
         return CorrectedImg
 
-    def ShockTrakingAutomation(self, img: np.ndarray[int],
-                               method: str = 'integral',
-                               reviewInterval: list[int] = [0, 0],
-                               Signalfilter: str = None,
-                               CheckSolutionTime: bool = True,
+    def ShockTrakingAutomation(self, img:np.ndarray[int], method:str='integral', 
+                               reviewInterval:list[int]=[0, 0], Signalfilter:str=None,
                                **kwargs) -> list[float]:
         """
-        This method automates the shock tracking process and generates shock signals based on linescanning technique,
-        where a snapshots list is given as input, three methods of tracking can be proposed
+        This method automates the shock tracking process and generates shock signals based on 
+        linescanning technique, where a snapshots list is given as input, three methods of tracking
+        can be proposed
 
-            1. `integral`: This method tracks the shock through the largest blocked area by the knife. More information and detailed discrepancies can be found in this article https://dx.doi.org/10.2139/ssrn.4797840.
-            2. `darkest_spot`: The shock is tracked by the abslute dark point of the schlieren image
-            3. `maxGrad`: By performing sobel gradient algorithem, the shock edge is determined as the maximum gradient and tracked. More information can be found in this article https://doi.org/10.1007/s00348-021-03145-3
+            1. `integral`: This method tracks the shock through the largest blocked area by the 
+              knife. More information and detailed discrepancies can be found in this article 
+              https://dx.doi.org/10.2139/ssrn.4797840.
+            2. `darkest_spot`: The shock is tracked by the abslute dark point of the schlieren 
+              image
+            3. `maxGrad`: By performing sobel gradient algorithem, the shock edge is determined as 
+              the maximum gradient and tracked. More information can be found in this article 
+              https://doi.org/10.1007/s00348-021-03145-3
 
-        for better resolution and to avoid any missed shock location, signal filtering can be applied, the method supports these methods
+        for better resolution and to avoid any missed shock location, signal filtering can be 
+        applied, the method supports these methods
 
-            1. `median`: run through the signal entry by entry, replacing each entry with the median of the entry and its neighboring entries when entries are 3
-            2. `Wiener`: based on minimizing the mean square error between the estimated random process and the desired process.
+            1. `median`: run through the signal entry by entry, replacing each entry with the 
+              median of the entry and its neighboring entries when entries are 3
+            2. `Wiener`: based on minimizing the mean square error between the estimated random 
+              process and the desired process.
             3. `med-Wiener`: use both filter sequentially
 
         Parameters:
             - **img (numpy.ndarray)**: Input image or image data.
-            - **method (str)**: Method for shock tracking (integral, darkest_spot, maxGrad). Default is 'integral'.
-            - **reviewInterval (list)**: List containing two integers representing the review interval.
+            - **method (str)**: Method for shock tracking (integral, darkest_spot, maxGrad). 
+              Default is 'integral'.
+            - **reviewInterval (list)**: List containing two integers representing the review 
+              interval.
                                      Available only with 'integral' method. Default is [0, 0].
-            - **Signalfilter (str)**: The method for signal filtering (median, Wiener, med-Wiener). Default is None.
+            - **Signalfilter (str)**: The method for signal filtering (median, Wiener, med-Wiener). 
+              Default is None.
             - **CheckSolutionTime (bool)**: Whether to check solution time. Default is True.
             - `**kwargs`:
 
@@ -443,7 +461,7 @@ class SOA:
         """
         return GenerateShockSignal(img, method, Signalfilter, reviewInterval, **kwargs)
 
-    def VelocitySignal(self, Signal: list[float], TotalTime: float) -> list[float]:
+    def VelocitySignal(self, Signal:list[float], TotalTime:float) -> list[float]:
         """
         Calculate the velocity signal from the given positional signal.
         The function calculates the velocity at each point in the Signal using

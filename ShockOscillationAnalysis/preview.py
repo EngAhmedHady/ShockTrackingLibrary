@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+/
++  -*- coding: utf-8 -*-
 """
 Created on Wed Feb 28 11:05:30 2024
 
@@ -311,7 +312,10 @@ def visualize_shock_angles(shock_deg: list[float], avg_ang_glob: float, std_mid_
 
     fig, ax = plt.subplots(figsize=(10, 8))
     # Plot histogram of shock angles
-    ax.hist(shock_deg, bins=20, edgecolor='black', alpha=0.8, color='skyblue')
+    ax.hist(shock_deg, bins=20, edgecolor='black', 
+            # alpha=0.8, 
+            # color='skyblue'
+            )
 
     # Plot average and standard deviation lines
     y_limit = ax.get_ylim()[1]
@@ -321,8 +325,9 @@ def visualize_shock_angles(shock_deg: list[float], avg_ang_glob: float, std_mid_
               label=['Average Angle', '1-σ Deviation'])
 
     # Add labels, and grid
-    ax.set_xlabel("Angle (deg)")
-    ax.set_ylabel("Frequency")
+    # ax.set_xlabel("Angle (deg)")
+    # ax.set_ylabel("Frequency")
+    # ax.set_xlim([74,81])
     ax.grid(True, axis='y', which='major', color='#D8D8D8', linestyle='-', alpha=0.3, lw=1.5)
     if output_directory:
         fig.savefig(f"{output_directory}/Hist_Ang_{avg_ang_glob:.2f}_std_{std_mid_Avg:.2f}.png",

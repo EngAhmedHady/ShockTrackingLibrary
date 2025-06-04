@@ -27,7 +27,7 @@ def GradientGenerator(img:np.ndarray[int], KernalDim: int = 3)-> np.ndarray[int]
 
     Example:
         >>> gradient = GradientGenerator(image, KernalDim=3)
-        
+
     .. note::
         - The input image should be in grayscale.
         - The function returns the gradient magnitude of the input image.
@@ -69,11 +69,11 @@ def IntegralShocktracking(SnapshotSlice: list[int], Plot: bool, count: int,
     LastShockLocation = ShockLocation[-1] if ShockLocation else -1
 
     minLoc, certain, reason = ShockTraking(SnapshotSlice,
-                                           LastShockLoc = LastShockLocation,
-                                           Plot = Plot,
-                                           count = count)
+                                           LastShockLoc=LastShockLocation,
+                                           Plot=Plot,
+                                           count=count)
     ShockLocation.append(minLoc)
-    if not certain: uncertain.append([count,minLoc,reason])
+    if not certain: uncertain.append([count, minLoc, reason])
     return ShockLocation, uncertain
 
 def GradShocktracking(GradSlice,Plot,count,ShockLocation, uncertain):

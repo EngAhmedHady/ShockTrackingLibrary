@@ -142,10 +142,10 @@ class InclinedShockTracking(SOA):
         return slices_info, nPnts, inclinationCheck
 
     @calculate_running_time
-    def InclinedShockTracking(self, img_set: list[np.ndarray],
-                              nSlices: int, Ref: list[int], slice_thickness: int = 1,
-                              nReview: int|list[int] = 0, output_dirc: str = '',
-                              comment: str = '', **kwargs) -> tuple:
+    def InclinedShockTracking(self, img_set:list[np.ndarray],
+                              nSlices:int, Ref:list[int], slice_thickness:int=1,
+                              nReview:int|list[int]=0, output_dirc:str='',
+                              comment:str='', **kwargs) -> tuple:
 
         """
         Track and analyze the shock angle in a sequence of images.
@@ -333,7 +333,8 @@ class InclinedShockTracking(SOA):
                 if not certainLoc:
                     uncertain.append(xLoc[-1])
                     uncertainY.append(Ref[2][i])
-
+            
+            
             # Calculate the slope using least squares method
             # est_shock_slope = v_least_squares(xLoc, columnY, nSlices)
             est_shock_slope, midLoc = ransac(np.array(xLoc), columnY, 1)
@@ -379,7 +380,7 @@ class InclinedShockTracking(SOA):
 
         df = img_set_size-1
         if conf_interval > 0:
-            print('Calculating confidance limits...', end='')
+            print('Calculating confidance limits ... ', end='')
             e, pop_ylist, m, shock_deg, midLocs, w_avg_ang, conf_ang=conf_lim(xLocs, midLocs,
                                                                               columnY, y, m,
                                                                               img_indx, shock_deg,
@@ -391,6 +392,7 @@ class InclinedShockTracking(SOA):
             avg_angle_data[2:4] = [w_avg_ang, conf_ang]
             t = stats.t.ppf(conf_interval, df)
             avg_midloc= np.mean(midLocs)
+            avg_midloc_data[0] = avg_midloc
             avg_ang_glob = np.mean(shock_deg)
 
         std_mid_xloc = np.sqrt(np.sum((midLocs-avg_midloc)**2)/df)
@@ -403,7 +405,7 @@ class InclinedShockTracking(SOA):
         avg_ang_conf = t*np.sqrt(std_mid_Avg**2/img_set_size) if conf_interval > 0 else 0
         avg_angle_data[1] = avg_ang_conf
 
-
+        
         print(f'Angle range variation: [{min(shock_deg):0.2f}, {max(shock_deg):0.2f}],', end =' ')
         print(f'\u03C3 = {np.std(shock_deg, ddof=1):0.2f}')
         print(f'Average shock loc.: {avg_midloc:0.2f}\u00B1{mid_xloc_conf:0.2f} px')
@@ -461,8 +463,8 @@ class InclinedShockTracking(SOA):
         op_bg_path = kwargs.get('op_bg_path', None)
         if op_bg_path is not None:
             bg_files = sorted(glob.glob(op_bg_path))
-            bg_y_crop = kwargs.get('bg_y_crop', (0, shp[1]))
-            bg_x_crop = kwargs.get('bg_x_crop', (0, shp[0]))
+            bg_y_crop = kwargs.get('bg_y_crop', (0, shp[0]))
+            bg_x_crop = kwargs.get('bg_x_crop', (0, shp[1]))
             bg_resize = kwargs.get('bg_resize', (shp[1],shp[0]))
             bg_90rotate = kwargs.get('bg_90rotate', 0)
             if len(bg_files) >= img_set_size:
@@ -510,6 +512,7 @@ class InclinedShockTracking(SOA):
                                                    int(5*(n+1)/(n_review/20))))
                 n += 1
             print()
+            
         return avg_angle_data, avg_midloc_data
 
 
