@@ -1,6 +1,6 @@
 [project]
 name = "Shock Oscillation Analysis"
-version = "2.15.8"
+version = "2.15.9"
 authors = [
   { name="Ahmed H. Hanfy", email="ahmed.hady.hanfy92@gmail.com" },
   { name="Pawel Flaszyński"},

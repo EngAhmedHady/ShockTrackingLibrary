@@ -104,11 +104,11 @@ The method's performance has been validated in a **transonic fan passage test se
     [loc_avg, loc_conf, std_dev]
 
 
-### ⚙️ Function Optimizations
+### 🛠️ Function Optimizations
 
 Improved: ``SOA.extract_coordinates``, ``v_least_squares``
 
-### 🛠️ Robust File Handling
+### Robust File Handling
 
 Crop X: ``crop_x_img``, Crop Y: ``crop_y_img``, Resize: ``resize_img``
 
@@ -122,6 +122,7 @@ Crop X: ``crop_x_img``, Crop Y: ``crop_y_img``, Resize: ``resize_img``
 
 - Fixed circular import issue using `constent.py`
 
+- Also, ``InclinedLine``, ``AvgAnglePlot``, ``InclinedShockDomainSetup``
 
 
 ## Installation
