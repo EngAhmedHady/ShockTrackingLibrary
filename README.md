@@ -13,14 +13,14 @@ This Python package introduces an advanced method that employs **line-scanning**
 
 The method's performance has been validated in a **transonic fan passage test section** and a **supercritical A320 wing profile** under varying Reynolds numbers and oscillation conditions.
 
-> 📄 For scientific details and benchmarking, please refer to the article:  
+> For scientific details and benchmarking, please refer to the article:  
 > **"Advancements in Shock-Wave Analysis and Tracking from Schlieren Imaging"**  
 > DOI: [10.2139/ssrn.4797840](https://dx.doi.org/10.2139/ssrn.4797840) and [10.1007/s00348-021-03145-3](https://doi.org/10.1007/s00348-021-03145-3)
 
 ---
 <img src="https://github.com/user-attachments/assets/0a4532af-44c4-4bd1-bac2-01925d841ce4" alt="drawing" style="width:360px;"/> <img src="https://github.com/user-attachments/assets/66e4c5a9-24ac-4e09-b2e6-ee5f222929b0" alt="drawing" style="width:640px;"/>
 
-## 🚀 Key Features
+## Key Features
 
 - **Three robust shock tracking methods**:  
   - `integral`: Based on maximum blocked light intensity.  
@@ -39,9 +39,9 @@ The method's performance has been validated in a **transonic fan passage test se
 
 ---
 
-## 🔄 What's New in This Release
+## What's New in This Release
 
-### 🔧 Code Enhancements
+### Code Enhancements
 - Improved code style according to **PEP 8**
 - Defined universal units:  
   ```python
@@ -93,7 +93,7 @@ The method's performance has been validated in a **transonic fan passage test se
 - Rotate output: ``op_90rotate=True``
 - Use ``nReview``as an integer or tuple: (start, end, step) - applicable only with ``inc_tracking.ShockPointsTracking``
 
-### 📦 Output Format Improvements
+### Output Format Improvements
 
 - *avg_shock_angle*:
 
@@ -104,7 +104,7 @@ The method's performance has been validated in a **transonic fan passage test se
     [loc_avg, loc_conf, std_dev]
 
 
-### 🛠️ Function Optimizations
+### Function Optimizations
 
 Improved: ``SOA.extract_coordinates``, ``v_least_squares``
 
@@ -112,7 +112,7 @@ Improved: ``SOA.extract_coordinates``, ``v_least_squares``
 
 Crop X: ``crop_x_img``, Crop Y: ``crop_y_img``, Resize: ``resize_img``
 
-### 🐞 Bug Fixes
+### Bug Fixes
 
 - Handle images without scale in ``sliceListGenerator.GenerateSliceArray``
 
