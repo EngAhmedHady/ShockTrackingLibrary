@@ -1,0 +1,15 @@
+Outlier detected: Error=2563.712525299376, Position=1, ImageIndex=61
+Outlier detected: Error=2292.7928824422333, Position=2, ImageIndex=61
+Outlier detected: Error=2082.3813564682073, Position=3, ImageIndex=61
+Outlier leverage: 0.7004896958480704, H0 = 0.4
+Outlier detected: Error=186.69876021428635, Position=3, ImageIndex=83
+Outlier detected: Error=230.51140495061716, Position=4, ImageIndex=83
+Outlier detected: Error=178.64465906380772, Position=6, ImageIndex=83
+Outlier leverage: 0.4919716465058938, H0 = 0.4
+Outlier detected: Error=157.53066142229105, Position=2, ImageIndex=9
+Outlier detected: Error=181.11619908506415, Position=3, ImageIndex=9
+Outlier leverage: 0.4650383019696133, H0 = 0.4
+Outlier detected: Error=1889.9461680234772, Position=1, ImageIndex=74
+Outlier detected: Error=1764.0446670544547, Position=2, ImageIndex=74
+Outlier detected: Error=2.168101973163609, Position=3, ImageIndex=74
+Outlier leverage: 0.7403944948959476, H0 = 0.4

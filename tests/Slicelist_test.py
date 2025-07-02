@@ -4,10 +4,7 @@ Created on Wed Jun 12 09:51:35 2024
 
 @author: Ahmed H. Hanfy
 """
-import sys
-sys.path.append(r'..\ShockOscillationAnalysis')
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'ShockOscillationAnalysis')))
-from slice_list_generator import SliceListGenerator 
+from ShockOscillationAnalysis import SliceListGenerator
 
 if __name__ == '__main__':
     # Define the snapshots path with glob[note the extention of imported files]
@@ -19,18 +16,27 @@ if __name__ == '__main__':
     output_directory = r'results'
     
     # iniate the SliceListGenerator module
-    SA = SliceListGenerator(f,D)
+    SA = SliceListGenerator(f, D)
     
     # use GenerateSlicesArray function
     ShockwaveRegion ,n ,WR, Scale = SA.GenerateSlicesArray(imgPath,
-                                                           scale_pixels = True,
-                                                           slice_loc = 10,            # as scaled tracking reference values in mm
-                                                           full_img_width = False,    # to crop the slices by vertical reference line 
-                                                           slice_thickness = 60,      # always in pixels
-                                                           shock_angle_samples = 33,  # number of samples to determine the average inclination
-                                                           angle_samples_review = 3, # to preview the tracked points during angle determination
-                                                           inclination_est_info =  [110, (474, 591),(463, 482)], # information for angle determination
-                                                           preview =  True,           # to preview the final setup before proceeding
-                                                           output_directory = output_directory, # the directory where the slice list will be stored
-                                                           comment='-SliceList',      # additional comments to the stored slice list file name
+                                                           scale_pixels=True,
+                                                           # as scaled tracking reference values in mm
+                                                           slice_loc=10,
+                                                           # to crop the slices by vertical reference line
+                                                           full_img_width=False,
+                                                           # in pixels
+                                                           slice_thickness=60,
+                                                           # number of samples to determine the average inclination
+                                                           shock_angle_samples=33,
+                                                           # to preview the tracked points during angle determination
+                                                           angle_samples_review=3,
+                                                           # information for angle determination
+                                                           inclination_est_info=[110, (474, 591), (463, 482)],
+                                                           # to preview the final setup before proceeding
+                                                           preview=True,
+                                                           # the directory where the slice list will be stored
+                                                           output_directory=output_directory,
+                                                           # additional comments to the stored slice list file name
+                                                           comment='-SliceList',
                                                            )

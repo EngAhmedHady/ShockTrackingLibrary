@@ -6,10 +6,11 @@ Created on Tue Nov 5 10:15:04 2024
 """
 import numpy as np
 from scipy import stats
+from ..constants import BCOLOR
 from ..preview import residual_preview
-from ..ShockOscillationAnalysis import BCOLOR
-from ..linedrawingfunctions import AngleFromSlope
+from ..support_func import log_message
 from .inc_tracking_support import ransac
+from ..linedrawingfunctions import AngleFromSlope
 
 def save_data_txt(outlier_p:list[tuple[float, int]], hi:np.ndarray,
                   leverage_lim:float, img_indx:int=None, 
@@ -154,7 +155,8 @@ def IQR(error: list[float], y_dp: list[float],
         save_data_txt(outlier, hi, lev_th, img_indx, output_directory, comment)
         # If residual preview is requested, call the preview function
         resid_preview = kwargs.get('residual_preview', False)
-        if resid_preview: residual_preview(error, (e_median,Q1,Q2,IQR), nSlices, img_indx)
+        if resid_preview: residual_preview(error, (e_median,Q1,Q2,IQR), nSlices, img_indx,
+                                           log_dirc=output_directory)
     else:
         outlier = [] # Clear outliers if leverage is below the threshold
     return outlier
@@ -258,18 +260,37 @@ def error_analysis(xloc: list[float], columnY:list[float], nSlices: int,
     # Package results as a list of tuples
     return list(zip(x_dash, Sx * t, Spre * t)), s
 
-def pop_outlier(indx, xloc, columnY, n_slice_new):
+def pop_outlier(indx:int, xloc:np.ndarray, columnY:np.ndarray, 
+                n_slice_new:int, log_dirc:str='') -> tuple:
+    """
+    Removes an outlier at a given index and recomputes the RANSAC-based shock slope.
+
+    Parameters:
+        - **indx (int)**: Index of the outlier to remove.
+        - **xloc (np.ndarray)**: Array of x-locations.
+        - **columnY (np.ndarray)**: Corresponding y-values.
+        - **n_slice_new (int)**: Number of slices after removing the outlier (not used in function body).
+        - **log_dirc (str, optional)**: log file directory. Default is ''.
+
+    Returns:
+        tuple:
+            - new_shock_slope (float): Slope estimated after removing the outlier.
+            - new_midxloc (np.ndarray): Fitted x-locations from RANSAC.
+            - new_midyloc (np.ndarray): Fitted y-locations from RANSAC.
+            - newxloc (np.ndarray): xloc after removing the outlier.
+            - newyloc (np.ndarray): columnY after removing the outlier.
+            - removed_point (list): The removed [x, y] outlier point.
+            - new_count (int): Length of the updated y-array.
+    """
     newxloc = np.delete(xloc, indx)
     newyloc = np.delete(columnY, indx)
-    # new_shock_slope = v_least_squares(newxloc, newyloc, n_slice_new - 1)
-    new_shock_slope, new_midxloc = ransac(newxloc, newyloc, 1)
+    new_shock_slope, new_midxloc, new_midyloc = ransac(newxloc, newyloc, 1, log_dirc=log_dirc)
     
-    # new_midxloc = np.mean(newxloc)
-    return new_shock_slope, new_midxloc, newxloc, newyloc, [xloc[indx], columnY[indx]], len(newyloc)
+    return new_shock_slope, new_midxloc, new_midyloc, newxloc, newyloc, [xloc[indx], columnY[indx]], len(newyloc)
 
 def outlier_correction(outliers_set: list[list[float, int, int]],
                        xlocs: list[list[float]], columnY: list[int],
-                       t: float) -> list[list[float, float, list[int], float, float]]:
+                       t: float, log_dirc:str='') -> list[list[float, float, list[int], float, float]]:
     """
     Corrects for outliers by iteratively removing them, recalculating slopes, midpoints,
     and associated statistics.
@@ -296,22 +317,22 @@ def outlier_correction(outliers_set: list[list[float, int, int]],
 
         for outlier in outliers:
             # Update parameters by removing the outlier
-            n_slope, n_midxloc, nxloc, nyloc, popy, n_slice_new = pop_outlier(
-                outlier[1], nxloc, nyloc, n_slice_new
+            n_slope, n_midxloc, n_midyloc, nxloc, nyloc, popy, n_slice_new = pop_outlier(
+                outlier[1], nxloc, nyloc, n_slice_new,log_dirc=log_dirc
             )
             removed_outliers.append(popy)
             for outlier in outliers: outlier[1] -= 1
 
         # Recalculate averages and error metrics
-        n_y_avg = np.mean(nyloc)
-        n_y_int = n_y_avg - n_midxloc * n_slope
-        n_y_ss = (nyloc - n_y_avg) ** 2
+        # n_y_avg = np.mean(nyloc)
+        n_y_int = n_midyloc - n_midxloc * n_slope
+        n_y_ss = (nyloc - n_midyloc) ** 2
         n_Sty = np.sum(n_y_ss)
         n_y_dp = n_y_ss / n_Sty
 
         n_e , n_s = error_analysis(nxloc, nyloc, n_slice_new, n_slope, n_y_int, t, n_y_dp)
         # Append corrected parameters
-        corrections.append([n_slope, n_midxloc, removed_outliers, n_e, n_s, n_Sty])
+        corrections.append([n_slope, n_midxloc, n_midyloc, removed_outliers, n_e, n_s, n_Sty])
     return corrections
 
 def compute_weighted_average(slope: np.ndarray, Sm: np.ndarray, img_set_size: int) -> tuple[float]:
@@ -332,34 +353,29 @@ def compute_weighted_average(slope: np.ndarray, Sm: np.ndarray, img_set_size: in
         - Handles cases where uncertainties are zero by considering their corresponding angles directly in the weighted average.
             
     Equations:
-        - Weighted Average Slope:
+        - Weighted Average Slope has two conditions:
 
           .. math::
-            m_{avg} = \\frac{\\sum_{i} \\frac{m_i}{\\sigma_i^2}}{\\sum_{i} \\frac{1}{\\sigma_i^2}}
+            \overline{m_1}=\\frac{\sum_{i}^{N-r}\\frac{m_i}{Sm_i^2}}{\sum_{i}^{N-r}\\frac{1}{\\sigma_i^2}}\\forall\\ \\sigma_i>0,
+            
+            \overline{m_2}=\\sum_{i}^{r}m_i\\forall\\ \\sigma_i=0
 
-          where :math:`m_i` are the slopes and :math:`\\sigma_i` are their respective standard deviations.
+          where :math:`\\sigma_i=\\frac{s}{\\sqrt{\\sum\left(Y_j-\\overline{Y}\\right)^2}}`, 
+          :math:`s` is the standard error. :math:`Y_j` is the slice location,  
+          :math:`\\overline{Y}` is the mean $y$-location of the slices,
+          :math:`N` is the total number of images, and
+          :math:`r` is the number of images when :math:`\\sigma_i = 0`.
 
-        - Combined Uncertainty of the Weighted Average Slope:
+        - Compine Weighted Average slope (including zero-uncertainty cases):
 
           .. math::
-            \\sigma_{m_{avg}} = \\sqrt{\\frac{1}{\\sum_{i} \\frac{1}{\\sigma_i^2}}}
-
-        - Weighted Average Angle (including zero-uncertainty cases):
-
-          .. math::
-            w_{avg\\_ang} = \\frac{\\left(m_{avg\\_ang} \\cdot (N - N_{zero}) + \\sum_{j} \\theta_j \\right)}{N}
+            \\overline{m_{wj}}=\\frac{\\left(\\left(N-r\\right)\\overline{m_1}+r\\overline{m_2}\\right)}{N}
 
         
         - Uses the relationship between slope and angle:
           
           .. math::
-            \\theta_j = \\arctan(w_j) \\cdot \\frac{180}{\\pi}
-        
-        where:
-            - :math:`m_{avg\\_ang} = \\arctan(m_{avg}) \\cdot \\frac{180}{\\pi}`
-            - :math:`N` is the total number of images.
-            - :math:`N_{zero}` is the count of zero-uncertainty slopes.
-            - :math:`\\theta_j` are the angles computed from slopes with zero uncertainty
+            \\theta_i = \\arctan(m_{wj}) \\cdot \\frac{180}{\\pi}
 
     """
 
@@ -393,7 +409,7 @@ def compute_weighted_average(slope: np.ndarray, Sm: np.ndarray, img_set_size: in
     return Sm_avg, w_avg_ang
 
 def conf_lim(xlocs: list[list[float]], midLocs: list[float],
-             columnY: list[int], y_avg: int,
+             columnY: list[int], y_avg: list[float],
              slope: list[float], img_indx: list[int], shock_deg: list[float],
              e: list[list[float]], pop_ylist: list[int],
              uncertainY_list: list[list[int]],
@@ -409,7 +425,7 @@ def conf_lim(xlocs: list[list[float]], midLocs: list[float],
         - **xlocs (list[list[float]])**: The x-coordinates for each slice of the shock wave.
         - **midLocs (list[float])**: The midpoint locations for each image.
         - **columnY (list[int])**: Y-values corresponding to each slice.
-        - **y_avg (int)**: The average Y value used for reference.
+        - **y_avg (list[float])**: The average Y values used for reference.
         - **slope (list[float])**: The slope values for each image.
         - **shock_deg (list[float])**: The estimated shock angle in degrees for each image.
         - **img_indx (list[int])**: Indexes of the images.
@@ -422,11 +438,15 @@ def conf_lim(xlocs: list[list[float]], midLocs: list[float],
             Additional parameters for the functions `error_analysis`, `IQR`, and others.
 
     Returns:
-        tuple[List[List[float]], List[int], float, float]
+        tuple
             - `e`: List of error values for each slice.
             - `pop_ylist`: Updated list of Y-values.
+            - `slope`: updated list of slops
+            - `shock_deg`: updated list of shock angles in degrees
+            - `midLocs`: updated list of average x-locations
             - `w_avg_ang`: Weighted average shock angle.
             - `conf_ang`: Confidence angle for the weighted average.
+
 
     Example:
         >>> xlocs = [[1.0, 2.0], [2.0, 3.0]]
@@ -453,35 +473,37 @@ def conf_lim(xlocs: list[list[float]], midLocs: list[float],
     conf_interval = kwargs.get('conf_interval', 0)
     # Ensure that the number of slices is sufficient
     if nSlices < 3:
-        min_nSlices = 'nSlices must be at least 3 to have enough degrees of freedom.'
-        print(f'{BCOLOR.FAIL}Error:{BCOLOR.ENDC}{BCOLOR.ITALIC}{min_nSlices}{BCOLOR.ENDC}')
+        error = 'nSlices must be at least 3 to have enough degrees of freedom.'
+        log_message(error, output_directory)
+        print(f'{BCOLOR.FAIL}Error:{BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
         return e, pop_ylist, 0, 0
 
     df = nSlices - 2
     t = stats.t.ppf(conf_interval, df)
 
-    # Calculate y statistics
-    y_ss = (columnY-y_avg)**2
-    y_dp = y_ss/np.sum(y_ss)
-
-    # initiate lists
-    outliers_set = []
-    Sty = np.ones(img_set_size)*np.sum(y_ss) # y total sum of squres
     s = np.zeros(img_set_size)
 
     for i, xloc in enumerate(xlocs):
-        y_int = y_avg - midLocs[i]*slope[i]
+        # Calculate y statistics
+        y_ss = (columnY-y_avg[i])**2
+        y_dp = y_ss/np.sum(y_ss)
+
+        # initiate lists
+        outliers_set = []
+        Sty = np.ones(img_set_size)*np.sum(y_ss) # y total sum of squres
+        y_int = y_avg[i] - midLocs[i]*slope[i]
         e[i], s[i] = error_analysis(xloc, columnY, nSlices, slope[i], y_int, t, y_dp)
         error, _, _ = zip(*e[i])
         error = np.array(error)-xloc
-        outliers = IQR(error**2, y_dp, columnY, uncertainY_list[i], i, img_indx[i], output_directory, comment, **kwargs)
+        outliers = IQR(error**2, y_dp, columnY, uncertainY_list[i], i, img_indx[i], 
+                       output_directory, comment, **kwargs)
         if outliers != []: outliers_set.append(outliers)
 
-    correction = outlier_correction(outliers_set, xlocs, columnY, t)
+    correction = outlier_correction(outliers_set, xlocs, columnY, t, log_dirc=output_directory)
 
     for i, outliers in enumerate(outliers_set):
         j = outliers[0][2]
-        slope[j], midLocs[j], pop_ylist[j], e[j], s[j], Sty[j] = correction[i]
+        slope[j], midLocs[j], y_avg[j], pop_ylist[j], e[j], s[j], Sty[j] = correction[i]
         shock_deg[j] = AngleFromSlope(slope[j])
 
     Sm = s / np.sqrt(Sty)
@@ -490,11 +512,14 @@ def conf_lim(xlocs: list[list[float]], midLocs: list[float],
     # Confidence interval for slope
     m_conf_int = t * Sm_avg
     conf_ang = 180-AngleFromSlope(m_conf_int)
+    log_message('Done', output_directory)
     print(u'\u2713')
     # Display results
-    print(f'weighted average shock angle: {w_avg_ang:0.2f}\u00B1{conf_ang:0.3f} deg',
-            end='')
-    print(f',\t \u03C3 = {Sm_avg:0.5f}')
+    new_log=f'weighted average shock angle: {w_avg_ang:0.2f}\u00B1{conf_ang:0.3f} deg'
+    new_log2 = f',\t \u03C3 = {Sm_avg:0.5f} deg'
+    log_message(f'{new_log}{new_log2}', output_directory)
+    print(f'{new_log}{new_log2}')
 
-    return e, pop_ylist, slope, shock_deg, midLocs, w_avg_ang, conf_ang
+
+    return e, pop_ylist, slope, shock_deg, midLocs, y_avg, w_avg_ang, conf_ang
 

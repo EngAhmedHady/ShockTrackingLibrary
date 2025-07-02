@@ -4,10 +4,12 @@ Created on Sat Dec  9 00:20:49 2023
 
 @author: Ahmed H. Hanfy
 """
-import numpy as np
+
 import cv2
+import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image, ImageEnhance
+from .support_func import log_message
 
 def plotting(FFT:np.array, y:int, Spectlocation: list) -> None:
     """
@@ -46,12 +48,13 @@ def plotting(FFT:np.array, y:int, Spectlocation: list) -> None:
     ax.set_ylim([int(y/2)-20,int(y/2)+MaxY+147])
 
 
-def SliceListAverage(img: np.array) -> np.array:
+def SliceListAverage(img: np.array, log_dirc:str='') -> np.array:
     """
     Compute the average intensity profile across the width of an image and subtract it from each row.
 
     Parameters:
         - **img (numpy.ndarray)**: Input image (grayscale or BGR).
+        - **log_dirc (str)**: log file directory.
 
     Returns:
         numpy.ndarray: New image with the average intensity profile subtracted from each row.
@@ -73,7 +76,9 @@ def SliceListAverage(img: np.array) -> np.array:
     """    
     # Convert image to grayscale if it is in color
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
-    print('\t - subtracting Averaging ...', end=" ")
+    new_log = '\t - subtracting Averaging ...'
+    log_message(new_log, log_dirc)
+    print(new_log, end=" ")
     width = len(img[0])
     
     # Calculate the average intensity for each column
@@ -90,6 +95,7 @@ def SliceListAverage(img: np.array) -> np.array:
     maxValue = np.amax(Newimg); minValue = np.amin(Newimg)
     Newimg = np.around(((Newimg-minValue)/(maxValue-minValue))*255).astype(np.uint8)
     print(u'\u2713')
+    log_message('Done', log_dirc)
     return Newimg
 
 # def ImgListAverage(imgList: list[np.array]) -> list[np.array]:
@@ -104,7 +110,7 @@ def SliceListAverage(img: np.array) -> np.array:
 #     return NewImg
     
 
-def CleanIlluminationEffects(img: np.array, filterCenter:list[tuple] = [(0, 233)], 
+def CleanIlluminationEffects(img: np.array, log_dirc, filterCenter:list[tuple] = [(0, 233)], 
                              D:int = 10, n:int = 10, ShowIm:bool = False ,**kwargs) -> np.array:
     
     """
@@ -112,6 +118,7 @@ def CleanIlluminationEffects(img: np.array, filterCenter:list[tuple] = [(0, 233)
 
     Parameters:
         - **img (numpy.ndarray)**: Input image (grayscale or BGR).
+        - **log_dirc (str)**: log file directory.
         - **filterCenter (list)**: Coordinates [x, y] of the filter center. Default: [0, 233].
         - **D (float)**: Cut-off frequency for the low-pass filter. Default: 10.
         - **n (int)**: Filter order. Default: 10.
@@ -151,8 +158,9 @@ def CleanIlluminationEffects(img: np.array, filterCenter:list[tuple] = [(0, 233)
     
     # Convert image to grayscale if it is in color
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
-    
-    print('\t - Removing illumination instability', end=" ")
+    new_log = '\t - Removing illumination instability'
+    log_message(new_log, log_dirc)
+    print(new_log, end=" ")
     
     dft = cv2.dft(np.float32(img),flags = cv2.DFT_COMPLEX_OUTPUT)
     magnitude_spectrum = np.fft.fftshift(dft)
@@ -189,9 +197,10 @@ def CleanIlluminationEffects(img: np.array, filterCenter:list[tuple] = [(0, 233)
 
     CleanedImage = np.around(((img_back[:,:,0]-minValue)/(maxValue-minValue))*255).astype(np.uint8)
     print(u' \u2713')
+    log_message('Done', log_dirc)
     return CleanedImage
 
-def BrightnessAndContrast(img:np.array, **kwargs) -> np.array:
+def BrightnessAndContrast(img:np.array, log_dirc, **kwargs) -> np.array:
     """
     Adjusts the brightness, contrast, and sharpness of an image.
     This function adjusts the brightness, contrast, and sharpness of the input image.
@@ -204,6 +213,7 @@ def BrightnessAndContrast(img:np.array, **kwargs) -> np.array:
 
     Parameters:
         - **img (numpy.ndarray)**: NumPy array representing the image.
+        - **log_dirc (str)**: log file directory.
         - ** **kwargs**:
             - Brightness (float, optional): Brightness adjustment factor (default: 1). Valid range: 0 (min) to 2 (max).
             - Contrast (float, optional): Contrast adjustment factor (default: 1). Valid range: 0 (min) to 2 (max).
@@ -232,9 +242,10 @@ def BrightnessAndContrast(img:np.array, **kwargs) -> np.array:
     # Convert image to grayscale if it is in color
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) > 2 else img
     
-    img = Image.fromarray(img, mode='L')    
-    
-    print('\t - Enhancing Image visability ...', end=" ")
+    img = Image.fromarray(img, mode='L')
+    new_log = '\t - Enhancing Image visability ...'
+    log_message(new_log, log_dirc)
+    print(new_log, end=" ")
     
     CorrectedImage = img.copy()
     if Brightness != 1:
@@ -249,6 +260,7 @@ def BrightnessAndContrast(img:np.array, **kwargs) -> np.array:
         enhancer = ImageEnhance.Sharpness(CorrectedImage)
         CorrectedImage = enhancer.enhance(Sharpness)
     print(u'\u2713')
+    log_message('Done', log_dirc)
     return np.array(CorrectedImage)
         
         

@@ -6,10 +6,12 @@ Created on Fri Dec  1 15:27:54 2023
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from .support_func import log_message
 plt.rcParams.update({'font.size': 16})
 
 
-def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alpha = 0.3):
+def ShockTraking(SnapshotSlice:np.ndarray, LastShockLoc:int = -1, 
+                 Plot:bool = False, count:int = -1, Alpha:float = 0.3, log_dirc:str = ''):
     """
     Process a given slice to track shock waves and determine the shock location.
 
@@ -18,6 +20,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
         - **LastShockLoc (int, optional)**: The location of the last shock. Default is -1.
         - **Plot (bool, optional)**: Whether to plot the slice illumination values with locations and average line. Default is False.
         - **count (int, optional)**: Counter for plotting. Default is -1.
+        - **log_dirc (str)**: log file directory.
 
     Returns:
         tuple: A tuple containing:
@@ -45,6 +48,7 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
         avg = np.mean(SnapshotSlice) # ...... Average illumination on the slice
         MinimumPoint = min(SnapshotSlice) # ........... minimum (darkest) point
     except Exception as e:
+        log_message(f'Error at {count}: {e}', log_dirc)
         print(count, SnapshotSlice, e)
         certainLoc = False
         Plot = True
@@ -114,7 +118,9 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
                 color = 'red', fontsize=14)
         if count > -1: ax.set_title(count)
         certainLoc = False
-        print(f"\n The error at {count} is: ", e)
+        error = f"Error at {count}: {e}"
+        log_message(error, log_dirc)
+        print(f'\n {error}', e)
         return minLoc, certainLoc, reason
 
     if Plot:
@@ -226,7 +232,9 @@ def ShockTraking(SnapshotSlice, LastShockLoc = -1, Plot = False, count = -1, Alp
                     color = 'red', fontsize=14)
             if count > -1: ax.set_title(count)
             certainLoc = False
-            print("\n The error is: ",e)
+            error = f"Error at {count}: {e}"
+            log_message(error, log_dirc)
+            print(f'\n {error}', e)
             return minLoc, certainLoc, reason
 
 

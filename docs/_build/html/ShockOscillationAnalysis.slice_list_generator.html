@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -5,19 +7,15 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ShockOscillationAnalysis.slice_list_generator package &mdash; ShockTrackingLibrary 1.9.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=c4cb232b"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c4cb232b"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -96,13 +94,14 @@
 <p>&#64;author: Ahmed H. Hanfy</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.slice_list_generator.list_generation_tools.GenerateIndicesList">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.slice_list_generator.list_generation_tools.</span></span><span class="sig-name descname"><span class="pre">GenerateIndicesList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_n_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">every_n_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">range</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.slice_list_generator.list_generation_tools.GenerateIndicesList" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.slice_list_generator.list_generation_tools.</span></span><span class="sig-name descname"><span class="pre">GenerateIndicesList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_n_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">every_n_files</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">range</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.slice_list_generator.list_generation_tools.GenerateIndicesList" title="Link to this definition"></a></dt>
 <dd><p>Generate a list of indices based on the specified range and step.</p>
 <dl class="simple">
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>total_n_files (int)</strong>: The total number of available files.</p></li>
 <li><p><strong>files (list[int, int], optional)</strong>: A list specifying the start and end files (default is [0, 0]).</p></li>
 <li><p><strong>every_n_files (int, optional)</strong>: Step value to determine the frequency of indices (default is 1).</p></li>
+<li><p><strong>log_dirc (str)</strong>: log file directory.</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><p>tuple[range, int]:  A tuple containing a range object of the indices and the total number of images.</p>
@@ -132,12 +131,13 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.slice_list_generator.list_generation_tools.genratingRandomNumberList">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.slice_list_generator.list_generation_tools.</span></span><span class="sig-name descname"><span class="pre">genratingRandomNumberList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ShockAngleSamples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.slice_list_generator.list_generation_tools.genratingRandomNumberList" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.slice_list_generator.list_generation_tools.</span></span><span class="sig-name descname"><span class="pre">genratingRandomNumberList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ShockAngleSamples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.slice_list_generator.list_generation_tools.genratingRandomNumberList" title="Link to this definition"></a></dt>
 <dd><p>Generate a list of random indices based on the given sample size.</p>
 <dl class="simple">
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>ShockAngleSamples (int)</strong>: The desired number of shock angle samples.</p></li>
 <li><p><strong>n1 (int)</strong>: The total number of files available.</p></li>
+<li><p><strong>log_dirc (str)</strong>: log file directory.</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><p>list:  A list of randomly selected indices.</p>
@@ -292,13 +292,14 @@ provided the defualt <code class="docutils literal notranslate"><span class="pre
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.IntersectionPoint">
-<span class="sig-name descname"><span class="pre">IntersectionPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.IntersectionPoint" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">IntersectionPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">M</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.IntersectionPoint" title="Link to this definition"></a></dt>
 <dd><p>Calculate the intersection point between two lines.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>M (list)</strong>: List containing slopes of the two lines.</p></li>
 <li><p><strong>A (list)</strong>: List containing y-intercepts of the two lines.</p></li>
 <li><p><strong>Ref (list)</strong>: List containing reference points for each line.</p></li>
+<li><p><strong>log_dirc (str)</strong>: log file directory.</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><dl class="simple">
@@ -308,7 +309,7 @@ provided the defualt <code class="docutils literal notranslate"><span class="pre
 </dd>
 </dl>
 </dd>
-<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">__importImages</span> <span class="kn">import</span> <span class="n">importSchlierenImages</span>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">__importImages</span><span class="w"> </span><span class="kn">import</span> <span class="n">importSchlierenImages</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">instance</span> <span class="o">=</span> <span class="n">importSchlierenImages</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">slopes</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">intercepts</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>

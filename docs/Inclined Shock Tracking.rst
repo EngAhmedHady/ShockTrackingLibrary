@@ -57,19 +57,22 @@ In this tutorial, the first leading edge shock from 100 schlieren images, is tra
 
         Img Shape is: (900, 960, 3)
         Screen resolution: 1920, 1080
-        Vertical range of tracking points starts from 575.00mm to 200.00mm
-        in pixels from 200px to 575px
-        registered line: [(404, 0), (0, 713), -1.763157894736842, 713.8684210526316]
+        Vertical range of tracking points is:
+            - In pixels from 200px to 575px
+        Registered line: ((415, 0), (0, 726), -1.7477477477477477, 726.0270270270271)
         Shock inclination test and setup ... ✓
-        Importing 100 images ...
-        [====================] 100%
+        Importing 100 images...
+        [=================== ] 99%
         Shock tracking started ... ✓
+        Angle range variation: [56.82, 61.46],	σ = 0.94
+        Average shock loc.: 227.08±0.00 px
+        Average shock angle: 58.94±0.00 deg
         Plotting tracked data ...
         info.: For memory reasons, only 20 images will be displayed.
         note: this will not be applied on images storing
         [====================] 100%
-        Angle range variation: [59.02,62.44], σ = 0.69
-        Average inclination angle 60.67 deg
+        Processing time: 1 Sec
+        (array([58.93693154,  0.        ,  0.        ,  0.        ,  0.94152004]), array([227.07783223,   0.        ,  23.87470901]))
     
     And the 20 images are displayed, among of them
 

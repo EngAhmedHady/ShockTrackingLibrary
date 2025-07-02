@@ -4,10 +4,7 @@ Created on Thu Feb 29 17:29:05 2024
 
 @author: Ahmed H. Hanfy
 """
-import sys
-sys.path.append(r'..\ShockOscillationAnalysis')
-# from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
-from inc_tracking import InclinedShockTracking as IncTrac
+from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
 
 if __name__ == '__main__':
     # Define the snapshots path with glob [note extention of imported files]

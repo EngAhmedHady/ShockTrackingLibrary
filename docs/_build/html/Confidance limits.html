@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confidance limits &mdash; ShockTrackingLibrary 1.9.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c4cb232b"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Analyze a shock signal" href="Analyze%20a%20shock%20signal.html" />
+    <link rel="prev" title="Slice list generation" href="Slice%20list%20generation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ShockTrackingLibrary
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="Tutorial.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Tutorial.html#installing">Installing</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="Tutorial.html#examples">Examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Slice%20list%20generation.html">Slice list generation</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Confidance limits</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="Analyze%20a%20shock%20signal.html">Analyze a shock signal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Inclined%20Shock%20Tracking.html">Inclined Shock Tracking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Mach%20number%20estimation.html">Mach number estimation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">ShockOscillationAnalysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ShockTrackingLibrary</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="Tutorial.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Confidance limits</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Confidance limits.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="confidance-limits">
+<h1>Confidance limits<a class="headerlink" href="#confidance-limits" title="Link to this heading"></a></h1>
+<p>When dealing with thousands of images featuring <strong>dynamically behaving shocks</strong>, achieving accurate tracking can be tough, especially if the shock contrast is low or it’s not perfectly aligned.
+That’s where the <a class="reference internal" href="ShockOscillationAnalysis.slice_list_generator.html#ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.GenerateSlicesArray" title="ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.GenerateSlicesArray"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">SliceListGenerator.GenerateSlicesArray</span></code></a> function comes in.
+(A detailed methodology for this process will be available in an upcoming publication.)</p>
+<p>The core challenge is that relying on a single pixel row for shock tracking can lead to lost contrast.
+To combat this, the <a class="reference internal" href="ShockOscillationAnalysis.slice_list_generator.html#ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.GenerateSlicesArray" title="ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.GenerateSlicesArray"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">SliceListGenerator.GenerateSlicesArray</span></code></a> function employs a multi-faceted approach:</p>
+<ol class="arabic">
+<li><p><strong>Vertical Averaging for Contrast:</strong> To boost the shock’s visibility, the function applies <strong>vertical averaging</strong> of pixel rows. This feature is activated through the attribute <code class="docutils literal notranslate"><span class="pre">slice_thickness</span></code>.
+This process combines information from several rows around the shock area, making it stand out more effectively.</p></li>
+<li><p><strong>Precise Angle Estimation:</strong> Shocks are not always conveniently perpendicular to the image’s horizontal axis.
+To ensure accurate averaging, images need to be rotated so the shock is <strong>perpendicular to the image frame</strong>.
+Getting this angle right is critical; errors can cause the shock to blend in, thereby reducing tracking accuracy.
+This angle estimation is automatically activated when <code class="docutils literal notranslate"><span class="pre">slice_thickness</span></code> is defined.
+However, the tracking range can be separately defined using the attribute <code class="docutils literal notranslate"><span class="pre">sat_vr</span></code>, which stands for <strong>shock angle tracking vertical range</strong>.</p></li>
+<li><p><strong>Robust Angle Refinement with RANSAC:</strong> To prevent misalignment from incorrect angle estimates,
+<a class="reference internal" href="ShockOscillationAnalysis.slice_list_generator.html#ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.GenerateSlicesArray" title="ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.GenerateSlicesArray"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">SliceListGenerator.GenerateSlicesArray</span></code></a>,
+employs a statistical technique called <strong>Random Sample Consensus (RANSAC)</strong>.</p>
+<ul class="simple">
+<li><p>It begins by taking random samples of tracked shock points.</p></li>
+<li><p>Then, it fits a line to these points using the <a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.v_least_squares" title="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.v_least_squares"><code class="xref any py py-func docutils literal notranslate"><span class="pre">vertical</span> <span class="pre">least</span> <span class="pre">squares</span> <span class="pre">method</span></code></a>.</p></li>
+<li><p>This process is repeated, <strong>iteratively maximizing the number of “inliers”</strong> (points that fit the line well),
+ensuring a highly robust and accurate shock angle estimation. The maximum number of RANSAC iterations (<span class="math notranslate nohighlight">\(itr_{max}\)</span>) is determined probabilistically.</p></li>
+</ul>
+<p>more info. can be found <a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.ransac" title="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.ransac"><code class="xref any py py-func docutils literal notranslate"><span class="pre">inc_tracking_support.ransac</span></code></a></p>
+</li>
+<li><p><strong>Post-Processing Evaluation:</strong> After fitting the line, its accuracy is evaluated using <strong>linear regression relations</strong>,
+which are activated with the attribute <code class="docutils literal notranslate"><span class="pre">conf_interval</span></code>. This helps assess the scatter of the points and determines the confidence (<span class="math notranslate nohighlight">\(z_j\)</span>) of the estimated line.
+The shock’s standard deviation also provides valuable insights into its dynamics.
+more info. can be found <a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.tracking_accuracy.error_analysis" title="ShockOscillationAnalysis.inc_tracking.tracking_accuracy.error_analysis"><code class="xref any py py-func docutils literal notranslate"><span class="pre">tracking_accuracy.error_analysis</span></code></a></p></li>
+<li><p><strong>Outlier Elimination:</strong> For more accurate angle estimation, Tukey’s fences approach [1, 2] is utilized.
+This method is automatically activated when <code class="docutils literal notranslate"><span class="pre">conf_interval</span></code> is defined and is used to remove outliers, especially if they exhibit high leverage and uncertainty.
+more info. can be found <a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.tracking_accuracy.IQR" title="ShockOscillationAnalysis.inc_tracking.tracking_accuracy.IQR"><code class="xref any py py-func docutils literal notranslate"><span class="pre">tracking_accuracy.IQR</span></code></a></p></li>
+<li><p><strong>Averaging Shock Angles:</strong> Finally, for the entire set of images, the average shock angle is calculated.
+This can be done using either a simple <strong>arithmetic average</strong> (<span class="math notranslate nohighlight">\(m\)</span>) or a <strong>weighted average</strong> (<span class="math notranslate nohighlight">\(m_w\)</span>).
+The weighted average is particularly useful as it accounts for variations, using the <strong>inverse standard deviation of the slope at each snapshot</strong> to give more reliable estimates greater weight.
+more info. can be found <a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.tracking_accuracy.compute_weighted_average" title="ShockOscillationAnalysis.inc_tracking.tracking_accuracy.compute_weighted_average"><code class="xref any py py-func docutils literal notranslate"><span class="pre">tracking_accuracy.compute_weighted_average</span></code></a></p></li>
+</ol>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Run the following code:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ShockOscillationAnalysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">SliceListGenerator</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># Define the snapshots path with glob[note the extention of imported files]</span>
+    <span class="n">imgPath</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;test_files\raw_images\*.png&#39;</span>
+
+    <span class="n">f</span> <span class="o">=</span> <span class="mi">2000</span>    <span class="c1"># images sampling rate</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mi">80</span>      <span class="c1"># distance in mm</span>
+
+    <span class="n">output_directory</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;results\Slicelist_confidance-results&#39;</span>
+
+    <span class="c1"># iniate the SliceListGenerator module</span>
+    <span class="n">SA</span> <span class="o">=</span> <span class="n">SliceListGenerator</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+
+    <span class="c1"># use GenerateSlicesArray function</span>
+    <span class="n">ShockwaveRegion</span> <span class="p">,</span><span class="n">n</span> <span class="p">,</span><span class="n">WR</span><span class="p">,</span> <span class="n">Scale</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">GenerateSlicesArray</span><span class="p">(</span><span class="n">imgPath</span><span class="p">,</span>
+                                                        <span class="c1"># Define the reference line locations</span>
+                                                        <span class="n">Ref_x0</span><span class="o">=</span><span class="p">[</span><span class="mi">109</span><span class="p">,</span> <span class="mi">726</span><span class="p">],</span> <span class="n">Ref_y0</span><span class="o">=</span><span class="mi">617</span><span class="p">,</span>
+                                                        <span class="c1"># Define the range of images to be only imported</span>
+                                                        <span class="n">within_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="mi">200</span><span class="p">],</span>
+                                                        <span class="n">scale_pixels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                        <span class="c1"># as scaled tracking reference values in mm</span>
+                                                        <span class="n">slice_loc</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                                        <span class="c1"># to crop the slices by vertical reference line</span>
+                                                        <span class="n">full_img_width</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                        <span class="c1"># in mm</span>
+                                                        <span class="n">slice_thickness</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">],</span>
+                                                        <span class="c1"># Define shock angle tracking vertical range in mm</span>
+                                                        <span class="n">sat_vr</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">],</span>
+                                                        <span class="c1"># Define confidence interval with 98% accuracy</span>
+                                                        <span class="n">conf_interval</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span>
+                                                        <span class="c1"># number of samples to determine the average inclination</span>
+                                                        <span class="n">shock_angle_samples</span><span class="o">=</span><span class="mi">33</span><span class="p">,</span>
+                                                        <span class="c1"># Define the number of points to track for angle estimation</span>
+                                                        <span class="n">nPnts</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
+                                                        <span class="c1"># to preview the tracked points during angle determination</span>
+                                                        <span class="n">angle_samples_review</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                                        <span class="c1"># information for angle determination</span>
+                                                        <span class="n">inclination_est_info</span><span class="o">=</span><span class="p">[</span><span class="mi">110</span><span class="p">,</span> <span class="p">(</span><span class="mi">474</span><span class="p">,</span> <span class="mi">591</span><span class="p">),</span> <span class="p">(</span><span class="mi">463</span><span class="p">,</span> <span class="mi">482</span><span class="p">)],</span>
+                                                        <span class="c1"># to preview the final setup before proceeding</span>
+                                                        <span class="n">preview</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                        <span class="c1"># display properties</span>
+                                                        <span class="n">avg_preview_mode</span><span class="o">=</span><span class="s1">&#39;avg_ang&#39;</span><span class="p">,</span>
+                                                        <span class="n">points_opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                                                        <span class="n">points_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                                                        <span class="c1"># the directory where the slice list will be stored</span>
+                                                        <span class="n">output_directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">,</span>
+                                                        <span class="c1"># additional comments to the stored slice list file name</span>
+                                                        <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;-SliceList&#39;</span><span class="p">,</span>
+                                                        <span class="p">)</span>
+</pre></div>
+</div>
+<ol class="arabic" start="2">
+<li><p>Review the spacified domain and reference lines, then press <cite>Esc</cite> to abort or any other key to continue:</p>
+<a class="reference internal image-reference" href="_images/T5-3c.png"><img alt="_images/T5-3c.png" class="align-center" src="_images/T5-3c.png" style="width: 600px;" />
+</a>
+</li>
+<li><p>The software will estimate the shock angle, store the <code class="docutils literal notranslate"><span class="pre">angle_samples_review</span></code> and preview the rotated image, press <cite>Esc</cite> to abort or any other key to continue:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Img Shape is: (900, 960, 3)</span>
+<span class="go">Image scale: 0.12965964343598055 mm/px</span>
+<span class="go">Slice center is located at:</span>
+<span class="go">    - 540px in absolute reference</span>
+<span class="go">    - 9.98mm (77px) from reference `Ref_y0`</span>
+<span class="go">Shock angle tracking vertical range above the reference `Ref_y0` is:</span>
+<span class="go">    - In (mm)s from 18.02mm to 4.93mm</span>
+<span class="go">    - In pixels from 139px to 38px</span>
+<span class="go">Shock inclination test and setup ... ✓</span>
+<span class="go">Warning: Requested files are out of range; Only available files will be imported from 50 to 100</span>
+<span class="go">Import 33 images for inclination Check ...</span>
+<span class="go">[====================] 100%</span>
+<span class="go">Shock inclination estimation ...</span>
+<span class="go">Shock tracking started ... ✓</span>
+<span class="go">Calculating confidance limits ... ✓</span>
+<span class="go">weighted average shock angle: 93.79±0.109 deg,   σ = 0.00083 deg</span>
+<span class="go">Angle range variation: [79.95, 104.28], σ = 5.10 deg</span>
+<span class="go">Average shock loc.: 469.75±6.47 px</span>
+<span class="go">Average shock angle: 95.03±1.90 deg</span>
+<span class="go">Plotting tracked data ...</span>
+<span class="go">[====================] 100%</span>
+<span class="go">Processing time: 5 Sec</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/T5-61.png"><img alt="_images/T5-61.png" src="_images/T5-61.png" style="width: 215px;" />
+</a>
+<a class="reference internal image-reference" href="_images/T5-70.png"><img alt="_images/T5-70.png" src="_images/T5-70.png" style="width: 215px;" />
+</a>
+<a class="reference internal image-reference" href="_images/T5-83.png"><img alt="_images/T5-83.png" src="_images/T5-83.png" style="width: 215px;" />
+</a>
+<a class="reference internal image-reference" href="_images/T5-4.png"><img alt="_images/T5-4.png" class="align-center" src="_images/T5-4.png" style="width: 600px;" />
+</a>
+<a class="reference internal image-reference" href="_images/T5-5.png"><img alt="_images/T5-5.png" class="align-center" src="_images/T5-5.png" style="width: 600px;" />
+</a>
+</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>In the first and third images, red uncertain points significantly deviate from the actual shock location due to the complexity of the shock structure.
+However, the algorithm successfully identified and excluded these outliers, focusing instead on the correct shock angle.</p></li>
+<li><p>These uncertain points can influence the arithmetic average of the shock angle. However, in the weighted average approach,
+images like the first and third—which exhibit high standard deviation—are assigned lower weights compared to the second image.
+This results in a more reliable average estimation.</p></li>
+<li><p>The standard deviation for arithmetic average are notably higher than the weighted average,
+indicating greater variability and lower confidence. This difference is also reflected in the overall confidence level of the result.</p></li>
+<li><p>A <cite>log.txt</cite> file is generated in the results directory. It contains details about the tracking process and the operations performed.</p></li>
+</ul>
+</div>
+<ol class="arabic" start="4">
+<li><p>The software will generate the slice list and store the data:</p>
+<blockquote>
+<div><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">RotatedImage: stored ✓</span>
+<span class="go">DomainImage: stored ✓</span>
+<span class="go">working range is: {&#39;Ref_x0&#39;: [109, 726], &#39;Ref_y1&#39;: 540, &#39;avg_shock_angle&#39;: array([95.03081317,  1.90169604, 93.79126163,  0.10905212,  5.10271056]), &#39;avg_shock_loc&#39;: array([469.7515693 ,   6.47399096,  17.37128401])}</span>
+<span class="go">Importing 50 images ...</span>
+<span class="go">[=================== ] 98%</span>
+<span class="go">ImageList write: Image list was stored at: results\Slicelist_confidance-results\2.0kHz_10mm_0.12965964343598055mm-px_tk_38px_-SliceList.png</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/T5-6.png"><img alt="_images/T5-6.png" class="align-center" src="_images/T5-6.png" style="width: 600px;" />
+</a>
+</div></blockquote>
+</li>
+</ol>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<div class="line-block">
+<div class="line"><a class="reference internal" href="ShockOscillationAnalysis.slice_list_generator.html#ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.GenerateSlicesArray" title="ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.GenerateSlicesArray"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">SliceListGenerator.GenerateSlicesArray</span></code></a></div>
+<div class="line"><a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.v_least_squares" title="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.v_least_squares"><code class="xref any py py-func docutils literal notranslate"><span class="pre">inc_tracking_support.v_least_squares</span></code></a></div>
+<div class="line"><a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.ransac" title="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.ransac"><code class="xref any py py-func docutils literal notranslate"><span class="pre">inc_tracking_support.ransac</span></code></a></div>
+<div class="line"><a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.tracking_accuracy.error_analysis" title="ShockOscillationAnalysis.inc_tracking.tracking_accuracy.error_analysis"><code class="xref any py py-func docutils literal notranslate"><span class="pre">tracking_accuracy.error_analysis</span></code></a></div>
+<div class="line"><a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.tracking_accuracy.IQR" title="ShockOscillationAnalysis.inc_tracking.tracking_accuracy.IQR"><code class="xref any py py-func docutils literal notranslate"><span class="pre">tracking_accuracy.IQR</span></code></a></div>
+<div class="line"><a class="reference internal" href="ShockOscillationAnalysis.inc_tracking.html#ShockOscillationAnalysis.inc_tracking.tracking_accuracy.compute_weighted_average" title="ShockOscillationAnalysis.inc_tracking.tracking_accuracy.compute_weighted_average"><code class="xref any py py-func docutils literal notranslate"><span class="pre">tracking_accuracy.compute_weighted_average</span></code></a></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Slice%20list%20generation.html" class="btn btn-neutral float-left" title="Slice list generation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Analyze%20a%20shock%20signal.html" class="btn btn-neutral float-right" title="Analyze a shock signal" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Ahmed H. Hanfy, Paweł Flaszyński, Piotr Kaczyński, and Piotr Doerffer..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

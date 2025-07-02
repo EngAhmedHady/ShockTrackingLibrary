@@ -21,6 +21,7 @@ Examples
    :maxdepth: 4
    
    Slice list generation
+   Confidance limits
    Analyze a shock signal
    Inclined Shock Tracking
    Mach number estimation

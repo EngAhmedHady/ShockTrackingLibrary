@@ -18,27 +18,37 @@ Steps are as following:
 
    if __name__ == '__main__':
       # define the slice list file
-      imgPath = r'results\2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png'
-      
+       imgdirc = r'results\Slicelist_test-results'
+      imgpath = fr'{imgdirc}\2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png'
+
       f = 2000    # images sampling rate
-      
-      # from the file name or can be passed directly from SliceListGenerator.GenerateSlicesArray function
-      Scale = 0.12965964343598055 # mm/px indicates the displacement accuracy
-         
+
+      # from the file name or can be passed directly from:
+      # SliceListGenerator.GenerateSlicesArray function
+      scale = 0.12965964343598055  # mm/px
+
       # import the slice list
-      slicelist = cv2.imread(imgPath)
-      
+      slicelist = cv2.imread(imgpath)
+      n = slicelist.shape[0]  # time
+
       # iniate the ShockOscillationAnalysis module
       SA = SOA(f)
-      
+
       # spacify the shock region (Draw 2 vertical lines)
-      NewRef = SA.LineDraw(slicelist, 'V', 0, Intialize = True)
-      NewRef = SA.LineDraw(SA.clone, 'V', 1) 
-      NewRef.sort()                                # to make sure the spacified lines are correctly sorted
-      ShockwaveRegion = slicelist[:,NewRef[0]:NewRef[1]] # to crop the slicelist to the shock region
-      xPixls = (NewRef[1]-NewRef[0])               # the width of the slice list in pixels 
-      ShockResionScale = xPixls*Scale              # the width of the slice list in mm
-      print(f'Shock Regions: {NewRef},\t Represents: {xPixls}px, \t Shock Regions in mm:{ShockResionScale}')
+      newref = SA.LineDraw(slicelist, 'V', 0, Intialize=True)
+      newref = SA.LineDraw(SA.clone, 'V', 1)
+      # to make sure the spacified lines are correctly sorted
+      newref.sort()
+      # to crop the slicelist to the shock region
+      shock_region = slicelist[:, newref[0]:newref[1]]
+      # the width of the slice list in pixels
+      xPixls = (newref[1]-newref[0])
+      # the width of the slice list in mm
+      shock_region_mm = xPixls*scale
+      # Add info to log.txt file
+      newlog = f'Shock Regions: {newref},\t Represents: {xPixls}px, \t Shock Regions in mm:{shock_region_mm}'
+      SA.log(newlog, imgdirc)
+      print(newlog)
 
 
 .. note::
@@ -57,9 +67,9 @@ And the console output of this step is:
 
 .. code-block:: console
 
-   registered line: 429 
-   registered line: 286
-   Shock Regions: [276, 428],	 Represents: 152px, 	 Shock Regions in mm:19.708265802269043
+   Registered line: 255
+   Registered line: 441
+   Shock Regions: [255, 441],	 Represents: 186px, 	 Shock Regions in mm:24.116693679092382
 
 2. To improve the traking quality, it is good to clean optical defects by subtracting Average slice from all slices:
 
@@ -104,13 +114,18 @@ The console output of this step is:
 
 .. code-block:: python
 
+   import matplotlib.pyplot as plt
+
    #%% Find shock location
    shock_loc_px, uncer = SA.ShockTrakingAutomation(shock_region, 
                                                    method = 'integral',        # there is also 'maxGrad' and 'darkest_spot'
                                                    reviewInterval = [11,14],   # to review the tracking process within this range
                                                    Signalfilter = 'med-Wiener')
     
-   print(f'uncertainty ratio: {(len(uncer)/len(shock_loc_px))*100:0.2f}%')
+   # Add info to log.txt file
+    newlog = f'uncertainty ratio: {(len(uncer)/len(shock_loc_px))*100:0.2f}%'
+    SA.log(newlog, imgdirc)
+    print(newlog)
     
    # unpack and scale the output values 
    shock_loc_mm= scale * np.array(shock_loc_px)     # to scale the shock location output to mm  
@@ -150,11 +165,11 @@ The console output of this step is:
 
 .. code-block:: console
 
-   Processing the shock location ...
+   Processing the shock location using integral method...
    [====================] 100%
    Appling med-Wiener filter...
    Processing time: 0 Sec
-   uncertainty ratio: 14.00%
+   uncertainty ratio: 12.00%
 
 .. note::
    - Mostly, the tracked points follow the shock location; however, the uncertainty ratio is quite high at 14%.
@@ -162,27 +177,29 @@ The console output of this step is:
 
 4. Finally, shift the signal by the average value and use welch method to study the power spectral density (PSD).
     
-.. code-block:: python
+   .. code-block:: python
+      
+      from scipy import signal
 
-   #%% Apply welch method for PSD
-    avg_shock_loc = np.average(shock_loc_mm)      # find the average shock location
-    shock_loc_mm = shock_loc_mm - avg_shock_loc   # to shift the signal to the average
-    
-   # Calculate the PSD
-   Freq, psd = signal.welch(x = shock_loc_mm, fs = f, window='barthann',
-                            nperseg = 512, noverlap=0, nfft=None, detrend='constant',
-                            return_onesided=True, scaling='density')
-    
-   fig,ax = plt.subplots(figsize=(10,10))
-   ax.loglog(Freq, psd, lw = '2')
-   ax.set_ylabel(r"PSD [mm$^2$/Hz]")
-   ax.set_xlabel("Frequency [Hz]")
+      #%% Apply welch method for PSD
+      avg_shock_loc = np.average(shock_loc_mm)      # find the average shock location
+      shock_loc_mm = shock_loc_mm - avg_shock_loc   # to shift the signal to the average
+         
+      # Calculate the PSD
+      Freq, psd = signal.welch(x = shock_loc_mm, fs = f, window='barthann',
+                                 nperseg = 512, noverlap=0, nfft=None, detrend='constant',
+                                 return_onesided=True, scaling='density')
+         
+      fig,ax = plt.subplots(figsize=(10,10))
+      ax.loglog(Freq, psd, lw = '2')
+      ax.set_ylabel(r"PSD [mm$^2$/Hz]")
+      ax.set_xlabel("Frequency [Hz]")
 
    The out put results:
 
-.. image:: _static\\img\\T4\\T4-7.png
-   :width: 600
-   :align: center
+   .. image:: _static\\img\\T4\\T4-7.png
+      :width: 600
+      :align: center
 
 
 The full code example:
@@ -197,65 +214,86 @@ The full code example:
 
    if __name__ == '__main__':
       # define the slice list file
-      imgPath = r'results\2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png'
-      
+      imgdirc = r'results\Slicelist_test-results'
+      imgpath = fr'{imgdirc}\2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png'
+
       f = 2000    # images sampling rate
-      
-      # from the file name or can be passed directly from SliceListGenerator.GenerateSlicesArray function
-      scale = 0.12965964343598055 # mm/px
-         
+
+      # from the file name or can be passed directly from:
+      # SliceListGenerator.GenerateSlicesArray function
+      scale = 0.12965964343598055  # mm/px
+
       # import the slice list
-      slicelist = cv2.imread(imgPath)
-      n = slicelist.shape[0] # time 
-      
+      slicelist = cv2.imread(imgpath)
+      n = slicelist.shape[0]  # time
+
       # iniate the ShockOscillationAnalysis module
       SA = SOA(f)
-      
+
       # spacify the shock region (Draw 2 vertical lines)
-      newref = SA.LineDraw(slicelist, 'V', 0, Intialize = True)
-      newref = SA.LineDraw(SA.clone, 'V', 1) 
-      newref.sort()                                   # to make sure the spacified lines are correctly sorted
-      shock_region = slicelist[:,newref[0]:newref[1]] # to crop the slicelist to the shock region
-      xPixls = (newref[1]-newref[0])                  # the width of the slice list in pixels 
-      shock_region_mm = xPixls*scale                  # the width of the slice list in mm
-      print(f'Shock Regions: {newref},\t Represents: {xPixls}px, \t Shock Regions in mm:{shock_region_mm}')
-      
-      #%% slice list cleaning 
-      # [subtracting the average, subtracting ambiant light frequency, improve brightness/contrast/sharpness]
-      shock_region = SA.CleanSnapshots(shock_region,'Average')    
-      
-      #%% Find shock location
-      shock_loc_px, uncer = SA.ShockTrakingAutomation(shock_region, 
-                                                      method = 'integral',        # There is also 'maxGrad' and 'darkest_spot'
-                                                      reviewInterval = [11,14],   # to review the tracking process within this range
-                                                      Signalfilter = 'med-Wiener')
-      
-      print(f'uncertainty ratio: {(len(uncer)/len(shock_loc_px))*100:0.2f}%')
-      
-      # unpack and scale the output values 
-      shock_loc_mm= scale * np.array(shock_loc_px)  # to scale the shock location output to mm  
-      
-      snapshot_indx, uncertain, reason = zip(*uncer)   # unpack uncertainity columns
-      uncertain_mm = scale * np.array(uncertain)       # to scale the uncertain locatshock location output to mm 
-      
+      newref = SA.LineDraw(slicelist, 'V', 0, Intialize=True)
+      newref = SA.LineDraw(SA.clone, 'V', 1)
+      # to make sure the spacified lines are correctly sorted
+      newref.sort()
+      # to crop the slicelist to the shock region
+      shock_region = slicelist[:, newref[0]:newref[1]]
+      # the width of the slice list in pixels
+      xPixls = (newref[1]-newref[0])
+      # the width of the slice list in mm
+      shock_region_mm = xPixls*scale
+      # Add info to log.txt file
+      newlog = f'Shock Regions: {newref},\t Represents: {xPixls}px, \t Shock Regions in mm:{shock_region_mm}'
+      SA.log(newlog, imgdirc)
+      print(newlog)
+
+      # %% slice list cleaning
+      # [subtracting the average, subtracting ambiant light frequency,
+      # improve brightness/contrast/sharpness]
+      shock_region = SA.CleanSnapshots(shock_region, 'Average')
+
+      # %% Find shock location
+      shock_loc_px, uncer = SA.ShockTrakingAutomation(shock_region,
+                                                      method='integral',        # There is also 'maxGrad' and 'darkest_spot'
+                                                      reviewInterval=[11, 14],  # to review the tracking process within this range
+                                                      Signalfilter='med-Wiener')
+
+      # Add info to log.txt file
+      newlog = f'uncertainty ratio: {(len(uncer)/len(shock_loc_px))*100:0.2f}%'
+      SA.log(newlog, imgdirc)
+      print(newlog)
+
+      # unpack and scale the output values
+      # to scale the shock location output to mm
+      shock_loc_mm = scale * np.array(shock_loc_px)
+
+      # unpack uncertainity columns
+      snapshot_indx, uncertain, reason = zip(*uncer)
+      # to scale the uncertain locatshock location output to mm
+      uncertain_mm = scale * np.array(uncertain)
+
       # plotting the output
-      fig1, ax1 = plt.subplots(figsize=(8,50))
-      ax1.imshow(shock_region, extent=[0, shock_region_mm, shock_region.shape[0], 0], aspect='0.1', cmap='gray');
-      ax1.plot(shock_loc_mm, range(n),'x', lw = 1, color = 'g', ms = 7)
-      ax1.plot(uncertain_mm, snapshot_indx,'x', lw = 1, color = 'r', ms = 5)
-      
-      #%% Apply welch method for PSD
-      avg_shock_loc = np.average(shock_loc_mm)      # find the average shock location
-      shock_loc_mm = shock_loc_mm - avg_shock_loc   # to shift the signal to the average
-      
-      Freq, psd = signal.welch(x = shock_loc_mm, fs = f, window='barthann',
-                           nperseg = 512, noverlap=0, nfft=None, detrend='constant',
-                           return_onesided=True, scaling='density')
-      
-      fig,ax = plt.subplots(figsize=(10,10))
-      ax.loglog(Freq, psd, lw = '2')
-      ax.set_ylabel(r"PSD [mm$^2$/Hz]"); 
-      ax.set_xlabel("Frequency [Hz]");
+      fig1, ax1 = plt.subplots(figsize=(8, 50))
+      ax1.imshow(shock_region,
+                  extent=[0, shock_region_mm, shock_region.shape[0], 0],
+                  aspect='0.1', cmap='gray')
+      ax1.plot(shock_loc_mm, range(n), 'x', lw=1, color='g', ms=7)
+      ax1.plot(uncertain_mm, snapshot_indx, 'x', lw=1, color='r', ms=5)
+
+      # %% Apply welch method for PSD
+      # find the average shock location
+      avg_shock_loc = np.average(shock_loc_mm)
+      # to shift the signal to the average
+      shock_loc_mm = shock_loc_mm - avg_shock_loc
+
+      Freq, psd = signal.welch(x=shock_loc_mm, fs=f, window='barthann',
+                              nperseg=512, noverlap=0, nfft=None,
+                              detrend='constant', return_onesided=True,
+                              scaling='density')
+
+      fig, ax = plt.subplots(figsize=(10, 10))
+      ax.loglog(Freq, psd, lw='2')
+      ax.set_ylabel(r"PSD [mm$^2$/Hz]")
+      ax.set_xlabel("Frequency [Hz]")
     
 .. seealso::
    :any:`SOA.LineDraw<ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.LineDraw>`,

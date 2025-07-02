@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -5,19 +7,16 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ShockOscillationAnalysis package &mdash; ShockTrackingLibrary 1.9.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=c4cb232b"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c4cb232b"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -161,153 +160,6 @@
 <p>Created on Tue Dec 20 09:32:30 2022</p>
 <p>&#64;author: Ahmed H. Hanfy</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.ShockOscillationAnalysis.</span></span><span class="sig-name descname"><span class="pre">BCOLOR</span></span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A class to represent ANSI escape sequences for coloring terminal text.
-This class provides various ANSI escape codes to color and style text in
-terminal output.</p>
-<dl class="simple">
-<dt>Supported formats:</dt><dd><ul class="simple">
-<li><p>BGOKBLUE: background blue</p></li>
-<li><p>BGOKCYAN: background cyan</p></li>
-<li><p>OKCYAN: cyan text</p></li>
-<li><p>BGOKGREEN: background green</p></li>
-<li><p>OKGREEN: green text</p></li>
-<li><p>WARNING: yellow background (warning)</p></li>
-<li><p>FAIL: red text (fail)</p></li>
-<li><p>ITALIC: italic text</p></li>
-<li><p>UNDERLINE: underlined text</p></li>
-<li><p>ENDC: reset all attributes.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.BGOKBLUE">
-<span class="sig-name descname"><span class="pre">BGOKBLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[44m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.BGOKBLUE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.BGOKCYAN">
-<span class="sig-name descname"><span class="pre">BGOKCYAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[46m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.BGOKCYAN" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.BGOKGREEN">
-<span class="sig-name descname"><span class="pre">BGOKGREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[42m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.BGOKGREEN" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.ENDC">
-<span class="sig-name descname"><span class="pre">ENDC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[0m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.ENDC" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.FAIL">
-<span class="sig-name descname"><span class="pre">FAIL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[31m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.FAIL" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.ITALIC">
-<span class="sig-name descname"><span class="pre">ITALIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[3m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.ITALIC" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.OKCYAN">
-<span class="sig-name descname"><span class="pre">OKCYAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[36m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.OKCYAN" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.OKGREEN">
-<span class="sig-name descname"><span class="pre">OKGREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[32m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.OKGREEN" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.UNDERLINE">
-<span class="sig-name descname"><span class="pre">UNDERLINE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[4m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.UNDERLINE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.WARNING">
-<span class="sig-name descname"><span class="pre">WARNING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[43m'</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.BCOLOR.WARNING" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.ShockOscillationAnalysis.</span></span><span class="sig-name descname"><span class="pre">CVColor</span></span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A class to represent common colors used in OpenCV.
-This class provides RGB tuples for a variety of commonly used colors.</p>
-<dl class="simple">
-<dt>Supported colors:</dt><dd><p>BLACK, WHITE, RED, GREEN, BLUE, GREENBLUE, YELLOW, CYAN, MAGENTA,
-FUCHSIPINK, GRAY, ORANGE</p>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.BLACK">
-<span class="sig-name descname"><span class="pre">BLACK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.BLACK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.BLUE">
-<span class="sig-name descname"><span class="pre">BLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(255,</span> <span class="pre">0,</span> <span class="pre">0)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.BLUE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.CYAN">
-<span class="sig-name descname"><span class="pre">CYAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(255,</span> <span class="pre">255,</span> <span class="pre">0)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.CYAN" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.FUCHSIPINK">
-<span class="sig-name descname"><span class="pre">FUCHSIPINK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(255,</span> <span class="pre">128,</span> <span class="pre">255)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.FUCHSIPINK" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.GRAY">
-<span class="sig-name descname"><span class="pre">GRAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(128,</span> <span class="pre">128,</span> <span class="pre">128)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.GRAY" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.GREEN">
-<span class="sig-name descname"><span class="pre">GREEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0,</span> <span class="pre">255,</span> <span class="pre">0)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.GREEN" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.GREENBLUE">
-<span class="sig-name descname"><span class="pre">GREENBLUE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(255,</span> <span class="pre">128,</span> <span class="pre">0)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.GREENBLUE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.MAGENTA">
-<span class="sig-name descname"><span class="pre">MAGENTA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(255,</span> <span class="pre">0,</span> <span class="pre">255)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.MAGENTA" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.ORANGE">
-<span class="sig-name descname"><span class="pre">ORANGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0,</span> <span class="pre">128,</span> <span class="pre">255)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.ORANGE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.RED">
-<span class="sig-name descname"><span class="pre">RED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">255)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.RED" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.WHITE">
-<span class="sig-name descname"><span class="pre">WHITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(255,</span> <span class="pre">255,</span> <span class="pre">255)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.WHITE" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.YELLOW">
-<span class="sig-name descname"><span class="pre">YELLOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(0,</span> <span class="pre">255,</span> <span class="pre">255)</span></em><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.CVColor.YELLOW" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.ShockOscillationAnalysis.</span></span><span class="sig-name descname"><span class="pre">SOA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelScale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -331,13 +183,17 @@ Supported corrections include ‘Brightness/Contrast’, ‘Average’, and ‘F
 <li><p><strong>filterCenter (list)</strong>: Overrides the default filter center if provided.</p></li>
 <li><p><strong>D (int)</strong>: Overrides the default cut-off frequency if provided.</p></li>
 <li><p><strong>n (int)</strong>: Overrides the default filter order if provided.</p></li>
-<li><p><strong>ShowIm (bool)</strong>: Overrides the default value for displaying images if provided.</p></li>
+<li><p><strong>ShowIm (bool)</strong>: Overrides the default value for displaying images if 
+provided.</p></li>
 </ul>
 </dd>
 <dt>Brightness/Contrast:</dt><dd><ul>
-<li><p><strong>Brightness (float, optional)</strong>: Brightness adjustment factor (default: 1). Valid range: 0 (min) to 2 (max).</p></li>
-<li><p><strong>Contrast (float, optional)</strong>: Contrast adjustment factor (default: 1). Valid range: 0 (min) to 2 (max).</p></li>
-<li><p><strong>Sharpness (float, optional)</strong>: Sharpness adjustment factor (default: 1). Valid range: 0 (min) to 3 (max).</p></li>
+<li><p><strong>Brightness (float, optional)</strong>: Brightness adjustment factor (default: 1). 
+Valid range: 0 (min) to 2 (max).</p></li>
+<li><p><strong>Contrast (float, optional)</strong>: Contrast adjustment factor (default: 1). 
+Valid range: 0 (min) to 2 (max).</p></li>
+<li><p><strong>Sharpness (float, optional)</strong>: Sharpness adjustment factor (default: 1). 
+Valid range: 0 (min) to 3 (max).</p></li>
 </ul>
 </dd>
 </dl>
@@ -350,7 +206,8 @@ Supported corrections include ‘Brightness/Contrast’, ‘Average’, and ‘F
 <li><p>numpy.ndarray: Corrected image snapshot.</p></li>
 </ul>
 </dd>
-<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cleaned_image</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">CleanSnapshots</span><span class="p">(</span><span class="n">original_image</span><span class="p">,</span> <span class="s1">&#39;Brightness/Contrast&#39;</span><span class="p">,</span> <span class="s1">&#39;FFT&#39;</span><span class="p">,</span> <span class="n">Brightness</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">D</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cleaned_image</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">CleanSnapshots</span><span class="p">(</span><span class="n">original_image</span><span class="p">,</span> <span class="s1">&#39;Brightness/Contrast&#39;</span><span class="p">,</span> 
+<span class="go">                                            &#39;FFT&#39;, Brightness=1.5, D=20)</span>
 </pre></div>
 </div>
 </dd>
@@ -358,16 +215,18 @@ Supported corrections include ‘Brightness/Contrast’, ‘Average’, and ‘F
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>If ‘Brightness/Contrast’ is in <cite>*args</cite>, the image undergoes brightness and contrast adjustments.</p></li>
+<li><p>If ‘Brightness/Contrast’ is in <cite>*args</cite>, the image undergoes brightness and contrast 
+adjustments.</p></li>
 <li><p>If ‘Average’ is in <cite>*args</cite>, the average illumination effect is removed.</p></li>
-<li><p>If ‘FFT’ is in <cite>*args</cite>, the illumination effects are corrected using FFT-based filtering.</p></li>
+<li><p>If ‘FFT’ is in <cite>*args</cite>, the illumination effects are corrected using FFT-based 
+filtering.</p></li>
 </ul>
 </div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.DefineReferences">
-<span class="sig-name descname"><span class="pre">DefineReferences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_pixels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_y1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.DefineReferences" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">DefineReferences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_pixels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_y1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.DefineReferences" title="Link to this definition"></a></dt>
 <dd><p>Define reference lines on an image for scalling and further processing.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
@@ -375,9 +234,12 @@ Supported corrections include ‘Brightness/Contrast’, ‘Average’, and ‘F
 <li><p><strong>shp (tuple)</strong>: Shape of the image (height, width).</p></li>
 <li><p><strong>Ref_x0 (list[int])</strong>: List of x-coordinates for vertical reference lines.</p></li>
 <li><p><strong>scale_pixels (bool)</strong>: Whether to scale pixels based on the reference lines.</p></li>
-<li><p><strong>Ref_y0 (int, optional)</strong>: y-coordinate of the top horizontal reference line. Default is -1.</p></li>
-<li><p><strong>Ref_y1 (int, optional)</strong>: y-coordinate of the bottom horizontal reference line. Default is -1.</p></li>
-<li><p><strong>slice_loc (int, optional)</strong>: Location of the slice for horizontal reference lines. Default is 0.</p></li>
+<li><p><strong>Ref_y0 (int, optional)</strong>: y-coordinate of the top horizontal reference line. 
+Default is -1.</p></li>
+<li><p><strong>Ref_y1 (int, optional)</strong>: y-coordinate of the bottom horizontal reference line. 
+Default is -1.</p></li>
+<li><p><strong>slice_loc (int, optional)</strong>: Location of the slice for horizontal reference lines. 
+Default is 0.</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
@@ -472,36 +334,44 @@ image.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.ShockTrakingAutomation">
-<span class="sig-name descname"><span class="pre">ShockTrakingAutomation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'integral'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reviewInterval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Signalfilter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CheckSolutionTime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.ShockTrakingAutomation" title="Link to this definition"></a></dt>
-<dd><p>This method automates the shock tracking process and generates shock signals based on linescanning technique,
-where a snapshots list is given as input, three methods of tracking can be proposed</p>
+<span class="sig-name descname"><span class="pre">ShockTrakingAutomation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'integral'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reviewInterval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Signalfilter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.ShockTrakingAutomation" title="Link to this definition"></a></dt>
+<dd><p>This method automates the shock tracking process and generates shock signals based on 
+linescanning technique, where a snapshots list is given as input, three methods of tracking
+can be proposed</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li><p><cite>integral</cite>: This method tracks the shock through the largest blocked area by the knife. More information and detailed discrepancies can be found in this article <a class="reference external" href="https://dx.doi.org/10.2139/ssrn.4797840">https://dx.doi.org/10.2139/ssrn.4797840</a>.</p></li>
-<li><p><cite>darkest_spot</cite>: The shock is tracked by the abslute dark point of the schlieren image</p></li>
-<li><p><cite>maxGrad</cite>: By performing sobel gradient algorithem, the shock edge is determined as the maximum gradient and tracked. More information can be found in this article <a class="reference external" href="https://doi.org/10.1007/s00348-021-03145-3">https://doi.org/10.1007/s00348-021-03145-3</a></p></li>
+<li><p><cite>integral</cite>: This method tracks the shock through the largest blocked area by the 
+knife. More information and detailed discrepancies can be found in this article 
+<a class="reference external" href="https://dx.doi.org/10.2139/ssrn.4797840">https://dx.doi.org/10.2139/ssrn.4797840</a>.</p></li>
+<li><p><cite>darkest_spot</cite>: The shock is tracked by the abslute dark point of the schlieren 
+image</p></li>
+<li><p><cite>maxGrad</cite>: By performing sobel gradient algorithem, the shock edge is determined as 
+the maximum gradient and tracked. More information can be found in this article 
+<a class="reference external" href="https://doi.org/10.1007/s00348-021-03145-3">https://doi.org/10.1007/s00348-021-03145-3</a></p></li>
 </ol>
 </div></blockquote>
-<p>for better resolution and to avoid any missed shock location, signal filtering can be applied, the method supports these methods</p>
+<p>for better resolution and to avoid any missed shock location, signal filtering can be 
+applied, the method supports these methods</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li><p><cite>median</cite>: run through the signal entry by entry, replacing each entry with the median of the entry and its neighboring entries when entries are 3</p></li>
-<li><p><cite>Wiener</cite>: based on minimizing the mean square error between the estimated random process and the desired process.</p></li>
+<li><p><cite>median</cite>: run through the signal entry by entry, replacing each entry with the 
+median of the entry and its neighboring entries when entries are 3</p></li>
+<li><p><cite>Wiener</cite>: based on minimizing the mean square error between the estimated random 
+process and the desired process.</p></li>
 <li><p><cite>med-Wiener</cite>: use both filter sequentially</p></li>
 </ol>
 </div></blockquote>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>img (numpy.ndarray)</strong>: Input image or image data.</p></li>
-<li><p><strong>method (str)</strong>: Method for shock tracking (integral, darkest_spot, maxGrad). Default is ‘integral’.</p></li>
-<li><dl class="simple">
-<dt><strong>reviewInterval (list)</strong>: List containing two integers representing the review interval.</dt><dd><p>Available only with ‘integral’ method. Default is [0, 0].</p>
-</dd>
-</dl>
-</li>
-<li><p><strong>Signalfilter (str)</strong>: The method for signal filtering (median, Wiener, med-Wiener). Default is None.</p></li>
+<li><p><strong>method (str)</strong>: Method for shock tracking (integral, darkest_spot, maxGrad). 
+Default is ‘integral’.</p></li>
+<li><p><strong>reviewInterval (list)</strong>: List containing two integers representing the review 
+interval. Available only with ‘integral’ method. Default is [0, 0].</p></li>
+<li><p><strong>Signalfilter (str)</strong>: The method for signal filtering (median, Wiener, med-Wiener). 
+Default is None.</p></li>
 <li><p><strong>CheckSolutionTime (bool)</strong>: Whether to check solution time. Default is True.</p></li>
-<li><p><cite>**kwargs</cite>:</p></li>
+<li><p>** <strong>kwargs</strong>:</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><p>numpy.ndarray: Generated shock signals.</p>
@@ -509,7 +379,7 @@ where a snapshots list is given as input, three methods of tracking can be propo
 <dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">shock_signals</span> <span class="o">=</span> <span class="n">ShockTrakingAutomation</span><span class="p">(</span><span class="n">image</span><span class="p">,</span>
 <span class="go">                                           method=&#39;integral&#39;,</span>
 <span class="go">                                           reviewInterval=[10, 20],</span>
-<span class="go">                                           Signalfilter=filter_function,</span>
+<span class="go">                                           Signalfilter=&#39;median&#39;,</span>
 <span class="go">                                           CheckSolutionTime=True)</span>
 </pre></div>
 </div>
@@ -528,13 +398,8 @@ all intermediate points. It then subtracts the average velocity from
 each point to return the velocity signal.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
-<li><p><strong>Signal (list or numpy.ndarray)</strong>: Positional signal data points
-in mm.</p></li>
-<li><dl class="simple">
-<dt><strong>TotalTime (float)</strong>: Total time duration over which the signal</dt><dd><p>is recorded.</p>
-</dd>
-</dl>
-</li>
+<li><p><strong>Signal (list or numpy.ndarray)</strong>: Positional signal data points in mm.</p></li>
+<li><p><strong>TotalTime (float)</strong>: Total time duration over which the signal is recorded.</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><p>numpy.ndarray: Velocity signal after removing the average velocity.</p>
@@ -657,7 +522,7 @@ It prints the running time to the console using the TimeCalculation function.</p
 <dt>Returns:</dt><dd><p>function: The wrapped function.</p>
 </dd>
 <dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@calculate_running_time</span>
-<span class="gp">... </span><span class="k">def</span> <span class="nf">my_function</span><span class="p">():</span>
+<span class="gp">... </span><span class="k">def</span><span class="w"> </span><span class="nf">my_function</span><span class="p">():</span>
 <span class="gp">... </span>    <span class="c1"># function body</span>
 <span class="gp">... </span>    <span class="k">pass</span>
 </pre></div>
@@ -674,7 +539,7 @@ It prints the running time to the console using the TimeCalculation function.</p
 <p>&#64;author: Ahmed H. Hanfy</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.generateshocksignal.DarkestSpotShocktracking">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.generateshocksignal.</span></span><span class="sig-name descname"><span class="pre">DarkestSpotShocktracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SnapshotSlice</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ShockLocation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.generateshocksignal.DarkestSpotShocktracking" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.generateshocksignal.</span></span><span class="sig-name descname"><span class="pre">DarkestSpotShocktracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SnapshotSlice</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ShockLocation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.generateshocksignal.DarkestSpotShocktracking" title="Link to this definition"></a></dt>
 <dd><p>Perform shock tracking based on the location of the darkest spot in a snapshot slice.</p>
 <p>This function identifies the position of the darkest spot in a given snapshot slice and
 appends its index to the list of shock locations. Optionally, it also records any uncertainty
@@ -697,14 +562,15 @@ regarding the shock location.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.generateshocksignal.GenerateShockSignal">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.generateshocksignal.</span></span><span class="sig-name descname"><span class="pre">GenerateShockSignal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'integral'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signalfilter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">review_slice_tracking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.generateshocksignal.GenerateShockSignal" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.generateshocksignal.</span></span><span class="sig-name descname"><span class="pre">GenerateShockSignal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'integral'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signalfilter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">review_slice_tracking</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.generateshocksignal.GenerateShockSignal" title="Link to this definition"></a></dt>
 <dd><p>Find the shockwave locations in a series of snapshots with optional signal processing filters.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>img (numpy.ndarray)</strong>: Input array of shape (num_snapshots, height, width) representing a series of snapshots.</p></li>
-<li><p><strong>reviewInterval (list, optional)</strong>: List specifying the review interval for plotting. Default is [0, 0].</p></li>
-<li><p><strong>Signalfilter (str, optional)</strong>: Type of signal filter to apply (‘median’, ‘Wiener’, ‘med-Wiener’). Default is None.</p></li>
-<li><p><strong>CheckSolutionTime (bool, optional)</strong>: Flag to measure and display the time taken for shock tracking. Default is True.</p></li>
+<li><p><strong>method (str, optional)</strong>: shock tracking method (integral(Defult), darkest_spot, maxGrad).</p></li>
+<li><p><strong>review_slice_tracking (int|list[int, int], optional)</strong>: List specifying the review interval for plotting. Default is -1.</p></li>
+<li><p><strong>signalfilter (str, optional)</strong>: Type of signal filter to apply (‘median’, ‘Wiener’, ‘med-Wiener’). Default is None.</p></li>
+<li><p><strong>log_dirc (str)</strong>: log file directory.</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
@@ -713,9 +579,9 @@ regarding the shock location.</p>
 </ul>
 </dd>
 <dt>Examples:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create an instance of the class</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">instance</span> <span class="o">=</span> <span class="n">SOA</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">D</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SA</span> <span class="o">=</span> <span class="n">SOA</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">D</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load a series of snapshots (assuming &#39;snapshots&#39; is a NumPy array)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">shock_locations</span><span class="p">,</span> <span class="n">uncertain_locations</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">FindTheShockwaveImproved</span><span class="p">(</span><span class="n">snapshots</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shock_locations</span><span class="p">,</span> <span class="n">uncertain_locations</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">GenerateShockSignal</span><span class="p">(</span><span class="n">snapshots</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd>
@@ -724,15 +590,12 @@ regarding the shock location.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.generateshocksignal.GradShocktracking">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.generateshocksignal.</span></span><span class="sig-name descname"><span class="pre">GradShocktracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">GradSlice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Plot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ShockLocation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertain</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.generateshocksignal.GradShocktracking" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.generateshocksignal.</span></span><span class="sig-name descname"><span class="pre">GradShocktracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">GradSlice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ShockLocation</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.generateshocksignal.GradShocktracking" title="Link to this definition"></a></dt>
 <dd><p>Perform shock tracking based on gradient values.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>GradSlice (numpy.ndarray)</strong>: Array containing gradient values for shock tracking.</p></li>
-<li><p><strong>Plot (bool)</strong>: Flag indicating whether to generate plots of the results.</p></li>
-<li><p><strong>count (int)</strong>: Current iteration count.</p></li>
 <li><p><strong>ShockLocation (list)</strong>: List containing the shock location from previous iterations.</p></li>
-<li><p><strong>uncertain (bool)</strong>: Flag indicating uncertainty in the shock tracking process.</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><dl class="simple">
@@ -781,7 +644,7 @@ The <cite>KernalDim</cite> parameter specifies the dimension of the Sobel kernel
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.generateshocksignal.IntegralShocktracking">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.generateshocksignal.</span></span><span class="sig-name descname"><span class="pre">IntegralShocktracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SnapshotSlice</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ShockLocation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.generateshocksignal.IntegralShocktracking" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.generateshocksignal.</span></span><span class="sig-name descname"><span class="pre">IntegralShocktracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SnapshotSlice</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ShockLocation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.generateshocksignal.IntegralShocktracking" title="Link to this definition"></a></dt>
 <dd><p>Perform shock tracking based on integral method discriped in <a class="reference external" href="https://dx.doi.org/10.2139/ssrn.4797840">https://dx.doi.org/10.2139/ssrn.4797840</a>.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
@@ -790,6 +653,7 @@ The <cite>KernalDim</cite> parameter specifies the dimension of the Sobel kernel
 <li><p><strong>count (int)</strong>: Current snapshot/image number.</p></li>
 <li><p><strong>ShockLocation (float)</strong>: Location of the shock from the previous iteration.</p></li>
 <li><p><strong>uncertain (bool)</strong>: Flag indicating uncertainty.</p></li>
+<li><p><strong>log_dirc (str)</strong>: log file directory.</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><dl class="simple">
@@ -815,7 +679,7 @@ The <cite>KernalDim</cite> parameter specifies the dimension of the Sobel kernel
 <p>&#64;author: Ahmed H. Hanfy</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.imgcleaningfunctions.BrightnessAndContrast">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.imgcleaningfunctions.</span></span><span class="sig-name descname"><span class="pre">BrightnessAndContrast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.imgcleaningfunctions.BrightnessAndContrast" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.imgcleaningfunctions.</span></span><span class="sig-name descname"><span class="pre">BrightnessAndContrast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.imgcleaningfunctions.BrightnessAndContrast" title="Link to this definition"></a></dt>
 <dd><p>Adjusts the brightness, contrast, and sharpness of an image.
 This function adjusts the brightness, contrast, and sharpness of the input image.
 The <cite>Brightness</cite>, <cite>Contrast</cite>, and <cite>Sharpness</cite> parameters control the degree of adjustment.
@@ -825,6 +689,7 @@ The image is converted to grayscale if it is in color. The adjusted image is ret
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>img (numpy.ndarray)</strong>: NumPy array representing the image.</p></li>
+<li><p><strong>log_dirc (str)</strong>: log file directory.</p></li>
 <li><dl class="simple">
 <dt>** <strong>kwargs</strong>:</dt><dd><ul>
 <li><p>Brightness (float, optional): Brightness adjustment factor (default: 1). Valid range: 0 (min) to 2 (max).</p></li>
@@ -858,11 +723,12 @@ Ensure that the PIL library is installed in your Python environment.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.imgcleaningfunctions.CleanIlluminationEffects">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.imgcleaningfunctions.</span></span><span class="sig-name descname"><span class="pre">CleanIlluminationEffects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterCenter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[(0,</span> <span class="pre">233)]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ShowIm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.imgcleaningfunctions.CleanIlluminationEffects" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.imgcleaningfunctions.</span></span><span class="sig-name descname"><span class="pre">CleanIlluminationEffects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterCenter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[(0,</span> <span class="pre">233)]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ShowIm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.imgcleaningfunctions.CleanIlluminationEffects" title="Link to this definition"></a></dt>
 <dd><p>Clean illumination effects from an image using a frequency domain approach.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>img (numpy.ndarray)</strong>: Input image (grayscale or BGR).</p></li>
+<li><p><strong>log_dirc (str)</strong>: log file directory.</p></li>
 <li><p><strong>filterCenter (list)</strong>: Coordinates [x, y] of the filter center. Default: [0, 233].</p></li>
 <li><p><strong>D (float)</strong>: Cut-off frequency for the low-pass filter. Default: 10.</p></li>
 <li><p><strong>n (int)</strong>: Filter order. Default: 10.</p></li>
@@ -881,8 +747,8 @@ Ensure that the PIL library is installed in your Python environment.</p>
 </dd>
 <dt>Returns:</dt><dd><p>numpy.ndarray: Cleaned image.</p>
 </dd>
-<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">cv2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s1">&#39;your_image.jpg&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">CleanIlluminationEffects</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">filterCenter</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">233</span><span class="p">],</span> <span class="n">D</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ShowIm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s1">&#39;Original Image&#39;</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span>
@@ -906,17 +772,18 @@ Ensure that the PIL library is installed in your Python environment.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.imgcleaningfunctions.SliceListAverage">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.imgcleaningfunctions.</span></span><span class="sig-name descname"><span class="pre">SliceListAverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.imgcleaningfunctions.SliceListAverage" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.imgcleaningfunctions.</span></span><span class="sig-name descname"><span class="pre">SliceListAverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.imgcleaningfunctions.SliceListAverage" title="Link to this definition"></a></dt>
 <dd><p>Compute the average intensity profile across the width of an image and subtract it from each row.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>img (numpy.ndarray)</strong>: Input image (grayscale or BGR).</p></li>
+<li><p><strong>log_dirc (str)</strong>: log file directory.</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><p>numpy.ndarray: New image with the average intensity profile subtracted from each row.</p>
 </dd>
-<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">cv2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s1">&#39;your_image.jpg&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">Average</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s1">&#39;Original Image&#39;</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span>
@@ -974,7 +841,7 @@ where the last dimension represents the real and imaginary parts of the Fourier-
 <section id="module-ShockOscillationAnalysis.linedrawingfunctions">
 <span id="shockoscillationanalysis-linedrawingfunctions-module"></span><h3>ShockOscillationAnalysis.linedrawingfunctions module<a class="headerlink" href="#module-ShockOscillationAnalysis.linedrawingfunctions" title="Link to this heading"></a></h3>
 <p>Created on Fri Dec  1 10:38:37 2023</p>
-<p>256hor: Ahmed H. Hanfy</p>
+<p>author: Ahmed H. Hanfy</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.linedrawingfunctions.AngleFromSlope">
 <span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.linedrawingfunctions.</span></span><span class="sig-name descname"><span class="pre">AngleFromSlope</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.linedrawingfunctions.AngleFromSlope" title="Link to this definition"></a></dt>
@@ -999,7 +866,7 @@ This function computes the angle in degrees corresponding to the provided slope 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.linedrawingfunctions.InclinedLine">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.linedrawingfunctions.</span></span><span class="sig-name descname"><span class="pre">InclinedLine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgShape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.linedrawingfunctions.InclinedLine" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.linedrawingfunctions.</span></span><span class="sig-name descname"><span class="pre">InclinedLine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">P1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imgShape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.linedrawingfunctions.InclinedLine" title="Link to this definition"></a></dt>
 <dd><p>Generates the inclined line equation from two points or one point and slope.</p>
 <p>The image boundary/shape should be given.</p>
 <dl>
@@ -1151,7 +1018,7 @@ visualization purposes.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.preview.plot_review">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.preview.</span></span><span class="sig-name descname"><span class="pre">plot_review</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertain_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_ang</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mid_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_preview_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Mach_ang_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.preview.plot_review" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.preview.</span></span><span class="sig-name descname"><span class="pre">plot_review</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertain_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_slope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_ang</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mid_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_avg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avg_preview_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Mach_ang_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.preview.plot_review" title="Link to this definition"></a></dt>
 <dd><p>Plot review function to visualize shock points and additional features on an image.</p>
 <dl class="simple">
 <dt>Parameters:</dt><dd><ul class="simple">
@@ -1166,6 +1033,7 @@ visualization purposes.</p>
 <li><p><strong>avg_ang (float)</strong>: The average angle.</p></li>
 <li><p><strong>mid_loc (int, optional)</strong>: The middle location. Defaults to -1.</p></li>
 <li><p><strong>y (int, optional)</strong>: The y-coordinate. Defaults to -1.</p></li>
+<li><p><strong>y_avg (list(float), optional)</strong>: middle vertical locations from RANSAC. Defaults to -1.</p></li>
 <li><p><strong>avg_preview_mode (bool, optional)</strong>: Flag indicating whether to show average preview mode. Defaults to None.</p></li>
 <li><p><strong>Mach_ang_mode (bool, optional)</strong>: Flag indicating whether to show Mach angle mode. Defaults to None.</p></li>
 <li><p><cite>**kwargs</cite>: Additional keyword arguments for customization.</p></li>
@@ -1178,7 +1046,7 @@ visualization purposes.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.preview.residual_preview">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.preview.</span></span><span class="sig-name descname"><span class="pre">residual_preview</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nSlices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.preview.residual_preview" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.preview.</span></span><span class="sig-name descname"><span class="pre">residual_preview</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margins</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nSlices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.preview.residual_preview" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -1212,7 +1080,7 @@ the transformation to have an effect.</p></li>
 </ul>
 </div>
 <dl>
-<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Line&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rotate_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
@@ -1251,7 +1119,7 @@ the transformation to have an effect.</p></li>
 <p>&#64;author: Ahmed H. Hanfy</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.shocktracking.ShockTraking">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.shocktracking.</span></span><span class="sig-name descname"><span class="pre">ShockTraking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SnapshotSlice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LastShockLoc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.shocktracking.ShockTraking" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.shocktracking.</span></span><span class="sig-name descname"><span class="pre">ShockTraking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SnapshotSlice</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LastShockLoc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.shocktracking.ShockTraking" title="Link to this definition"></a></dt>
 <dd><p>Process a given slice to track shock waves and determine the shock location.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
@@ -1259,6 +1127,7 @@ the transformation to have an effect.</p></li>
 <li><p><strong>LastShockLoc (int, optional)</strong>: The location of the last shock. Default is -1.</p></li>
 <li><p><strong>Plot (bool, optional)</strong>: Whether to plot the slice illumination values with locations and average line. Default is False.</p></li>
 <li><p><strong>count (int, optional)</strong>: Counter for plotting. Default is -1.</p></li>
+<li><p><strong>log_dirc (str)</strong>: log file directory.</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><dl class="simple">
@@ -1354,7 +1223,7 @@ the transformation to have an effect.</p></li>
 <span id="shockoscillationanalysis-support-func-module"></span><h3>ShockOscillationAnalysis.support_func module<a class="headerlink" href="#module-ShockOscillationAnalysis.support_func" title="Link to this heading"></a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.support_func.bg_manipulation">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.support_func.</span></span><span class="sig-name descname"><span class="pre">bg_manipulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_crop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_crop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_rotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.support_func.bg_manipulation" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.support_func.</span></span><span class="sig-name descname"><span class="pre">bg_manipulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_crop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_crop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bg_rotate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.support_func.bg_manipulation" title="Link to this definition"></a></dt>
 <dd><p>Perform background image manipulation including cropping, resizing, and rotation.</p>
 <p>This function processes a set of background images by applying optional cropping, resizing, and rotation. 
 The first image in the specified path is used for manipulation.</p>
@@ -1370,6 +1239,7 @@ Defaults to the dimensions after cropping.</p></li>
 <li><p><strong>bg_rotate (bool, optional)</strong>: Whether to rotate the image 90 degrees clockwise. Defaults to <cite>0</cite> (no rotation).</p></li>
 <li><p><strong>n (int, optional)</strong>: Number of images expected in the specified path. If <cite>-1</cite>, no specific count is enforced. 
 Defaults to <cite>-1</cite>.</p></li>
+<li><p><strong>log_dirc (str)</strong>: log file directory.</p></li>
 </ul>
 </dd>
 <dt>Returns:</dt><dd><ul class="simple">
@@ -1407,6 +1277,21 @@ Defaults to <cite>-1</cite>.</p></li>
 <span class="go">                                       bg_rotate=True)</span>
 </pre></div>
 </div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="ShockOscillationAnalysis.support_func.log_message">
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.support_func.</span></span><span class="sig-name descname"><span class="pre">log_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_file_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.support_func.log_message" title="Link to this definition"></a></dt>
+<dd><p>Logs a message to a specified file.</p>
+<p>The function checks if the log file exists. If it doesn’t, the file is created.
+The message is then appended to the file along with a timestamp.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><ul class="simple">
+<li><p><strong>message (str)</strong>: The message string to be logged.</p></li>
+<li><p><strong>log_file_path (str)</strong>: The path to the log file. Defaults to “application.log.txt”.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>

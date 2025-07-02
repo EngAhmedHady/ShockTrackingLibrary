@@ -9,8 +9,9 @@ import sys
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+from ..support_func import log_message
+from ..constants import BCOLOR, CVColor
 from ..linedrawingfunctions import InclinedLine
-from ..ShockOscillationAnalysis import BCOLOR, CVColor
 from scipy.interpolate import CubicSpline, PchipInterpolator
 
 
@@ -67,7 +68,7 @@ def v_least_squares(xLoc: list[float], columnY:list[float], nSlices: int) -> lis
 
 def ransac(x:np.ndarray, y:np.ndarray, threshold:float, 
            e:float=0.3, p:float=0.999, n_samples:int=5, 
-           max_trials:int=0) -> tuple[float]:
+           max_trials:int=0, log_dirc:str='') -> tuple[float]:
     """
     Perform RANSAC (Random Sample Consensus) algorithm for robust linear model fitting.
 
@@ -84,11 +85,13 @@ def ransac(x:np.ndarray, y:np.ndarray, threshold:float,
         - **n_samples (int, optional)**: Number of random points to select for model fitting in each iteration. Defaults to 5.
         - **max_trials (int, optional)**: Maximum number of RANSAC iterations. Defaults to 0, where the number of trials 
           is automatically computed based on `e` and `p`.
+        - **log_dirc (str)**: log file directory.
 
     Returns:
         - tuple:
             - **best_model (float)**: The slope of the best-fitting linear model.
-            - **best_inlier_mean (float)**: Mean of the x-coordinates of the inliers corresponding to the best model.
+            - **best_inlier_xmean (float)**: Mean of the x-coordinates of the inliers corresponding to the best model.
+            - **best_inlier_ymean (float)**: Mean of the y-coordinates of the inliers corresponding to the best model.
 
     Raises:
         - Exception: If the algorithm fails to find a valid model, the function will print debugging information.
@@ -172,8 +175,9 @@ def ransac(x:np.ndarray, y:np.ndarray, threshold:float,
             best_model = m
             best_inliers = inliers
     try:
-        return best_model, np.mean(x[best_inliers])
+        return best_model, np.mean(x[best_inliers]), np.mean(y[best_inliers])
     except Exception as e:
+        log_message(e, log_dirc)
         print(e, x, y, best_model, inliers)
         
 
@@ -222,6 +226,7 @@ def pearson_corr_coef(xLoc: list[float], columnY:list[float], nSlices: int) -> l
 def anglesInterpolation(pnts_y_list: list[int],       # Generated points by class
                         flow_dir: list[float] = None, # measured data (LDA, CFD, ... )
                         flow_Vxy:list[tuple] = None,  # measured data (LDA, CFD, ... )
+                        log_dirc:str='',
                         **kwargs) -> list[float]:     # other parameters
     """
     Interpolate angles based on given y-coordinates and corresponding angles or velocity components.
@@ -265,6 +270,8 @@ def anglesInterpolation(pnts_y_list: list[int],       # Generated points by clas
     if angle_interp_kind not in ['linear', 'CubicSpline', 'PCHIP']:
         warning = 'Interpolation method is not supported!;'
         action = 'Linear interpolation will be used'
+        log_message(f'Warning: {warning}', log_dirc)
+        log_message(action, log_dirc)
         print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
         print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
         angle_interp_kind = 'linear'
@@ -285,7 +292,9 @@ def anglesInterpolation(pnts_y_list: list[int],       # Generated points by clas
             case _:
                 action = 'First derivative at curves ends will considered zero,'
                 action += 'overshooting is likely occurs ...'
-            
+                
+        log_message(f'Warning: {warning}', log_dirc)
+        log_message(action, log_dirc)    
         print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
         print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
     
@@ -380,7 +389,7 @@ def doNone(img): return img
 
 def ImportingFiles(pathlist: list[str], indices_list: list[int], n_images: int, # Importing info.
                    imgs_shp: tuple[int], import_type = 'gray_scale',            # Images info.
-                   **kwargs) -> dict[int, np.ndarray]:      # Other parameters
+                   log_dirc:str='', **kwargs) -> dict[int, np.ndarray]:         # Other parameters
     """
     Import images from specified paths, optionally crop, resize or rotate them.
 
@@ -390,6 +399,7 @@ def ImportingFiles(pathlist: list[str], indices_list: list[int], n_images: int, 
         - **n_images (int)**: Number of images to import.
         - **imgs_shp (tuple[int])**: Desired shape of the images (height, width).
         - **import_type (str, optional)**: Type of image import. Can be 'gray_scale' for grayscale images or 'other' for other types. Default is 'other'.
+        - **log_dirc (str)**: log file directory.
         - **kwargs (dict, optional)**: Additional parameters:
             - **resize_img (tuple[int], optional)**: Tuple specifying the desired dimensions for resizing the images (width, height). Default is the original shape of the images.
             - **crop_y_img (tuple[int], optional)**: Tuple specifying the cropping range along the y-axis (min, max). Default is to crop the entire image along y.
@@ -425,7 +435,9 @@ def ImportingFiles(pathlist: list[str], indices_list: list[int], n_images: int, 
         - Cropping is applied to the images based on `crop_x_img` and `crop_y_img` parameters, and the images can optionally be rotated by 90 degrees.
         - Progress is displayed on the console while the images are being imported.
     """
-    print(f'Importing {n_images} images...')
+    new_log = f'Importing {n_images} images...'
+    log_message(new_log, log_dirc)
+    print(new_log)
     img_list={}
 
     # Get additional parameters from kwargs
@@ -459,5 +471,6 @@ def ImportingFiles(pathlist: list[str], indices_list: list[int], n_images: int, 
         sys.stdout.write('\r')
         sys.stdout.write("[%-20s] %d%%" % ('='*int(n/(n_images/20)), int(5*n/(n_images/20))))
     print()
+    log_message('Done', log_dirc)
     return img_list
     

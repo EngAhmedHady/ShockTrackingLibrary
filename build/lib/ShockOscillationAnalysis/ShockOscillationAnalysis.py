@@ -8,6 +8,8 @@ import cv2
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from .support_func import log_message
+from .constants import CVColor, BCOLOR
 from .imgcleaningfunctions import (SliceListAverage,
                                    CleanIlluminationEffects,
                                    BrightnessAndContrast)
@@ -19,61 +21,6 @@ plt.rcParams.update({'font.size': 16})
 plt.rcParams["text.usetex"] = True
 plt.rcParams["font.family"] = "serif"
 plt.rcParams['figure.max_open_warning'] = 0
-
-
-class CVColor:
-    """
-    A class to represent common colors used in OpenCV.
-    This class provides RGB tuples for a variety of commonly used colors.
-
-    Supported colors:
-       BLACK, WHITE, RED, GREEN, BLUE, GREENBLUE, YELLOW, CYAN, MAGENTA,
-       FUCHSIPINK, GRAY, ORANGE
-
-   """
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    RED = (0, 0, 255)
-    GREEN = (0, 255, 0)
-    BLUE = (255, 0, 0)
-    GREENBLUE = (255, 128, 0)
-    YELLOW = (0, 255, 255)
-    CYAN = (255, 255, 0)
-    MAGENTA = (255, 0, 255)
-    FUCHSIPINK = (255, 128, 255)
-    GRAY = (128, 128, 128)
-    ORANGE = (0, 128, 255)
-
-
-class BCOLOR:  # For coloring the text in terminal
-    """
-    A class to represent ANSI escape sequences for coloring terminal text.
-    This class provides various ANSI escape codes to color and style text in
-    terminal output.
-
-    Supported formats:
-        - BGOKBLUE: background blue
-        - BGOKCYAN: background cyan
-        - OKCYAN: cyan text
-        - BGOKGREEN: background green
-        - OKGREEN: green text
-        - WARNING: yellow background (warning)
-        - FAIL: red text (fail)
-        - ITALIC: italic text
-        - UNDERLINE: underlined text
-        - ENDC: reset all attributes.
-
-    """
-    BGOKBLUE = '\033[44m'
-    BGOKCYAN = '\033[46m'
-    OKCYAN = '\033[36m'
-    BGOKGREEN = '\033[42m'
-    OKGREEN = '\033[32m'
-    WARNING = '\033[43m'
-    FAIL = '\033[31m'
-    ENDC = '\033[0m'
-    ITALIC = '\033[3m'
-    UNDERLINE = '\033[4m'
 
 
 class SOA:
@@ -90,6 +37,7 @@ class SOA:
         self.Reference = []  # -------- initialize croping limits or line set
         self.line_coordinates = []  # - initialize Line coordinate
         self.outputPath = ''  # ------- image output
+        self.log = log_message
 
     def extract_coordinates(self, event: int,  # call event
                             x: int, y: int, flags: int,  # mouse current status
@@ -133,7 +81,7 @@ class SOA:
 
         """
 
-        window_name, img_shape, line_type, line_color = parameters
+        window_name, img_shape, line_type, line_color, log_dirc = parameters
         avg = None
 
         # Unconfirmed line drawing functions
@@ -180,7 +128,10 @@ class SOA:
                     self.Reference.append(avg)
                 self.clone = self.Temp.copy()
                 cv2.imshow(window_name, self.clone)
-                print(f'Registered line: {avg}')
+                new_log = f'Registered line: {avg}'
+                log_message(new_log, self.outputPath)
+                print(new_log)
+                
 
         # Delete draw line before storing
         elif event == cv2.EVENT_RBUTTONDOWN:
@@ -256,6 +207,8 @@ class SOA:
             inc_draw_color = kwargs.get('inc_draw_color', CVColor.BLUE)
             prams[0] = WindowHeader[LineNameInd]
             prams.append(inc_draw_color)
+            
+        prams.append(self.outputPath)
 
         cv2.imshow(WindowHeader[LineNameInd], self.clone)
         cv2.setMouseCallback(WindowHeader[LineNameInd],
@@ -266,10 +219,9 @@ class SOA:
         cv2.waitKey(1)
         return self.Reference
 
-    def DefineReferences(self, img: np.ndarray[int], shp: tuple[int],
-                         Ref_x0: list[int], scale_pixels: bool,
-                         Ref_y0: int = -1, Ref_y1: int = -1,
-                         slice_loc: int = 0) -> tuple[list[int],int,int]:
+    def DefineReferences(self, img: np.ndarray[int], shp:tuple[int],
+                         Ref_x0:list[int], scale_pixels:bool, Ref_y0:int=-1, Ref_y1:int=-1,
+                         slice_loc:int=0, **kwargs) -> tuple[list[int],int,int]:
         """
         Define reference lines on an image for scalling and further processing.
 
@@ -278,9 +230,12 @@ class SOA:
             - **shp (tuple)**: Shape of the image (height, width).
             - **Ref_x0 (list[int])**: List of x-coordinates for vertical reference lines.
             - **scale_pixels (bool)**: Whether to scale pixels based on the reference lines.
-            - **Ref_y0 (int, optional)**: y-coordinate of the top horizontal reference line. Default is -1.
-            - **Ref_y1 (int, optional)**: y-coordinate of the bottom horizontal reference line. Default is -1.
-            - **slice_loc (int, optional)**: Location of the slice for horizontal reference lines. Default is 0.
+            - **Ref_y0 (int, optional)**: y-coordinate of the top horizontal reference line. 
+              Default is -1.
+            - **Ref_y1 (int, optional)**: y-coordinate of the bottom horizontal reference line. 
+              Default is -1.
+            - **slice_loc (int, optional)**: Location of the slice for horizontal reference lines. 
+              Default is 0.
 
         Returns:
             - tuple: A tuple containing:
@@ -319,6 +274,7 @@ class SOA:
             Ref_x0 = self.Reference
             if len(Ref_x0) < 2:
                 error = 'Reference lines are not sufficient!'
+                log_message(error, self.outputPath)
                 print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
                 sys.exit()
             Ref_x0.sort()  # to make sure that the limits are properly assigned
@@ -329,11 +285,13 @@ class SOA:
                      CVColor.GREEN, 1)
             cv2.line(self.clone, (Ref_x0[1], 0), (Ref_x0[1], shp[0]),
                      CVColor.GREEN, 1)
-            self.Reference = Ref_x0[0:2].copy()
+            self.Reference = Ref_x0[0: 2].copy()
 
         # Calculate the pixel scale if required
         if scale_pixels:  self.pixelScale = self.D / abs(Ref_x0[1]-Ref_x0[0])
-        print(f'Image scale: {self.pixelScale} {self.univ_unit["dis"]}/px')
+        new_log = f'Image scale: {self.pixelScale} {self.univ_unit["dis"]}/px'
+        log_message(new_log, self.outputPath)
+        print(new_log)
 
         # --------------------------------------------------------------------
 
@@ -342,6 +300,7 @@ class SOA:
             self.LineDraw(self.clone, 'H', 2)  # to draw the reference line
             if len(self.Reference) < 3:
                 error = 'Reference lines are not sufficient!'
+                log_message(error, self.outputPath)
                 print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
                 sys.exit()
             Ref_y0 = self.Reference[-1]
@@ -356,7 +315,7 @@ class SOA:
             cv2.line(self.clone, (0, Ref_y0), (shp[1], Ref_y0), CVColor.YELLOW, 1)
         return Ref_x0, Ref_y0, Ref_y1
 
-    def CleanSnapshots(self, img: np.ndarray[int], *args, **kwargs) -> np.ndarray[int]:
+    def CleanSnapshots(self, img:np.ndarray[int], *args, **kwargs) -> np.ndarray[int]:
         """
         Clean and enhance snapshots based on specified corrections. This method takes an original 
         image snapshot `img` and applies specified corrections based on the provided `*args`.
@@ -371,65 +330,82 @@ class SOA:
                     - **filterCenter (list)**: Overrides the default filter center if provided.
                     - **D (int)**: Overrides the default cut-off frequency if provided.
                     - **n (int)**: Overrides the default filter order if provided.
-                    - **ShowIm (bool)**: Overrides the default value for displaying images if provided.
+                    - **ShowIm (bool)**: Overrides the default value for displaying images if 
+                      provided.
                 Brightness/Contrast:
-                    - **Brightness (float, optional)**: Brightness adjustment factor (default: 1). Valid range: 0 (min) to 2 (max).
-                    - **Contrast (float, optional)**: Contrast adjustment factor (default: 1). Valid range: 0 (min) to 2 (max).
-                    - **Sharpness (float, optional)**: Sharpness adjustment factor (default: 1). Valid range: 0 (min) to 3 (max).
+                    - **Brightness (float, optional)**: Brightness adjustment factor (default: 1). 
+                      Valid range: 0 (min) to 2 (max).
+                    - **Contrast (float, optional)**: Contrast adjustment factor (default: 1). 
+                      Valid range: 0 (min) to 2 (max).
+                    - **Sharpness (float, optional)**: Sharpness adjustment factor (default: 1). 
+                      Valid range: 0 (min) to 3 (max).
 
         Returns:
             - numpy.ndarray: Corrected image snapshot.
 
         Example:
-            >>> cleaned_image = instance.CleanSnapshots(original_image, 'Brightness/Contrast', 'FFT', Brightness=1.5, D=20)
+            >>> cleaned_image = instance.CleanSnapshots(original_image, 'Brightness/Contrast', 
+                                                        'FFT', Brightness=1.5, D=20)
 
         .. note::
-            - If 'Brightness/Contrast' is in `*args`, the image undergoes brightness and contrast adjustments.
+            - If 'Brightness/Contrast' is in `*args`, the image undergoes brightness and contrast 
+              adjustments.
             - If 'Average' is in `*args`, the average illumination effect is removed.
-            - If 'FFT' is in `*args`, the illumination effects are corrected using FFT-based filtering.
+            - If 'FFT' is in `*args`, the illumination effects are corrected using FFT-based 
+              filtering.
         """
 
+        new_log = 'Improving image quality ...'
+        log_message(new_log, self.outputPath)
+        print(new_log)
+        
         CorrectedImg = img.copy()
-
-        print('Improving image quality ...')
-
         for arg in args:
             if arg == 'Average':
-                CorrectedImg = SliceListAverage(CorrectedImg)
+                CorrectedImg = SliceListAverage(CorrectedImg, self.outputPath)
             if arg == 'FFT':
-                CorrectedImg = CleanIlluminationEffects(CorrectedImg, **kwargs)
+                CorrectedImg = CleanIlluminationEffects(CorrectedImg, self.outputPath, **kwargs)
             if arg == 'Brightness/Contrast':
-                CorrectedImg = BrightnessAndContrast(CorrectedImg, **kwargs)
+                CorrectedImg = BrightnessAndContrast(CorrectedImg, self.outputPath, **kwargs)
+        log_message('Done', self.outputPath)
         return CorrectedImg
 
-    def ShockTrakingAutomation(self, img: np.ndarray[int],
-                               method: str = 'integral',
-                               reviewInterval: list[int] = [0, 0],
-                               Signalfilter: str = None,
-                               CheckSolutionTime: bool = True,
+    def ShockTrakingAutomation(self, img:np.ndarray[int], method:str='integral', 
+                               reviewInterval:list[int]=[0, 0], Signalfilter:str=None,
                                **kwargs) -> list[float]:
         """
-        This method automates the shock tracking process and generates shock signals based on linescanning technique,
-        where a snapshots list is given as input, three methods of tracking can be proposed
+        This method automates the shock tracking process and generates shock signals based on 
+        linescanning technique, where a snapshots list is given as input, three methods of tracking
+        can be proposed
 
-            1. `integral`: This method tracks the shock through the largest blocked area by the knife. More information and detailed discrepancies can be found in this article https://dx.doi.org/10.2139/ssrn.4797840.
-            2. `darkest_spot`: The shock is tracked by the abslute dark point of the schlieren image
-            3. `maxGrad`: By performing sobel gradient algorithem, the shock edge is determined as the maximum gradient and tracked. More information can be found in this article https://doi.org/10.1007/s00348-021-03145-3
+            1. `integral`: This method tracks the shock through the largest blocked area by the 
+               knife. More information and detailed discrepancies can be found in this article 
+               https://dx.doi.org/10.2139/ssrn.4797840.
+            2. `darkest_spot`: The shock is tracked by the abslute dark point of the schlieren 
+               image
+            3. `maxGrad`: By performing sobel gradient algorithem, the shock edge is determined as 
+               the maximum gradient and tracked. More information can be found in this article 
+               https://doi.org/10.1007/s00348-021-03145-3
 
-        for better resolution and to avoid any missed shock location, signal filtering can be applied, the method supports these methods
+        for better resolution and to avoid any missed shock location, signal filtering can be 
+        applied, the method supports these methods
 
-            1. `median`: run through the signal entry by entry, replacing each entry with the median of the entry and its neighboring entries when entries are 3
-            2. `Wiener`: based on minimizing the mean square error between the estimated random process and the desired process.
+            1. `median`: run through the signal entry by entry, replacing each entry with the 
+               median of the entry and its neighboring entries when entries are 3
+            2. `Wiener`: based on minimizing the mean square error between the estimated random 
+               process and the desired process.
             3. `med-Wiener`: use both filter sequentially
 
         Parameters:
             - **img (numpy.ndarray)**: Input image or image data.
-            - **method (str)**: Method for shock tracking (integral, darkest_spot, maxGrad). Default is 'integral'.
-            - **reviewInterval (list)**: List containing two integers representing the review interval.
-                                     Available only with 'integral' method. Default is [0, 0].
-            - **Signalfilter (str)**: The method for signal filtering (median, Wiener, med-Wiener). Default is None.
+            - **method (str)**: Method for shock tracking (integral, darkest_spot, maxGrad). 
+              Default is 'integral'.
+            - **reviewInterval (list)**: List containing two integers representing the review 
+              interval. Available only with 'integral' method. Default is [0, 0].
+            - **Signalfilter (str)**: The method for signal filtering (median, Wiener, med-Wiener). 
+              Default is None.
             - **CheckSolutionTime (bool)**: Whether to check solution time. Default is True.
-            - `**kwargs`:
+            - ** **kwargs**:
 
         Returns:
             numpy.ndarray: Generated shock signals.
@@ -438,12 +414,14 @@ class SOA:
             >>> shock_signals = ShockTrakingAutomation(image,
                                                        method='integral',
                                                        reviewInterval=[10, 20],
-                                                       Signalfilter=filter_function,
+                                                       Signalfilter='median',
                                                        CheckSolutionTime=True)
-        """
-        return GenerateShockSignal(img, method, Signalfilter, reviewInterval, **kwargs)
 
-    def VelocitySignal(self, Signal: list[float], TotalTime: float) -> list[float]:
+        """
+        return GenerateShockSignal(img, method, Signalfilter, reviewInterval,
+                                   self.outputPath, **kwargs)
+
+    def VelocitySignal(self, Signal:list[float], TotalTime:float) -> list[float]:
         """
         Calculate the velocity signal from the given positional signal.
         The function calculates the velocity at each point in the Signal using
@@ -453,10 +431,8 @@ class SOA:
         each point to return the velocity signal.
 
         Parameters:
-            - **Signal (list or numpy.ndarray)**: Positional signal data points
-              in mm.
-            - **TotalTime (float)**: Total time duration over which the signal
-                is recorded.
+            - **Signal (list or numpy.ndarray)**: Positional signal data points in mm.
+            - **TotalTime (float)**: Total time duration over which the signal is recorded.
 
         Returns:
             numpy.ndarray: Velocity signal after removing the average velocity.

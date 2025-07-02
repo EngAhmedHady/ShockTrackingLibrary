@@ -2,10 +2,13 @@
 """
 Created on Fri Dec  1 10:38:37 2023
 
-256hor: Ahmed H. Hanfy
+author: Ahmed H. Hanfy
 """
 import sys
 import numpy as np
+from .constants import BCOLOR
+from .support_func import log_message
+
 
 def XCheck(x: float, Shp: tuple[int], slope: float, a: float) -> tuple[float]:
     """
@@ -40,7 +43,8 @@ def XCheck(x: float, Shp: tuple[int], slope: float, a: float) -> tuple[float]:
     elif x <  0 and x <= Shp[1]: y2 = int(a);              p2 = (0,y2)
     return p2
 
-def InclinedLine(P1: tuple[int], P2: tuple[int] = (), slope: float = None, imgShape: tuple[int] = ()) -> tuple[tuple[int], tuple[int],float,float]:
+def InclinedLine(P1: tuple[int], P2: tuple[int]=(), slope: float=None, 
+                 imgShape: tuple[int]=(), log_dirc='') -> tuple[tuple[int], tuple[int],float,float]:
     """
     Generates the inclined line equation from two points or one point and slope.
 
@@ -74,7 +78,10 @@ def InclinedLine(P1: tuple[int], P2: tuple[int] = (), slope: float = None, imgSh
 
     """
     if len(imgShape) < 1:
-        print('Image shape is not provided, program aborting ...')
+        error='Image shape is not provided, program aborting ...'
+        log_message(error, log_dirc)
+        print(f'{BCOLOR.FAIL}Error:{BCOLOR.ENDC}', end= ' ')
+        print(f'{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
         sys.exit()
 
     if len(P2) > 0 and slope is None:
@@ -87,8 +94,12 @@ def InclinedLine(P1: tuple[int], P2: tuple[int] = (), slope: float = None, imgSh
         a = P1[1] - slope*P1[0]
         try:
             Xmax = int((imgShape[0]-a)/slope)
-        except Exception:
+        except Exception as e:
+            error = f'InclinedLine error: y-intercept = {a}, slope = {slope}, type = {type(slope)}'
+            log_message(error, log_dirc)
+            log_message(e, log_dirc)
             print(a,slope, type(slope))
+            
         Xmin = int(-a/slope)
         if   Xmin >= 0 and Xmin <= imgShape[1]:
             p1 = (Xmin,0)

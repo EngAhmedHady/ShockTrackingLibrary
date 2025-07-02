@@ -1,5 +1,4 @@
-/
-+  -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Created on Wed Feb 28 11:05:30 2024
 
@@ -8,10 +7,12 @@ Created on Wed Feb 28 11:05:30 2024
 
 import cv2
 import numpy as np
+from .constants import CVColor
 import matplotlib.pyplot as plt
-from .ShockOscillationAnalysis import CVColor
-from .linedrawingfunctions import InclinedLine, AngleFromSlope
+from .support_func import log_message
 from matplotlib.patches import Arc, FancyArrowPatch
+from .linedrawingfunctions import InclinedLine, AngleFromSlope
+
 
 def angle_txt(ax, X, avg_txt_Yloc, angle, 
               lin_color, lin_opacity, avg_txt_size, 
@@ -82,8 +83,10 @@ def AvgAnglePlot(ax:plt.axes, img_shp:tuple , P: tuple, slope: float, angle: flo
     ax.plot([P1[0],P2[0]], [P1[1],P2[1]], lw=2,
             color=lin_color, linestyle=(0, (20, 3, 5, 3)), alpha=lin_opacity)
     
+        
     # Plot the text annotation if enabled
     if txt:
+        # ax.text(450, avg_txt_Yloc+100 , f'{P[0]:0.2f}', color=lin_color, fontsize=avg_txt_size)
         # Calculate the X position for the text annotation
         if slope != 0 and slope != np.inf: X = int((avg_txt_Yloc-a)/slope)
         elif slope == np.inf: X = P[0]
@@ -96,7 +99,7 @@ def AvgAnglePlot(ax:plt.axes, img_shp:tuple , P: tuple, slope: float, angle: flo
 def plot_review(ax:plt.axes, img: np.ndarray, shp:tuple[int], 
                 x_loc:list[float], column_y:list[float], 
                 uncertain:list[float], uncertain_y:list[float], 
-                avg_slope:float, avg_ang:float, mid_loc:int=-1, y:int=-1,
+                avg_slope:float, avg_ang:float, mid_loc:int=-1, y:int=-1, y_avg:float=-1,
                 avg_preview_mode=None, Mach_ang_mode=None, **kwargs):
 
     """
@@ -114,6 +117,7 @@ def plot_review(ax:plt.axes, img: np.ndarray, shp:tuple[int],
         - **avg_ang (float)**: The average angle.
         - **mid_loc (int, optional)**: The middle location. Defaults to -1.
         - **y (int, optional)**: The y-coordinate. Defaults to -1.
+        - **y_avg (list(float), optional)**: middle vertical locations from RANSAC. Defaults to -1.
         - **avg_preview_mode (bool, optional)**: Flag indicating whether to show average preview mode. Defaults to None.
         - **Mach_ang_mode (bool, optional)**: Flag indicating whether to show Mach angle mode. Defaults to None.
         - `**kwargs`: Additional keyword arguments for customization.
@@ -127,15 +131,14 @@ def plot_review(ax:plt.axes, img: np.ndarray, shp:tuple[int],
     points_size = kwargs.get('points_size', 12)
     uncertain_point_color = kwargs.get('uncertain_point_color', 'red')
 
-    ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.uint8), 
-              extent=(0, shp[1], shp[0], 0))
+    ax.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.uint8), extent=(0, shp[1], shp[0], 0))
 
     if avg_preview_mode is not None:
         avg_lin_color = kwargs.get('avg_lin_color', 'w')
         avg_show_txt = kwargs.get('avg_show_txt', True)
         avg_lin_opacity = kwargs.get('avg_lin_opacity', 1)
 
-        AvgAnglePlot(ax, shp, (mid_loc,y), avg_slope, avg_ang,
+        AvgAnglePlot(ax, shp, (mid_loc,y_avg), avg_slope, avg_ang,
                      txt=avg_show_txt, lin_color=avg_lin_color, lin_opacity=avg_lin_opacity,
                      **kwargs)
 
@@ -269,7 +272,7 @@ def PreviewCVPlots(img:np.ndarray, Ref_x0:list[int]=None, Ref_y:list[int]|int=No
 
     return img
 
-def residual_preview(error, margins, nSlices, count):
+def residual_preview(error, margins, nSlices, count, log_dirc=''):
     fig, ax = plt.subplots(figsize=(10, 8))
     e_median, Q1, Q2, IQR = margins
     try:
@@ -292,7 +295,9 @@ def residual_preview(error, margins, nSlices, count):
         ax.set_ylim([0, nSlices])
         ax.set_title(f'Outliers have high impact at {count}')
     except Exception as e:
-        print(f'Error during plotting: {e}')
+        error = f'Error during residual plotting: {e}'
+        log_message(error, log_dirc)
+        print(error)
 
 def visualize_shock_angles(shock_deg: list[float], avg_ang_glob: float, std_mid_Avg: float,
                            output_directory: str = '') -> None:
@@ -312,10 +317,7 @@ def visualize_shock_angles(shock_deg: list[float], avg_ang_glob: float, std_mid_
 
     fig, ax = plt.subplots(figsize=(10, 8))
     # Plot histogram of shock angles
-    ax.hist(shock_deg, bins=20, edgecolor='black', 
-            # alpha=0.8, 
-            # color='skyblue'
-            )
+    ax.hist(shock_deg, bins=20, edgecolor='black', alpha=0.8, color='skyblue')
 
     # Plot average and standard deviation lines
     y_limit = ax.get_ylim()[1]
@@ -325,8 +327,8 @@ def visualize_shock_angles(shock_deg: list[float], avg_ang_glob: float, std_mid_
               label=['Average Angle', '1-σ Deviation'])
 
     # Add labels, and grid
-    # ax.set_xlabel("Angle (deg)")
-    # ax.set_ylabel("Frequency")
+    ax.set_xlabel("Angle (deg)")
+    ax.set_ylabel("Frequency")
     # ax.set_xlim([74,81])
     ax.grid(True, axis='y', which='major', color='#D8D8D8', linestyle='-', alpha=0.3, lw=1.5)
     if output_directory:

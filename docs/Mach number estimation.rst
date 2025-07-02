@@ -83,25 +83,28 @@ Additionally, the flow direction can be evaluated using LDA measurements upstrea
     .. code-block:: console
 
         Img Shape is: (900, 960, 3)
-        registered line: 109
-        registered line: 726
-        Image scale: 0.12965964343598055
-        registered line: 615
+        Registered line: 726
+        Registered line: 110
+        Image scale: 0.12987012987012986 mm/px
+        Registered line: 616
         Screen resolution: 1920, 1080
-        Vertical range of tracking points starts from 5.00mm to 13.00mm
-        in pixels from 515px to 576px
-        registered line: [(819, 0), (0, 727), -0.888135593220339, 727.5694915254237]
+        Vertical range of tracking points is:
+            - In (mm)s from 5.00mm to 13.00mm
+            - In pixels from 516px to 578px
+        Registered line: ((871, 0), (0, 717), -0.8235294117647058, 717.8823529411765)
         Shock inclination test and setup ... ✓
-        Warning: Only boundary angles will considered ...
-        Importing 100 images ...
-        [====================] 100%
+        Importing 100 images...
+        [=================== ] 99%
+        Warning: Number of points is not sufficient for RANSAC!; Normal least square will be performed.
         Shock tracking started ... ✓
+        Angle range variation: [39.77, 50.29],	σ = 3.23
+        Average shock loc.: 208.15±0.00 px
+        Average shock angle: 42.36±0.00 deg
         Plotting tracked data ...
         info.: For memory reasons, only 20 images will be displayed.
         note: this will not be applied on images storing
         [====================] 100%
-        Angle range variation: [39.88,51.16], σ = 3.38
-        Average inclination angle 42.42 deg
+        Processing time: 1 Sec
     
     And the 20 images are displayed, among of them
 

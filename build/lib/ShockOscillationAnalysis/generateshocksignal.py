@@ -9,6 +9,7 @@ import sys
 import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
+from .support_func import log_message
 from .shocktracking import ShockTraking
 from .decorators import calculate_running_time
 
@@ -27,7 +28,7 @@ def GradientGenerator(img:np.ndarray[int], KernalDim: int = 3)-> np.ndarray[int]
 
     Example:
         >>> gradient = GradientGenerator(image, KernalDim=3)
-        
+
     .. note::
         - The input image should be in grayscale.
         - The function returns the gradient magnitude of the input image.
@@ -43,8 +44,8 @@ def GradientGenerator(img:np.ndarray[int], KernalDim: int = 3)-> np.ndarray[int]
     grad = cv2.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0)
     return grad
 
-def IntegralShocktracking(SnapshotSlice: list[int], Plot: bool, count: int,
-                          ShockLocation: float, uncertain: bool) -> tuple[float, bool]:
+def IntegralShocktracking(SnapshotSlice: list[int], ShockLocation: float, Plot: bool, count: int,
+                          uncertain: bool, log_dirc:str='') -> tuple[float, bool]:
     """
     Perform shock tracking based on integral method discriped in https://dx.doi.org/10.2139/ssrn.4797840.
 
@@ -54,6 +55,7 @@ def IntegralShocktracking(SnapshotSlice: list[int], Plot: bool, count: int,
         - **count (int)**: Current snapshot/image number.
         - **ShockLocation (float)**: Location of the shock from the previous iteration.
         - **uncertain (bool)**: Flag indicating uncertainty.
+        - **log_dirc (str)**: log file directory.
 
     Returns:
         tuple: A tuple containing:
@@ -69,23 +71,21 @@ def IntegralShocktracking(SnapshotSlice: list[int], Plot: bool, count: int,
     LastShockLocation = ShockLocation[-1] if ShockLocation else -1
 
     minLoc, certain, reason = ShockTraking(SnapshotSlice,
-                                           LastShockLoc = LastShockLocation,
-                                           Plot = Plot,
-                                           count = count)
+                                           LastShockLoc=LastShockLocation,
+                                           Plot=Plot,
+                                           count=count,
+                                           log_dirc=log_dirc)
     ShockLocation.append(minLoc)
-    if not certain: uncertain.append([count,minLoc,reason])
+    if not certain: uncertain.append([count, minLoc, reason])
     return ShockLocation, uncertain
 
-def GradShocktracking(GradSlice,Plot,count,ShockLocation, uncertain):
+def GradShocktracking(GradSlice,ShockLocation,**kwargs):
     """
     Perform shock tracking based on gradient values.
 
     Parameters:
         - **GradSlice (numpy.ndarray)**: Array containing gradient values for shock tracking.
-        - **Plot (bool)**: Flag indicating whether to generate plots of the results.
-        - **count (int)**: Current iteration count.
         - **ShockLocation (list)**: List containing the shock location from previous iterations.
-        - **uncertain (bool)**: Flag indicating uncertainty in the shock tracking process.
 
     Returns:
         tuple: A tuple containing:
@@ -99,10 +99,10 @@ def GradShocktracking(GradSlice,Plot,count,ShockLocation, uncertain):
 
     """
     ShockLocation.append(np.argmax(GradSlice))
-    return ShockLocation, uncertain
+    return ShockLocation, []
 
 def DarkestSpotShocktracking(SnapshotSlice: list[int],
-                             Plot: bool, count: int, ShockLocation: list[float], uncertain: list[tuple[int, float]]) -> tuple[list,list]:
+                             ShockLocation: list[float], **kwargs) -> tuple[list,list]:
     """
     Perform shock tracking based on the location of the darkest spot in a snapshot slice.
 
@@ -122,21 +122,22 @@ def DarkestSpotShocktracking(SnapshotSlice: list[int],
 
     """
     ShockLocation.append(np.argmin(SnapshotSlice))
-    return ShockLocation, uncertain
+    return ShockLocation, []
 
 
 @calculate_running_time
-def GenerateShockSignal(img, method='integral',
-                        signalfilter=None, review_slice_tracking = -1,
-                        **kwargs) -> tuple[list, list]:
+def GenerateShockSignal(img:np.ndarray[int], method:str='integral',
+                        signalfilter:str=None, review_slice_tracking:int|list[int,int]=-1,
+                        log_dirc:str= '',**kwargs) -> tuple[list, list]:
     """
     Find the shockwave locations in a series of snapshots with optional signal processing filters.
 
     Parameters:
         - **img (numpy.ndarray)**: Input array of shape (num_snapshots, height, width) representing a series of snapshots.
-        - **reviewInterval (list, optional)**: List specifying the review interval for plotting. Default is [0, 0].
-        - **Signalfilter (str, optional)**: Type of signal filter to apply ('median', 'Wiener', 'med-Wiener'). Default is None.
-        - **CheckSolutionTime (bool, optional)**: Flag to measure and display the time taken for shock tracking. Default is True.
+        - **method (str, optional)**: shock tracking method (integral(Defult), darkest_spot, maxGrad).
+        - **review_slice_tracking (int|list[int, int], optional)**: List specifying the review interval for plotting. Default is -1.
+        - **signalfilter (str, optional)**: Type of signal filter to apply ('median', 'Wiener', 'med-Wiener'). Default is None.
+        - **log_dirc (str)**: log file directory.
 
     Returns:
         - ShockLocation (list): List of shock locations for each snapshot.
@@ -144,9 +145,9 @@ def GenerateShockSignal(img, method='integral',
 
     Examples:
         >>> # Create an instance of the class
-        >>> instance = SOA(f,D)
+        >>> SA = SOA(f,D)
         >>> # Load a series of snapshots (assuming 'snapshots' is a NumPy array)
-        >>> shock_locations, uncertain_locations = instance.FindTheShockwaveImproved(snapshots)
+        >>> shock_locations, uncertain_locations = SA.GenerateShockSignal(snapshots)
 
     .. note:
         - Ensure that 'ShockTrackingModule' is properly defined and imported.
@@ -184,18 +185,25 @@ def GenerateShockSignal(img, method='integral',
 
 
     nShoots = img.shape[0] # .................... total number of snapshots
-    print(f'Processing the shock location using {method} method...')
+    new_log = f'Processing the shock location using {method} method...'
+    log_message(new_log, log_dirc)
+    print(new_log)
 
     for SnapshotSlice in ShockRegion:
         Plot = ploting and start <= count < end
-        ShockLocation, uncertain = TrakingMethod(SnapshotSlice,Plot,count,ShockLocation,uncertain)
+        ShockLocation, uncertain = TrakingMethod(SnapshotSlice, ShockLocation, Plot, count,
+                                                 uncertain, log_dirc)
         count += 1
         sys.stdout.write('\r')
         sys.stdout.write("[%-20s] %d%%" % ('='*int(count/(nShoots/20)), int(5*count/(nShoots/20))))
         sys.stdout.flush()
     print('')
+    log_message('Done', log_dirc)
 
-    print(f'Appling {signalfilter} filter...')
+    new_log= f'Appling {signalfilter} filter...'
+    log_message(new_log, log_dirc)
+    print(new_log)
+    
     if signalfilter == 'median':
         ShockLocation = signal.medfilt(ShockLocation)
     elif signalfilter == 'Wiener':
@@ -203,5 +211,7 @@ def GenerateShockSignal(img, method='integral',
     elif signalfilter == 'med-Wiener':
         ShockLocation = signal.medfilt(ShockLocation)
         ShockLocation = signal.wiener(ShockLocation.astype('float64'))
+    
+    log_message('Done', log_dirc)
 
     return ShockLocation, uncertain

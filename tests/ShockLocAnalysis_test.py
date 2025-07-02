@@ -5,16 +5,15 @@ Created on Wed Jun 12 14:23:30 2024
 @author: Ahmed H. Hanfy
 """
 import cv2
-import sys
 import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
-sys.path.append(r'..\ShockOscillationAnalysis')
 from ShockOscillationAnalysis import SOA
 
 if __name__ == '__main__':
     # define the slice list file
-    imgPath = r'results\2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png'
+    imgdirc = r'results\Slicelist_test-results'
+    imgpath = fr'{imgdirc}\2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png'
 
     f = 2000    # images sampling rate
 
@@ -23,7 +22,7 @@ if __name__ == '__main__':
     scale = 0.12965964343598055  # mm/px
 
     # import the slice list
-    slicelist = cv2.imread(imgPath)
+    slicelist = cv2.imread(imgpath)
     n = slicelist.shape[0]  # time
 
     # iniate the ShockOscillationAnalysis module
@@ -40,7 +39,10 @@ if __name__ == '__main__':
     xPixls = (newref[1]-newref[0])
     # the width of the slice list in mm
     shock_region_mm = xPixls*scale
-    print(f'Shock Regions: {newref},\t Represents: {xPixls}px, \t Shock Regions in mm:{shock_region_mm}')
+    # Add info to log.txt file
+    newlog = f'Shock Regions: {newref},\t Represents: {xPixls}px, \t Shock Regions in mm:{shock_region_mm}'
+    SA.log(newlog, imgdirc)
+    print(newlog)
 
     # %% slice list cleaning
     # [subtracting the average, subtracting ambiant light frequency,
@@ -53,7 +55,10 @@ if __name__ == '__main__':
                                                     reviewInterval=[11, 14],  # to review the tracking process within this range
                                                     Signalfilter='med-Wiener')
 
-    print(f'uncertainty ratio: {(len(uncer)/len(shock_loc_px))*100:0.2f}%')
+    # Add info to log.txt file
+    newlog = f'uncertainty ratio: {(len(uncer)/len(shock_loc_px))*100:0.2f}%'
+    SA.log(newlog, imgdirc)
+    print(newlog)
 
     # unpack and scale the output values
     # to scale the shock location output to mm

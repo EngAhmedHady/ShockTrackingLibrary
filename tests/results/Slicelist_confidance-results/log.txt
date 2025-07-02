@@ -1,0 +1,29 @@
+[2025-07-01 23:46:13] Img Shape is: (900, 960, 3)
+[2025-07-01 23:46:13] Image scale: 0.12965964343598055 mm/px
+[2025-07-01 23:46:13] Slice center is located at:
+[2025-07-01 23:46:13] 	- 540px in absolute reference
+[2025-07-01 23:46:13] 	- 9.98mm (77px) from reference `Ref_y0`
+[2025-07-01 23:46:13] Shock angle tracking vertical range above the reference `Ref_y0` is:
+[2025-07-01 23:46:13] 	- In (mm)s from 18.02mm to 4.93mm
+[2025-07-01 23:46:13] 	- In pixels from 139px to 38px
+[2025-07-01 23:46:13] Shock inclination test and setup ...
+[2025-07-01 23:46:13] Done
+[2025-07-01 23:46:17] Warning: Requested files are out of range;
+[2025-07-01 23:46:17] Only available files will be imported from 50 to 100
+[2025-07-01 23:46:17] Import 33 images for inclination Check ... 
+[2025-07-01 23:46:18] Shock inclination estimation ... 
+[2025-07-01 23:46:18] Shock tracking started ...
+[2025-07-01 23:46:18] Done
+[2025-07-01 23:46:18] Calculating confidance limits ... 
+[2025-07-01 23:46:18] Done
+[2025-07-01 23:46:18] weighted average shock angle: 93.79±0.109 deg,	 σ = 0.00083 deg
+[2025-07-01 23:46:18] Angle range variation: [79.95, 104.28],	σ = 5.10 deg
+[2025-07-01 23:46:18] Average shock loc.: 469.75±6.47 px
+[2025-07-01 23:46:18] Average shock angle: 95.03±1.90 deg
+[2025-07-01 23:46:18] Plotting tracked data ...
+[2025-07-01 23:46:23] Tracking shock done
+[2025-07-01 23:46:25] RotatedImage: stored ✓
+[2025-07-01 23:46:25] DomainImage: stored ✓
+[2025-07-01 23:46:25] working range is: {'Ref_x0': [109, 726], 'Ref_y1': 540, 'avg_shock_angle': array([95.03081317,  1.90169604, 93.79126163,  0.10905212,  5.10271056]), 'avg_shock_loc': array([469.7515693 ,   6.47399096,  17.37128401])}
+[2025-07-01 23:46:25] Importing 50 images ...
+[2025-07-01 23:46:26] ImageList write: Image list was stored at: results\Slicelist_confidance-results\2.0kHz_10mm_0.12965964343598055mm-px_tk_38px_-SliceList.png

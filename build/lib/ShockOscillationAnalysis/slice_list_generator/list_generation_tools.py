@@ -4,16 +4,20 @@ Created on Wed Feb 28 12:28:27 2024
 
 @author: Ahmed H. Hanfy
 """
+import sys
 import random
-from ..ShockOscillationAnalysis import BCOLOR
+from ..constants import BCOLOR
+from ..support_func import log_message
 
-def genratingRandomNumberList(ShockAngleSamples: int, n1: int) -> list[int]:
+
+def genratingRandomNumberList(ShockAngleSamples: int, n1: int, log_dirc:str='') -> list[int]:
     """
     Generate a list of random indices based on the given sample size.
 
     Parameters:
         - **ShockAngleSamples (int)**: The desired number of shock angle samples.
         - **n1 (int)**: The total number of files available.
+        - **log_dirc (str)**: log file directory.
 
     Returns:
         list:  A list of randomly selected indices.
@@ -32,6 +36,8 @@ def genratingRandomNumberList(ShockAngleSamples: int, n1: int) -> list[int]:
         ShockAngleSamples = n1
         warning = 'ShockAngleSamples should not be more than the number of files;'
         action = 'the number of files will be the only considered.'
+        log_message(f'Warning: {warning}', log_dirc)
+        log_message(action, log_dirc)
         print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
         print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
         
@@ -40,8 +46,8 @@ def genratingRandomNumberList(ShockAngleSamples: int, n1: int) -> list[int]:
     return randomIndx
 
 
-def GenerateIndicesList(total_n_files:int, files:list[int,int]=[0,0], 
-                        every_n_files:int=1) -> tuple[range, int]:
+def GenerateIndicesList(total_n_files:int, files:list[int,int]=[0,0], every_n_files:int=1,
+                        log_dirc:str='') -> tuple[range, int]:
     """
     Generate a list of indices based on the specified range and step.
 
@@ -49,6 +55,7 @@ def GenerateIndicesList(total_n_files:int, files:list[int,int]=[0,0],
         - **total_n_files (int)**: The total number of available files.
         - **files (list[int, int], optional)**: A list specifying the start and end files (default is [0, 0]).
         - **every_n_files (int, optional)**: Step value to determine the frequency of indices (default is 1).
+        - **log_dirc (str)**: log file directory.
 
     Returns:
         tuple[range, int]:  A tuple containing a range object of the indices and the total number of images.
@@ -67,18 +74,37 @@ def GenerateIndicesList(total_n_files:int, files:list[int,int]=[0,0],
         >>> print(num_images)
         8
     """
-    start_file = 0; end_file = total_n_files
+    start_file = 0
+    end_file = total_n_files
     if hasattr(files, "__len__"):
-        files.sort(); start, end = files
-        if abs(end-start) > 0: 
-            start_file = start 
-            end_file = end
+        files.sort()
+        start, end = files
+        if abs(end-start) == 0 or start >= total_n_files: 
+            error = 'Number of files to be imported is 0! Terminating process ...'
+            log_message(f'Error: {error}', log_dirc)
+            print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
+            sys.exit()
+            
+        start_file = start
+        
+        if end <= total_n_files: end_file = end
+        else:
+            warning = 'Requested files are out of range;'
+            action = f'Only available files will be imported from {start_file} to {end_file}'
+            log_message(f'Warning: {warning}', log_dirc)
+            log_message(action, log_dirc)
+            print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
+            print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
+            
+            
     elif files > 0: 
         if files <= total_n_files:  
             end_file = files
         else: 
             warning = 'Requested files are more than available files;'
             action = 'Only available files will be imported'
+            log_message(f'Warning: {warning}', log_dirc)
+            log_message(action, log_dirc)
             print(f'{BCOLOR.WARNING}Warning:{BCOLOR.ENDC}', end=' ')
             print(f'{BCOLOR.ITALIC}{warning} {action}{BCOLOR.ENDC}')
 

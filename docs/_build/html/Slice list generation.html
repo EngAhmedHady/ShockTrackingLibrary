@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -5,23 +7,19 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Slice list generation &mdash; ShockTrackingLibrary 1.9.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=c4cb232b"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c4cb232b"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Analyze a shock signal" href="Analyze%20a%20shock%20signal.html" />
+    <link rel="next" title="Confidance limits" href="Confidance%20limits.html" />
     <link rel="prev" title="Tutorials" href="Tutorial.html" /> 
 </head>
 
@@ -50,6 +48,7 @@
 <li class="toctree-l2"><a class="reference internal" href="Tutorial.html#installing">Installing</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="Tutorial.html#examples">Examples</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Slice list generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Confidance%20limits.html">Confidance limits</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Analyze%20a%20shock%20signal.html">Analyze a shock signal</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Inclined%20Shock%20Tracking.html">Inclined Shock Tracking</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Mach%20number%20estimation.html">Mach number estimation</a></li>
@@ -96,7 +95,7 @@ Each processed slice is then appended to the previous slices, creating a list of
 <ol class="arabic simple">
 <li><p>Run the following code:</p></li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ShockOscillationAnalysis</span> <span class="kn">import</span> <span class="n">SliceListGenerator</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ShockOscillationAnalysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">SliceListGenerator</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
    <span class="c1"># Define the snapshots path with glob[note the extention of imported files]</span>
@@ -105,23 +104,32 @@ Each processed slice is then appended to the previous slices, creating a list of
    <span class="n">f</span> <span class="o">=</span> <span class="mi">2000</span>    <span class="c1"># images sampling rate</span>
    <span class="n">D</span> <span class="o">=</span> <span class="mi">80</span>      <span class="c1"># distance in mm</span>
 
-   <span class="n">output_directory</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;results&#39;</span>
+   <span class="n">output_directory</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;results\Slicelist_test-results&#39;</span>
 
    <span class="c1"># iniate the SliceListGenerator module</span>
-   <span class="n">SA</span> <span class="o">=</span> <span class="n">SliceListGenerator</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">D</span><span class="p">)</span>
+   <span class="n">SA</span> <span class="o">=</span> <span class="n">SliceListGenerator</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
 
    <span class="c1"># use GenerateSlicesArray function</span>
    <span class="n">ShockwaveRegion</span> <span class="p">,</span><span class="n">n</span> <span class="p">,</span><span class="n">WR</span><span class="p">,</span> <span class="n">Scale</span> <span class="o">=</span> <span class="n">SA</span><span class="o">.</span><span class="n">GenerateSlicesArray</span><span class="p">(</span><span class="n">imgPath</span><span class="p">,</span>
-                                                         <span class="n">scale_pixels</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                                         <span class="n">slice_loc</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>            <span class="c1"># as scaled tracking reference values in mm</span>
-                                                         <span class="n">full_img_width</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>    <span class="c1"># to crop the slices by vertical reference line</span>
-                                                         <span class="n">slice_thickness</span> <span class="o">=</span> <span class="mi">60</span><span class="p">,</span>      <span class="c1"># always in pixels</span>
-                                                         <span class="n">shock_angle_samples</span> <span class="o">=</span> <span class="mi">33</span><span class="p">,</span>  <span class="c1"># number of samples to determine the average inclination</span>
-                                                         <span class="n">angle_samples_review</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>  <span class="c1"># to preview the tracked points during angle determination</span>
-                                                         <span class="n">inclination_est_info</span> <span class="o">=</span>  <span class="p">[</span><span class="mi">110</span><span class="p">,</span> <span class="p">(</span><span class="mi">474</span><span class="p">,</span> <span class="mi">591</span><span class="p">),(</span><span class="mi">463</span><span class="p">,</span> <span class="mi">482</span><span class="p">)],</span> <span class="c1"># information for angle determination</span>
-                                                         <span class="n">preview</span> <span class="o">=</span>  <span class="kc">True</span><span class="p">,</span>           <span class="c1"># to preview the final setup before proceeding</span>
-                                                         <span class="n">output_directory</span> <span class="o">=</span> <span class="n">output_directory</span><span class="p">,</span> <span class="c1"># the directory where the slice list will be stored</span>
-                                                         <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;-SliceList&#39;</span><span class="p">,</span>      <span class="c1"># additional comments to the stored slice list file name</span>
+                                                          <span class="n">scale_pixels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                          <span class="c1"># as scaled tracking reference values in mm</span>
+                                                          <span class="n">slice_loc</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                                                          <span class="c1"># to crop the slices by vertical reference line</span>
+                                                          <span class="n">full_img_width</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                          <span class="c1"># in pixels</span>
+                                                          <span class="n">slice_thickness</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+                                                          <span class="c1"># number of samples to determine the average inclination</span>
+                                                          <span class="n">shock_angle_samples</span><span class="o">=</span><span class="mi">33</span><span class="p">,</span>
+                                                          <span class="c1"># to preview the tracked points during angle determination</span>
+                                                          <span class="n">angle_samples_review</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                                          <span class="c1"># information for angle determination</span>
+                                                          <span class="n">inclination_est_info</span><span class="o">=</span><span class="p">[</span><span class="mi">110</span><span class="p">,</span> <span class="p">(</span><span class="mi">474</span><span class="p">,</span> <span class="mi">591</span><span class="p">),</span> <span class="p">(</span><span class="mi">463</span><span class="p">,</span> <span class="mi">482</span><span class="p">)],</span>
+                                                          <span class="c1"># to preview the final setup before proceeding</span>
+                                                          <span class="n">preview</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                          <span class="c1"># the directory where the slice list will be stored</span>
+                                                          <span class="n">output_directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">,</span>
+                                                          <span class="c1"># additional comments to the stored slice list file name</span>
+                                                          <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;-SliceList&#39;</span><span class="p">,</span>
                                                          <span class="p">)</span>
 </pre></div>
 </div>
@@ -135,14 +143,16 @@ Each processed slice is then appended to the previous slices, creating a list of
 <ol class="arabic simple" start="2">
 <li><p>Define the scalling lines. Press the left mouse button and drag to draw a line. Two lines will appear: the <strong>bold red line</strong> represents the start and end mouse locations, and the <strong>green line</strong> represents the full line. Left-click again to confirm flowed by any keyboard key to close the preview window or right-click to remove the line and try again.</p></li>
 </ol>
-<a class="reference internal image-reference" href="_images/T2-1c.png"><img alt="_images/T2-1c.png" class="align-center" src="_images/T2-1c.png" style="width: 600px;" /></a>
+<a class="reference internal image-reference" href="_images/T2-1c.png"><img alt="_images/T2-1c.png" class="align-center" src="_images/T2-1c.png" style="width: 600px;" />
+</a>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
 <ol class="arabic simple" start="3">
 <li><p>Repeat the drawing process to define y-Reference line (the <strong>yellow line</strong> in this case the leading of the lower profile)</p></li>
 </ol>
-<a class="reference internal image-reference" href="_images/T2-2c.png"><img alt="_images/T2-2c.png" class="align-center" src="_images/T2-2c.png" style="width: 600px;" /></a>
+<a class="reference internal image-reference" href="_images/T2-2c.png"><img alt="_images/T2-2c.png" class="align-center" src="_images/T2-2c.png" style="width: 600px;" />
+</a>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
@@ -153,32 +163,45 @@ Each processed slice is then appended to the previous slices, creating a list of
 <ol class="arabic simple" start="4">
 <li><p>The spacified <code class="docutils literal notranslate"><span class="pre">inclination_est_info</span></code> is reviewed, press any key to continue:</p></li>
 </ol>
-<a class="reference internal image-reference" href="_images/T3-3c.png"><img alt="_images/T3-3c.png" class="align-center" src="_images/T3-3c.png" style="width: 600px;" /></a>
+<a class="reference internal image-reference" href="_images/T3-3c.png"><img alt="_images/T3-3c.png" class="align-center" src="_images/T3-3c.png" style="width: 600px;" />
+</a>
 <ol class="arabic simple" start="5">
 <li><p>The software will estimate the shock angle, store the <code class="docutils literal notranslate"><span class="pre">angle_samples_review</span></code> and preview the rotated image, press any key to continue:</p></li>
 </ol>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Img Shape is: (900, 960, 3)</span>
-<span class="go">registered line: 109</span>
-<span class="go">registered line: 725</span>
-<span class="go">Image scale: 0.12987012987012986</span>
-<span class="go">registered line: 617</span>
-<span class="go">Slice is located at: 540px</span>
+<span class="go">Registered line: 109</span>
+<span class="go">Registered line: 726</span>
+<span class="go">Image scale: 0.12965964343598055 mm/px</span>
+<span class="go">Registered line: 618</span>
+<span class="go">Slice center is located at:</span>
+<span class="go">   - 541px in absolute reference</span>
+<span class="go">   - 9.98mm (77px) from reference `Ref_y0`</span>
+<span class="go">Shock angle tracking vertical range above the reference `Ref_y0` is:</span>
+<span class="go">   - In (mm)s from 13.87mm to 6.09mm</span>
+<span class="go">   - In pixels from 107px to 47px</span>
 <span class="go">Shock inclination test and setup ... ✓</span>
-<span class="go">Shock inclination estimation ...</span>
+<span class="go">Import 33 images for inclination Check ...</span>
 <span class="go">[====================] 100%</span>
+<span class="go">Shock inclination estimation ...</span>
 <span class="go">Shock tracking started ... ✓</span>
+<span class="go">Angle range variation: [78.77, 109.67],      σ = 5.54</span>
+<span class="go">Average shock loc.: 472.20±0.00 px</span>
+<span class="go">Average shock angle: 93.34±0.00 deg</span>
 <span class="go">Plotting tracked data ...</span>
 <span class="go">[====================] 100%</span>
-<span class="go">Angle range variation: [73.35,113.54], σ = 7.16</span>
-<span class="go">Average inclination angle 94.63 deg</span>
-<span class="go">RotatedImage: stored ✓</span>
-<span class="go">DomainImage: stored ✓</span>
+<span class="go">Processing time: 3 Sec</span>
 </pre></div>
 </div>
-<a class="reference internal image-reference" href="_images/ShockAngleReview_Ang94.63_00000.png"><img alt="_images/ShockAngleReview_Ang94.63_00000.png" src="_images/ShockAngleReview_Ang94.63_00000.png" style="width: 215px;" /></a>
-<a class="reference internal image-reference" href="_images/ShockAngleReview_Ang94.63_00001.png"><img alt="_images/ShockAngleReview_Ang94.63_00001.png" src="_images/ShockAngleReview_Ang94.63_00001.png" style="width: 215px;" /></a>
-<a class="reference internal image-reference" href="_images/ShockAngleReview_Ang94.63_00002.png"><img alt="_images/ShockAngleReview_Ang94.63_00002.png" src="_images/ShockAngleReview_Ang94.63_00002.png" style="width: 215px;" /></a>
-<a class="reference internal image-reference" href="_images/T3-4.png"><img alt="_images/T3-4.png" class="align-center" src="_images/T3-4.png" style="width: 600px;" /></a>
+<a class="reference internal image-reference" href="_images/ShockAngleReview_Ang94.63_00000.png"><img alt="_images/ShockAngleReview_Ang94.63_00000.png" src="_images/ShockAngleReview_Ang94.63_00000.png" style="width: 215px;" />
+</a>
+<a class="reference internal image-reference" href="_images/ShockAngleReview_Ang94.63_00001.png"><img alt="_images/ShockAngleReview_Ang94.63_00001.png" src="_images/ShockAngleReview_Ang94.63_00001.png" style="width: 215px;" />
+</a>
+<a class="reference internal image-reference" href="_images/ShockAngleReview_Ang94.63_00002.png"><img alt="_images/ShockAngleReview_Ang94.63_00002.png" src="_images/ShockAngleReview_Ang94.63_00002.png" style="width: 215px;" />
+</a>
+<a class="reference internal image-reference" href="_images/T3-4.png"><img alt="_images/T3-4.png" class="align-center" src="_images/T3-4.png" style="width: 600px;" />
+</a>
+<a class="reference internal image-reference" href="_images/T3-5.png"><img alt="_images/T3-5.png" class="align-center" src="_images/T3-5.png" style="width: 600px;" />
+</a>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
@@ -188,18 +211,22 @@ Each processed slice is then appended to the previous slices, creating a list of
 <li><p>In the second image, there are red uncertain points that completely miss the location of the Mach wave due to the complexity of the shock shape.</p></li>
 <li><p>These uncertain points may affect the overall average angle. It is recommended to use more than 30% of the available data to estimate the shock angle accurately.</p></li>
 <li><p>The orange uncertain points do not always indicate a false shock location but suggest the possibility of missing the correct shock location.</p></li>
+<li><p><strong>log.txt</strong> file is generated at the result location. The log file contain the tracking info. and operations done.</p></li>
 </ul>
 </div>
 <ol class="arabic simple" start="6">
 <li><p>The software will generate the slice list and store the data:</p></li>
 </ol>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">working range is:  {&#39;Ref_x0&#39;: [109, 727, 619, [(414, 0), (505, 900), 9.909090909090908, -4105.90909090909]], &#39;Ref_y1&#39;: 542, &#39;avg_shock_angle&#39;: 96.9017901606706, &#39;avg_shock_loc&#39;: 473.3391835016835}</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">RotatedImage: stored ✓</span>
+<span class="go">DomainImage: stored ✓</span>
+<span class="go">working range is: {&#39;Ref_x0&#39;: [109, 726, 618, [(414, 0), (505, 900), 9.909090909090908, -4105.90909090909]], &#39;Ref_y1&#39;: 541, &#39;avg_shock_angle&#39;: array([93.33929034,  0.        ,  0.        ,  0.        ,  5.53565054]), &#39;avg_shock_loc&#39;: array([472.20126383,   0.        ,  13.80257916])}</span>
 <span class="go">Importing 100 images ...</span>
 <span class="go">[====================] 100%</span>
-<span class="go">ImageList write: File was stored: results\2.0kHz_10mm_0.12944983818770225mm-px_tk_60px_-SliceList.png</span>
+<span class="go">ImageList write: Image list was stored at: results\2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png</span>
 </pre></div>
 </div>
-<a class="reference internal image-reference" href="_images/2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png"><img alt="_images/2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png" class="align-center" src="_images/2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png" style="width: 600px;" /></a>
+<a class="reference internal image-reference" href="_images/2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png"><img alt="_images/2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png" class="align-center" src="_images/2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList.png" style="width: 600px;" />
+</a>
 <div class="line-block">
 <div class="line"><br /></div>
 </div>
@@ -213,7 +240,7 @@ Each processed slice is then appended to the previous slices, creating a list of
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <dl class="simple">
-<dt>The slice list file name <code class="docutils literal notranslate"><span class="pre">2.0kHz_10mm_0.12944983818770225mm-px_tk_60px_-SliceList</span></code> contain all information about the slice according to the provided parameters as follow:</dt><dd><ul class="simple">
+<dt>The slice list file name <code class="docutils literal notranslate"><span class="pre">2.0kHz_10mm_0.12965964343598055mm-px_tk_60px_-SliceList</span></code> contain all information about the slice according to the provided parameters as follow:</dt><dd><ul class="simple">
 <li><p>“<strong>2.0kHz</strong>” the sampling rate of the images.</p></li>
 <li><p>“<strong>10mm</strong>” is the main slice location.</p></li>
 <li><p>“<strong>0.12944983818770225mm-px</strong>” the scale of each pixels in mm based on <code class="docutils literal notranslate"><span class="pre">D</span></code> and the drawn vertical reference lines. Also can be defined as the tracking accuracy when the shock is tracked.</p></li>
@@ -236,7 +263,7 @@ Each processed slice is then appended to the previous slices, creating a list of
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="Tutorial.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Analyze%20a%20shock%20signal.html" class="btn btn-neutral float-right" title="Analyze a shock signal" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Confidance%20limits.html" class="btn btn-neutral float-right" title="Confidance limits" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

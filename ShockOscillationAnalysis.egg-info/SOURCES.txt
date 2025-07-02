@@ -3,6 +3,7 @@ README.md
 setup.py
 ShockOscillationAnalysis/ShockOscillationAnalysis.py
 ShockOscillationAnalysis/__init__.py
+ShockOscillationAnalysis/constants.py
 ShockOscillationAnalysis/decorators.py
 ShockOscillationAnalysis/generateshocksignal.py
 ShockOscillationAnalysis/imgcleaningfunctions.py
