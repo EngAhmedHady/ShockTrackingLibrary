@@ -18,6 +18,7 @@ The method's performance has been validated in a **transonic fan passage test se
 > DOI: [10.2139/ssrn.4797840](https://dx.doi.org/10.2139/ssrn.4797840) and [10.1007/s00348-021-03145-3](https://doi.org/10.1007/s00348-021-03145-3)
 
 ---
+<img src="https://github.com/user-attachments/assets/0a4532af-44c4-4bd1-bac2-01925d841ce4" alt="drawing" style="width:360px;"/> <img src="https://github.com/user-attachments/assets/66e4c5a9-24ac-4e09-b2e6-ee5f222929b0" alt="drawing" style="width:640px;"/>
 
 ## 🚀 Key Features
 
