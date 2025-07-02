@@ -27,7 +27,7 @@ authors:
 title: "Shock Oscillation Analysis Library"
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.11197727
+    value: https://doi.org/10.5281/zenodo.11640800
 version: "2.15.8"
-date-released: "2024-06-13"
+date-released: "2025-07-01"
 url: "https://github.com/EngAhmedHady/ShockTrackingLibrary"
