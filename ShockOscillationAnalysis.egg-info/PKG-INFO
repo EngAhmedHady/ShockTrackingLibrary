@@ -1,6 +1,6 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.4
 Name: ShockOscillationAnalysis
-Version: 2.15.9
+Version: 2.15.10
 Home-page: https://github.com/EngAhmedHady/ShockTrackingLibrary
 Author: Ahmed H. Hanfy, Pawel Flaszyński, Piotr Kaczyński, Piotr Doerffer
 Author-email: ahmed.hady.hanfy92@gmail.com
@@ -8,6 +8,23 @@ License: MIT
 Requires-Python: >= 3.11
 Description-Content-Type: text/markdown
 License-File: LICENSE
+Requires-Dist: opencv-python>=4.10.0
+Requires-Dist: numpy>=2.1.2
+Requires-Dist: scipy>=1.11.4
+Requires-Dist: matplotlib>=3.8.0
+Requires-Dist: Pillow>=10.3.0
+Requires-Dist: datetime
+Requires-Dist: screeninfo
+Requires-Dist: keyboard
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: requires-python
 
 [![DOI](https://zenodo.org/badge/711672788.svg)](https://zenodo.org/doi/10.5281/zenodo.11197727) [![Documentation Status](https://readthedocs.org/projects/shocktrackinglibrary/badge/?version=latest)](https://shocktrackinglibrary.readthedocs.io/en/latest/?badge=latest) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/EngAhmedHady/ShockTrackingLibrary/blob/main/LICENSE)
 [![PyPI - Version](https://img.shields.io/pypi/v/ShockOscillationAnalysis)](https://pypi.org/project/ShockOscillationAnalysis)
@@ -26,10 +43,10 @@ The method's performance has been validated in a **transonic fan passage test se
 
 > For scientific details and benchmarking, please refer to the article:  
 > **"Advancements in Shock-Wave Analysis and Tracking from Schlieren Imaging"**  
-> DOI: [10.2139/ssrn.4797840](https://dx.doi.org/10.2139/ssrn.4797840) and [10.1007/s00348-021-03145-3](https://doi.org/10.1007/s00348-021-03145-3)
+> DOI: [10.2139/ssrn.4797840](https://dx.doi.org/10.2139/ssrn.4797840)
 
 ---
-<img src="https://github.com/user-attachments/assets/0a4532af-44c4-4bd1-bac2-01925d841ce4" alt="drawing" style="width:360px;"/> <img src="https://github.com/user-attachments/assets/66e4c5a9-24ac-4e09-b2e6-ee5f222929b0" alt="drawing" style="width:640px;"/>
+<img src="https://github.com/user-attachments/assets/0a4532af-44c4-4bd1-bac2-01925d841ce4" alt="drawing" style="width:240px;"/> <img src="https://github.com/user-attachments/assets/66e4c5a9-24ac-4e09-b2e6-ee5f222929b0" alt="drawing" style="width:450px;"/>
 
 ## Key Features
 
@@ -86,6 +103,8 @@ The method's performance has been validated in a **transonic fan passage test se
 - Histogram plotting with confidence stats
 
 - Weighted average using slope std and error
+
+see more [in this tutorial](https://shocktrackinglibrary.readthedocs.io/en/latest/Confidance%20limits.html#confidance-limits)
 
 ### Visualization Upgrades
 
@@ -145,5 +164,5 @@ Alternatively, you can also clone the repository manually by running: <br>
 ``git clone https://github.com/EngAhmedHady/ShockTrackingLibrary.git`` 
 
 Then install the package using: <br>
-``pip3 install dist\ShockOscillationAnalysis-2.15.8-py3-none-any.whl``
+``pip3 install dist\ShockOscillationAnalysis-2.15.9-py3-none-any.whl``
 

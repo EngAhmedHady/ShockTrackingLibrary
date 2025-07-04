@@ -377,7 +377,7 @@ class SliceListGenerator(SOA):
 
         # number of files to be imported
         files = sorted(glob.glob(path))
-        import_n_files = kwargs.get('n_files', 0)
+        import_n_files = kwargs.get('n_files', len(files))
         if import_n_files == 0:
             import_n_files = kwargs.get('within_range', [0, 0])
         import_step = kwargs.get('every_n_files', 1)

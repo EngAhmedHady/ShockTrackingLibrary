@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name='ShockOscillationAnalysis',
-    version='2.15.9',
+    version='2.15.10',
     packages=find_packages(),
     install_requires=[
         'opencv-python >= 4.10.0',
