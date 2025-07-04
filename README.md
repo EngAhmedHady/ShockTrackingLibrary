@@ -136,5 +136,5 @@ Alternatively, you can also clone the repository manually by running: <br>
 ``git clone https://github.com/EngAhmedHady/ShockTrackingLibrary.git`` 
 
 Then install the package using: <br>
-``pip3 install dist\ShockOscillationAnalysis-2.15.9-py3-none-any.whl``
+``pip3 install dist\ShockOscillationAnalysis-2.15.10-py3-none-any.whl``
 
