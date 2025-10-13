@@ -11,7 +11,7 @@ The instability of shock waves due to induced separation presents a significant 
 
 This Python package introduces an advanced method that employs **line-scanning** to detect and track shock waves from large series of schlieren images. It includes an **adaptive feedback system** to handle uncertainties in shock detection and is compatible with supervised learning and AI workflows. The method is capable of identifying and analyzing different types of shocks, even in low-resolution or visually degraded images.
 
-The method's performance has been validated in a **transonic fan passage test section** and a **supercritical A320 wing profile** under varying Reynolds numbers and oscillation conditions.
+The method's performance has been validated in a **transonic fan passage test section** and a **supercritical A320 wing representative profile** under varying Reynolds numbers and oscillation conditions.
 
 > For scientific details and benchmarking, please refer to the article:  
 > **"Enhanced line-scanning method for shock wave tracking in high-speed schlieren imaging"**  
