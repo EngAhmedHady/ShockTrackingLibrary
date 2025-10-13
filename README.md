@@ -14,8 +14,8 @@ This Python package introduces an advanced method that employs **line-scanning**
 The method's performance has been validated in a **transonic fan passage test section** and a **supercritical A320 wing profile** under varying Reynolds numbers and oscillation conditions.
 
 > For scientific details and benchmarking, please refer to the article:  
-> **"Advancements in Shock-Wave Analysis and Tracking from Schlieren Imaging"**  
-> DOI: [10.2139/ssrn.4797840](https://dx.doi.org/10.2139/ssrn.4797840)
+> **"Enhanced line-scanning method for shock wave tracking in high-speed schlieren imaging"**  
+> DOI: [10.1016/j.ast.2025.111022](https://doi.org/10.1016/j.ast.2025.111022)
 
 ---
 <img src="https://github.com/user-attachments/assets/0a4532af-44c4-4bd1-bac2-01925d841ce4" alt="drawing" style="width:240px;"/> <img src="https://github.com/user-attachments/assets/66e4c5a9-24ac-4e09-b2e6-ee5f222929b0" alt="drawing" style="width:450px;"/>
