@@ -163,17 +163,16 @@ class SliceListGenerator(SOA):
         .. note ::
             - The function assumes the input images are in RGB format.
             - The `kwargs` parameter can include:
-                - **Ref_x0 (list[int, int])**: Reference x boundaries.for scaling
+                - **Ref_x0 (list[int, int])**: Reference x boundaries for scaling
+                - **Ref_y00 (list[int, int])**: Reference y boundaries for horizontal scaling
                 - **Ref_y0 (int)**: Reference y datum (zero y location)
                 - **Ref_y1 (int)**: slice location (The scanning line, y-center of rotation)
                 - **avg_shock_angle (float)**: Average shock angle. (if known, to skip average shock inc check)
                 - **avg_shock_loc (int)**: Average shock location. (if known, x-center of rotation)
                 - **sat_vr (int | list[int,'str'])**: Shock Angle Test Vertical Range 
-                  (If not provided the vertical renge will be equal to the ``slice_thickness``, could be
-                  provided as number then value will be added equally to upper and lower the traking
-                  location in pixels, it also can be added as list `[upper bound, lower bound, unit(optional)]` 
-                  in current version unit should match the universal units ``'px'``, etc. if the unit not 
-                  provided the defualt ``'px'`` will be considered)
+                  (If not provided, the vertical range equals `slice_thickness`. Can be provided as a scalar 
+                  (added equally above and below the tracking location in pixels) or as a list 
+                  `[upper bound, lower bound, unit(optional)]`. Default unit is ``'px'``.)
                 - **n_files (int)**: Number of files to import
                 - **within_range (tuple[int, int])**: Range of files to import `(start, end)`
                 - **every_n_files (int)**: Step for file import.
@@ -191,9 +190,10 @@ class SliceListGenerator(SOA):
             6. Import files, slice them, and store the generated slices list into an image.
 
         Example:
-            >>> img_list, n, working_range, pixel_scale = GenerateSlicesArray(r'/path/to/*.ext', 
-                                                                              slice_loc=10, 
-                                                                              slice_thickness=5)
+            >>> img_list, n, working_range, pixel_scale = GenerateSlicesArray(
+            ...     r'/path/to/*.ext', 
+            ...     slice_loc=10, 
+            ...     slice_thickness=5)
         """
         important_info = kwargs.get('important_info', 0)
         if important_info:
@@ -236,12 +236,13 @@ class SliceListGenerator(SOA):
         new_log = f'Img Shape is: {shp}'
         log_message(new_log, output_directory)
         print(new_log)
-        Ref_x0 = kwargs.get('Ref_x0', [0,0])
+        Ref_x0 = kwargs.get('Ref_x0', [0, 0])
+        Ref_y00 = kwargs.get('Ref_y00', [-1, -1])
         Ref_y0 = kwargs.get('Ref_y0', -1)
         Ref_y1 = kwargs.get('Ref_y1', -1)
         if scale_pixels:
-            Ref_x0, Ref_y0, Ref_y1 = self.DefineReferences(img, shp,
-                                                           Ref_x0, scale_pixels,
+            Ref_x0, Ref_y0, Ref_y1, Ref_y00 = self.DefineReferences(img, shp,
+                                                           Ref_x0, Ref_y00, scale_pixels,
                                                            Ref_y0, Ref_y1, slice_loc)
         else: 
             self.clone = img.copy()
@@ -429,7 +430,7 @@ class SliceListGenerator(SOA):
 
         new_img = PreviewCVPlots(new_img, Ref_x0, Ref_y=Ref_y1,
                                  tk=[lower_bounds, upper_bounds],
-                                 avg_shock_loc=avg_shock_loc[0])
+                                 avg_shock_loc=avg_shock_loc[0], **kwargs)
 
         if avg_angle != 90 and preview:
             cv2.imshow('Final investigation domain', new_img)
@@ -468,18 +469,19 @@ class SliceListGenerator(SOA):
             log_message(f'DomainImage: {txt}', output_directory)
             print('DomainImage:', txt)
 
-        if full_img_width:
+        if full_img_width or not (Ref_x0[0]-Ref_x0[1]):
             x_range = [0, shp[1]]
-            working_range = {'Ref_x0': [0, shp[1]], 'Ref_y1': Ref_y1,
+            working_range = {'Ref_x0': [0, shp[1]], 'Ref_y00': Ref_y00, 'Ref_y1': Ref_y1,
                              'avg_shock_angle': avg_shock_angle,
                              'avg_shock_loc': avg_shock_loc}
-            new_log = f'scaling lines: Ref_x0 = {Ref_x0}, Ref_y1 = {Ref_y1}'
-            log_message(new_log, output_directory)
-            print(new_log)
+            if scale_pixels:
+                new_log = f'scaling lines: Ref_x0: {Ref_x0}, Ref_y00: {Ref_y00}, Ref_y1: {Ref_y1}'
+                log_message(new_log, output_directory)
+                print(new_log)
 
         else:
             x_range = Ref_x0
-            working_range = {'Ref_x0': Ref_x0, 'Ref_y1': Ref_y1,
+            working_range = {'Ref_x0': Ref_x0, 'Ref_y00': Ref_y00, 'Ref_y1': Ref_y1,
                              'avg_shock_angle': avg_shock_angle,
                              'avg_shock_loc': avg_shock_loc}
 

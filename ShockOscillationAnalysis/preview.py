@@ -220,8 +220,9 @@ def plot_review(ax:plt.axes, img: np.ndarray, shp:tuple[int],
     ax.plot(uncertain, uncertain_y, 'o',
             color=uncertain_point_color, ms=points_size, alpha=points_opacity)
 
-def PreviewCVPlots(img:np.ndarray, Ref_x0:list[int]=None, Ref_y:list[int]|int=None,
-                   tk:list[int]=None, avg_shock_loc:list[float]=None, **kwargs):
+def PreviewCVPlots(img:np.ndarray, Ref_x0:list[int]=None,
+                   Ref_y:list[int]|int=None, tk:list[int]=None, avg_shock_loc:list[float]=None,
+                   **kwargs):
     """
     PreviewCVPlots function is used to overlay various plot elements on an image for
     visualization purposes.
@@ -249,6 +250,12 @@ def PreviewCVPlots(img:np.ndarray, Ref_x0:list[int]=None, Ref_y:list[int]|int=No
         Ref_x0_color = kwargs.get('Ref_x0_color', CVColor.GREEN)
         cv2.line(img, (Ref_x0[0],0), (Ref_x0[0],shp[0]), Ref_x0_color, 1)
         cv2.line(img, (Ref_x0[1],0), (Ref_x0[1],shp[0]), Ref_x0_color, 1)
+    
+    Ref_y00 = kwargs.get('Ref_y00', None)    
+    if Ref_y00 is not None:
+        Ref_y00_color = kwargs.get('Ref_y00_color', CVColor.MAGENTA)
+        cv2.line(img, (0, Ref_y00[0]), (shp[1], Ref_y00[0]), Ref_y00_color, 1)
+        cv2.line(img, (0, Ref_y00[1]), (shp[1], Ref_y00[1]), Ref_y00_color, 1)
 
     if tk is not None and len(tk) == 2:
         tk_color = kwargs.get('tk_color', CVColor.GREENBLUE)

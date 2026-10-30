@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ShockOscillationAnalysis package &mdash; ShockTrackingLibrary 1.9.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -16,7 +16,6 @@
       <script src="_static/documentation_options.js?v=c4cb232b"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -161,7 +160,7 @@
 <p>&#64;author: Ahmed H. Hanfy</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.ShockOscillationAnalysis.</span></span><span class="sig-name descname"><span class="pre">SOA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelScale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.ShockOscillationAnalysis.</span></span><span class="sig-name descname"><span class="pre">SOA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelScale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.CleanSnapshots">
@@ -226,7 +225,7 @@ filtering.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.DefineReferences">
-<span class="sig-name descname"><span class="pre">DefineReferences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_pixels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_y1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.DefineReferences" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">DefineReferences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_y00</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_pixels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ref_y1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.DefineReferences" title="Link to this definition"></a></dt>
 <dd><p>Define reference lines on an image for scalling and further processing.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
@@ -236,6 +235,7 @@ filtering.</p></li>
 <li><p><strong>scale_pixels (bool)</strong>: Whether to scale pixels based on the reference lines.</p></li>
 <li><p><strong>Ref_y0 (int, optional)</strong>: y-coordinate of the top horizontal reference line. 
 Default is -1.</p></li>
+<li><p><strong>Ref_y00 (list[int])</strong>: List of y-coordinates for horizontal reference lines used for scaling.</p></li>
 <li><p><strong>Ref_y1 (int, optional)</strong>: y-coordinate of the bottom horizontal reference line. 
 Default is -1.</p></li>
 <li><p><strong>slice_loc (int, optional)</strong>: Location of the slice for horizontal reference lines. 
@@ -248,6 +248,7 @@ Default is 0.</p></li>
 <li><p>Ref_x0 (list[int]): Sorted list of x-coordinates for vertical reference lines.</p></li>
 <li><p>Ref_y0 (int): y-coordinate of the top horizontal reference line.</p></li>
 <li><p>Ref_y1 (int): y-coordinate of the bottom horizontal reference line.</p></li>
+<li><p>Ref_y00 (list[int]): Sorted list of horizontal scaling reference lines.</p></li>
 </ul>
 </dd>
 </dl>
@@ -258,14 +259,15 @@ Default is 0.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s1">&#39;path/to/image.jpg&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">shape</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Ref_x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Ref_y00</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">150</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">scale_pixels</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Ref_y0</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Ref_y1</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">slice_loc</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ref_x0</span><span class="p">,</span> <span class="n">ref_y0</span><span class="p">,</span> <span class="n">ref_y1</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">DefineReferences</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">Ref_x0</span><span class="p">,</span>
-<span class="go">                                                       scale_pixels, Ref_y0,</span>
-<span class="go">                                                       Ref_y1, slice_loc)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ref_x0</span><span class="p">,</span> <span class="n">ref_y0</span><span class="p">,</span> <span class="n">ref_y1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ref_x0</span><span class="p">,</span> <span class="n">ref_y0</span><span class="p">,</span> <span class="n">ref_y1</span><span class="p">,</span> <span class="n">ref_y00</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">DefineReferences</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">Ref_x0</span><span class="p">,</span>
+<span class="go">                                                                scale_pixels, Ref_y0,</span>
+<span class="go">                                                                Ref_y1, slice_loc)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ref_x0</span><span class="p">,</span> <span class="n">ref_y0</span><span class="p">,</span> <span class="n">ref_y1</span><span class="p">,</span> <span class="n">ref_y00</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd>
@@ -274,8 +276,8 @@ Default is 0.</p></li>
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>The function sets up vertical and horizontal reference lines on the image.</p></li>
-<li><p>It calculates the pixel scale if <cite>scale_pixels</cite> is True using horizontal distance
-between the reference vertical lines {Ref_x0}.</p></li>
+<li><p>It calculates the pixel scale if <cite>scale_pixels</cite> is True using the distance 
+between reference lines (vertical or horizontal depending on user prompts).</p></li>
 </ul>
 </div>
 </dd></dl>
@@ -342,7 +344,7 @@ can be proposed</p>
 <div><ol class="arabic simple">
 <li><p><cite>integral</cite>: This method tracks the shock through the largest blocked area by the 
 knife. More information and detailed discrepancies can be found in this article 
-<a class="reference external" href="https://dx.doi.org/10.2139/ssrn.4797840">https://dx.doi.org/10.2139/ssrn.4797840</a>.</p></li>
+<a class="reference external" href="https://dx.doi.org/10.1016/j.ast.2025.111022">https://dx.doi.org/10.1016/j.ast.2025.111022</a>.</p></li>
 <li><p><cite>darkest_spot</cite>: The shock is tracked by the abslute dark point of the schlieren 
 image</p></li>
 <li><p><cite>maxGrad</cite>: By performing sobel gradient algorithem, the shock edge is determined as 
@@ -475,6 +477,25 @@ to delete the line, press the right click anywhere on the image.</p></li>
 to calculate the inclined line and display it on the image.</p></li>
 </ul>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.n_linecheck">
+<span class="sig-name descname"><span class="pre">n_linecheck</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA.n_linecheck" title="Link to this definition"></a></dt>
+<dd><p>Checks if the provided list of reference lines meets the minimum required count.</p>
+<p>If the number of lines is less than <cite>min_n</cite>, this method logs the error,
+prints a formatted failure message to the console, and exits the program.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><ul class="simple">
+<li><p><strong>line_list (list[int])</strong>: A list of reference lines to check.</p></li>
+<li><p><strong>min_n (int):</strong> The minimum required number of reference lines.</p></li>
+</ul>
+</dd>
+<dt>Raises:</dt><dd><ul class="simple">
+<li><p><strong>SystemExit</strong>: Exits the program if the line count is insufficient.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -645,7 +666,7 @@ The <cite>KernalDim</cite> parameter specifies the dimension of the Sobel kernel
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.generateshocksignal.IntegralShocktracking">
 <span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.generateshocksignal.</span></span><span class="sig-name descname"><span class="pre">IntegralShocktracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SnapshotSlice</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ShockLocation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncertain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.generateshocksignal.IntegralShocktracking" title="Link to this definition"></a></dt>
-<dd><p>Perform shock tracking based on integral method discriped in <a class="reference external" href="https://dx.doi.org/10.2139/ssrn.4797840">https://dx.doi.org/10.2139/ssrn.4797840</a>.</p>
+<dd><p>Perform shock tracking based on integral method discriped in <a class="reference external" href="https://dx.doi.org/10.1016/j.ast.2025.111022">https://dx.doi.org/10.1016/j.ast.2025.111022</a>.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>SnapshotSlice (list)</strong>: snapshot slice in grayscale where shock is tracked.</p></li>
@@ -1119,13 +1140,13 @@ the transformation to have an effect.</p></li>
 <p>&#64;author: Ahmed H. Hanfy</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.shocktracking.ShockTraking">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.shocktracking.</span></span><span class="sig-name descname"><span class="pre">ShockTraking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SnapshotSlice</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LastShockLoc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.shocktracking.ShockTraking" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.shocktracking.</span></span><span class="sig-name descname"><span class="pre">ShockTraking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">SnapshotSlice</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LastShockLoc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_dirc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.shocktracking.ShockTraking" title="Link to this definition"></a></dt>
 <dd><p>Process a given slice to track shock waves and determine the shock location.</p>
 <dl>
 <dt>Parameters:</dt><dd><ul class="simple">
 <li><p><strong>SnapshotSlice (numpy.ndarray)</strong>: A slice of the image to process.</p></li>
 <li><p><strong>LastShockLoc (int, optional)</strong>: The location of the last shock. Default is -1.</p></li>
-<li><p><strong>Plot (bool, optional)</strong>: Whether to plot the slice illumination values with locations and average line. Default is False.</p></li>
+<li><p><strong>Plot (bool, optional)</strong>: Whether to plot the slice tracking process. Default is False.</p></li>
 <li><p><strong>count (int, optional)</strong>: Counter for plotting. Default is -1.</p></li>
 <li><p><strong>log_dirc (str)</strong>: log file directory.</p></li>
 </ul>
@@ -1149,7 +1170,7 @@ the transformation to have an effect.</p></li>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>The function processes the illumination values of a given image slice to track shock waves.</p></li>
+<li><p>The function processes the illumination values of a pixel slice to track shock waves.</p></li>
 <li><p>It returns the determined shock location, certainty status, and a reason for uncertainty.</p></li>
 </ul>
 </div>

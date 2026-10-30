@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ShockOscillationAnalysis.slice_list_generator package &mdash; ShockTrackingLibrary 1.9.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -167,7 +167,7 @@
 <p>&#64;author: Ahmed H. Hanfy</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.slice_list_generator.slice_list_generator.</span></span><span class="sig-name descname"><span class="pre">SliceListGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelScale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.slice_list_generator.slice_list_generator.</span></span><span class="sig-name descname"><span class="pre">SliceListGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixelScale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="ShockOscillationAnalysis.html#ShockOscillationAnalysis.ShockOscillationAnalysis.SOA" title="ShockOscillationAnalysis.ShockOscillationAnalysis.SOA"><code class="xref py py-class docutils literal notranslate"><span class="pre">SOA</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.slice_list_generator.slice_list_generator.SliceListGenerator.GenerateSlicesArray">
@@ -212,17 +212,16 @@ generating a single image where each row represents a snapshot.</p>
 <li><p>The function assumes the input images are in RGB format.</p></li>
 <li><dl class="simple">
 <dt>The <cite>kwargs</cite> parameter can include:</dt><dd><ul>
-<li><p><strong>Ref_x0 (list[int, int])</strong>: Reference x boundaries.for scaling</p></li>
+<li><p><strong>Ref_x0 (list[int, int])</strong>: Reference x boundaries for scaling</p></li>
+<li><p><strong>Ref_y00 (list[int, int])</strong>: Reference y boundaries for horizontal scaling</p></li>
 <li><p><strong>Ref_y0 (int)</strong>: Reference y datum (zero y location)</p></li>
 <li><p><strong>Ref_y1 (int)</strong>: slice location (The scanning line, y-center of rotation)</p></li>
 <li><p><strong>avg_shock_angle (float)</strong>: Average shock angle. (if known, to skip average shock inc check)</p></li>
 <li><p><strong>avg_shock_loc (int)</strong>: Average shock location. (if known, x-center of rotation)</p></li>
 <li><p><strong>sat_vr (int | list[int,’str’])</strong>: Shock Angle Test Vertical Range 
-(If not provided the vertical renge will be equal to the <code class="docutils literal notranslate"><span class="pre">slice_thickness</span></code>, could be
-provided as number then value will be added equally to upper and lower the traking
-location in pixels, it also can be added as list <cite>[upper bound, lower bound, unit(optional)]</cite> 
-in current version unit should match the universal units <code class="docutils literal notranslate"><span class="pre">'px'</span></code>, etc. if the unit not 
-provided the defualt <code class="docutils literal notranslate"><span class="pre">'px'</span></code> will be considered)</p></li>
+(If not provided, the vertical range equals <cite>slice_thickness</cite>. Can be provided as a scalar 
+(added equally above and below the tracking location in pixels) or as a list 
+<cite>[upper bound, lower bound, unit(optional)]</cite>. Default unit is <code class="docutils literal notranslate"><span class="pre">'px'</span></code>.)</p></li>
 <li><p><strong>n_files (int)</strong>: Number of files to import</p></li>
 <li><p><strong>within_range (tuple[int, int])</strong>: Range of files to import <cite>(start, end)</cite></p></li>
 <li><p><strong>every_n_files (int)</strong>: Step for file import.</p></li>
@@ -251,9 +250,10 @@ provided the defualt <code class="docutils literal notranslate"><span class="pre
 <li><p>Import files, slice them, and store the generated slices list into an image.</p></li>
 </ol>
 </dd>
-<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">img_list</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">working_range</span><span class="p">,</span> <span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">GenerateSlicesArray</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;/path/to/*.ext&#39;</span><span class="p">,</span> 
-<span class="go">                                                                  slice_loc=10, </span>
-<span class="go">                                                                  slice_thickness=5)</span>
+<dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">img_list</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">working_range</span><span class="p">,</span> <span class="n">pixel_scale</span> <span class="o">=</span> <span class="n">GenerateSlicesArray</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="sa">r</span><span class="s1">&#39;/path/to/*.ext&#39;</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">slice_loc</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> 
+<span class="gp">... </span>    <span class="n">slice_thickness</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd>

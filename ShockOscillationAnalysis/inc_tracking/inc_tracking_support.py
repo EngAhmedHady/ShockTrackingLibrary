@@ -139,8 +139,14 @@ def ransac(x:np.ndarray, y:np.ndarray, threshold:float,
         - The function is designed to handle datasets with a moderate proportion of outliers.
 
     """
+    # Remove indices where x or y contain NaN values
+    valid_mask = ~np.isnan(x) & ~np.isnan(y)
+    x = x[valid_mask]
+    y = y[valid_mask]
+    
     best_model = None
     # best_inliers = []
+    best_inliers = np.array([], dtype=int)
     best_score = 0
     # e: estimated outlier ratio (n_outlaier/data_set_size)
     # p: probability to select at least 1 outlier within a sample
@@ -176,9 +182,9 @@ def ransac(x:np.ndarray, y:np.ndarray, threshold:float,
             best_inliers = inliers
     try:
         return best_model, np.mean(x[best_inliers]), np.mean(y[best_inliers])
-    except Exception as e:
-        log_message(e, log_dirc)
-        print(e, x, y, best_model, inliers)
+    except Exception as er:
+        log_message(er, log_dirc)
+        print(er, x, y, best_model, inliers)
         
 
 def pearson_corr_coef(xLoc: list[float], columnY:list[float], nSlices: int) -> list[float]:
