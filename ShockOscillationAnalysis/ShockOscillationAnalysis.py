@@ -298,6 +298,7 @@ class SOA:
         y00_diff = abs(end-start)
         draw_y00 = y00_diff == 0
         ans1 = True
+        ans2 = True
         if draw_y00:
             ans1 = input("Use vertical lines for scaling? Type Y if yes:").strip()
             ans1 = True if ans1.upper() == 'Y' else False
@@ -319,12 +320,12 @@ class SOA:
             if ans1: 
                 ans2 = input("Still need vertical line? Type Y if yes:").strip()
                 ans2 = True if ans2.upper() == 'Y' else False
-                if ans2:
-                    self.LineDraw(img, 'V', 0, Intialize=True)
-                    self.LineDraw(self.clone, 'V', 1)
-                    Ref_x0 = self.Reference
-                    self.n_linecheck(Ref_x0, 2)
-                    Ref_x0.sort()  # to make sure that the limits are properly assigned
+            if ans2 or not ans1:
+                self.LineDraw(img, 'V', 0, Intialize=True)
+                self.LineDraw(self.clone, 'V', 1)
+                Ref_x0 = self.Reference
+                self.n_linecheck(Ref_x0, 2)
+                Ref_x0.sort()  # to make sure that the limits are properly assigned
         else:
             # set the vertical reference lines if provided
             self.clone = img.copy()

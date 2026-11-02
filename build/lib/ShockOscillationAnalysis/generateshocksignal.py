@@ -47,7 +47,7 @@ def GradientGenerator(img:np.ndarray[int], KernalDim: int = 3)-> np.ndarray[int]
 def IntegralShocktracking(SnapshotSlice: list[int], ShockLocation: float, Plot: bool, count: int,
                           uncertain: bool, log_dirc:str='') -> tuple[float, bool]:
     """
-    Perform shock tracking based on integral method discriped in https://dx.doi.org/10.2139/ssrn.4797840.
+    Perform shock tracking based on integral method discriped in https://dx.doi.org/10.1016/j.ast.2025.111022.
 
     Parameters:
         - **SnapshotSlice (list)**: snapshot slice in grayscale where shock is tracked.

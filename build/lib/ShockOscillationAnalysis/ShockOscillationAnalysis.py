@@ -219,9 +219,30 @@ class SOA:
         cv2.waitKey(1)
         return self.Reference
 
+    def n_linecheck(self, line_list: list, min_n: int):
+        """
+        Checks if the provided list of reference lines meets the minimum required count.
+
+        If the number of lines is less than `min_n`, this method logs the error,
+        prints a formatted failure message to the console, and exits the program.
+
+        Parameters:
+            - **line_list (list[int])**: A list of reference lines to check.
+            - **min_n (int):** The minimum required number of reference lines.
+
+        Raises:
+            - **SystemExit**: Exits the program if the line count is insufficient.
+        """
+        if len(line_list) < min_n:
+            error = 'Reference lines are not sufficient!'
+            log_message(error, self.outputPath)
+            print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
+            sys.exit()
+            
     def DefineReferences(self, img: np.ndarray[int], shp:tuple[int],
-                         Ref_x0:list[int], scale_pixels:bool, Ref_y0:int=-1, Ref_y1:int=-1,
-                         slice_loc:int=0, **kwargs) -> tuple[list[int],int,int]:
+                         Ref_x0:list[int], Ref_y00:list[int], scale_pixels:bool,
+                         Ref_y0:int=-1, Ref_y1:int=-1,
+                         slice_loc:int=0) -> tuple[list[int], int, int, list[int]]:
         """
         Define reference lines on an image for scalling and further processing.
 
@@ -232,6 +253,7 @@ class SOA:
             - **scale_pixels (bool)**: Whether to scale pixels based on the reference lines.
             - **Ref_y0 (int, optional)**: y-coordinate of the top horizontal reference line. 
               Default is -1.
+            - **Ref_y00 (list[int])**: List of y-coordinates for horizontal reference lines used for scaling.
             - **Ref_y1 (int, optional)**: y-coordinate of the bottom horizontal reference line. 
               Default is -1.
             - **slice_loc (int, optional)**: Location of the slice for horizontal reference lines. 
@@ -242,42 +264,68 @@ class SOA:
                 - Ref_x0 (list[int]): Sorted list of x-coordinates for vertical reference lines.
                 - Ref_y0 (int): y-coordinate of the top horizontal reference line.
                 - Ref_y1 (int): y-coordinate of the bottom horizontal reference line.
+                - Ref_y00 (list[int]): Sorted list of horizontal scaling reference lines.
 
         Example:
             >>> instance = SOA()
             >>> img = cv2.imread('path/to/image.jpg')
             >>> shape = img.shape
             >>> Ref_x0 = [100, 200]
+            >>> Ref_y00 = [50, 150]
             >>> scale_pixels = True
             >>> Ref_y0 = -1
             >>> Ref_y1 = -1
             >>> slice_loc = 50
-            >>> ref_x0, ref_y0, ref_y1 = instance.DefineReferences(img, shape, Ref_x0,
-                                                                   scale_pixels, Ref_y0,
-                                                                   Ref_y1, slice_loc)
-            >>> print(ref_x0, ref_y0, ref_y1)
+            >>> ref_x0, ref_y0, ref_y1, ref_y00 = instance.DefineReferences(img, shape, Ref_x0,
+                                                                            scale_pixels, Ref_y0,
+                                                                            Ref_y1, slice_loc)
+            >>> print(ref_x0, ref_y0, ref_y1, ref_y00)
 
         .. note::
             - The function sets up vertical and horizontal reference lines on the image.
-            - It calculates the pixel scale if `scale_pixels` is True using horizontal distance
-              between the reference vertical lines {Ref_x0}.
+            - It calculates the pixel scale if `scale_pixels` is True using the distance 
+              between reference lines (vertical or horizontal depending on user prompts). 
         """
 
         # Ensure the vertical reference lines are sorted if they are provided
-        Ref_x0.sort(); start, end = Ref_x0
-        x0_diff = abs(end-start);  draw_x0 = x0_diff == 0
+        Ref_x0.sort()
+        start, end = Ref_x0
+        x0_diff = abs(end-start)
+        draw_x0 = x0_diff == 0
+        
+        Ref_y00.sort()
+        start, end = Ref_y00
+        y00_diff = abs(end-start)
+        draw_y00 = y00_diff == 0
+        ans1 = True
+        ans2 = True
+        if draw_y00:
+            ans1 = input("Use vertical lines for scaling? Type Y if yes:").strip()
+            ans1 = True if ans1.upper() == 'Y' else False
+            if ans1: 
+                self.LineDraw(img, 'H', 0, Intialize=True, h_draw_color=CVColor.MAGENTA)
+                self.LineDraw(self.clone, 'H', 1)
+                Ref_y00 = self.Reference
+                self.n_linecheck(Ref_y00, 2)
+                Ref_y00.sort()  # to make sure that the limits are properly assigned
+        else:
+            # set the horizontal scaling reference lines if provided
+            self.clone = img.copy()
+            cv2.line(self.clone, (0, Ref_y00[0]), (shp[1], Ref_y00[0]), CVColor.MAGENTA, 1)
+            cv2.line(self.clone, (0, Ref_y00[1]), (shp[1], Ref_y00[1]), CVColor.MAGENTA, 1)
+            self.Reference = Ref_y00[0: 2].copy()
 
         if draw_x0:
             # Draw vertical reference lines if not provided
-            self.LineDraw(img, 'V', 0, Intialize=True)
-            self.LineDraw(self.clone, 'V', 1)
-            Ref_x0 = self.Reference
-            if len(Ref_x0) < 2:
-                error = 'Reference lines are not sufficient!'
-                log_message(error, self.outputPath)
-                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
-                sys.exit()
-            Ref_x0.sort()  # to make sure that the limits are properly assigned
+            if ans1: 
+                ans2 = input("Still need vertical line? Type Y if yes:").strip()
+                ans2 = True if ans2.upper() == 'Y' else False
+            if ans2 or not ans1:
+                self.LineDraw(img, 'V', 0, Intialize=True)
+                self.LineDraw(self.clone, 'V', 1)
+                Ref_x0 = self.Reference
+                self.n_linecheck(Ref_x0, 2)
+                Ref_x0.sort()  # to make sure that the limits are properly assigned
         else:
             # set the vertical reference lines if provided
             self.clone = img.copy()
@@ -288,7 +336,10 @@ class SOA:
             self.Reference = Ref_x0[0: 2].copy()
 
         # Calculate the pixel scale if required
-        if scale_pixels:  self.pixelScale = self.D / abs(Ref_x0[1]-Ref_x0[0])
+        if scale_pixels and not ans1:
+            self.pixelScale = self.D / abs(Ref_x0[1]-Ref_x0[0])
+        elif scale_pixels and ans1:
+            self.pixelScale = self.D / abs(Ref_y00[1]-Ref_y00[0])
         new_log = f'Image scale: {self.pixelScale} {self.univ_unit["dis"]}/px'
         log_message(new_log, self.outputPath)
         print(new_log)
@@ -298,11 +349,7 @@ class SOA:
         # Alocate Horizontal reference lines
         if Ref_y0 == -1 and Ref_y1 == -1:
             self.LineDraw(self.clone, 'H', 2)  # to draw the reference line
-            if len(self.Reference) < 3:
-                error = 'Reference lines are not sufficient!'
-                log_message(error, self.outputPath)
-                print(f'{BCOLOR.FAIL}Error: {BCOLOR.ENDC}{BCOLOR.ITALIC}{error}{BCOLOR.ENDC}')
-                sys.exit()
+            self.n_linecheck(self.Reference, 3)
             Ref_y0 = self.Reference[-1]
             Ref_y1 = self.Reference[-1]-round(slice_loc/self.pixelScale)
         else:
@@ -313,7 +360,7 @@ class SOA:
                 Ref_y0 = Ref_y1+round(slice_loc/self.pixelScale)
             self.Reference.append(Ref_y0)
             cv2.line(self.clone, (0, Ref_y0), (shp[1], Ref_y0), CVColor.YELLOW, 1)
-        return Ref_x0, Ref_y0, Ref_y1
+        return Ref_x0, Ref_y0, Ref_y1, Ref_y00
 
     def CleanSnapshots(self, img:np.ndarray[int], *args, **kwargs) -> np.ndarray[int]:
         """
@@ -380,7 +427,7 @@ class SOA:
 
             1. `integral`: This method tracks the shock through the largest blocked area by the 
                knife. More information and detailed discrepancies can be found in this article 
-               https://dx.doi.org/10.2139/ssrn.4797840.
+               https://dx.doi.org/10.1016/j.ast.2025.111022.
             2. `darkest_spot`: The shock is tracked by the abslute dark point of the schlieren 
                image
             3. `maxGrad`: By performing sobel gradient algorithem, the shock edge is determined as 

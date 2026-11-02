@@ -176,6 +176,11 @@ class SliceListGenerator(SOA):
                 - **n_files (int)**: Number of files to import
                 - **within_range (tuple[int, int])**: Range of files to import `(start, end)`
                 - **every_n_files (int)**: Step for file import.
+                - **Ref_x0_color (CVColor, tuple)**: Color of reference x0 lines. Defaults to CVColor.GREEN.
+                - **tk_color (CVColor, tuple)**: Color of tk lines. Defaults to CVColor.GREENBLUE.
+                - **Ref_y1_color (CVColor, tuple)**: Color of reference y1 lines. Defaults to CVColor.FUCHSIPINK.
+                - **Ref_y2_color (CVColor, tuple)**: Color of reference y2 lines. Defaults to CVColor.YELLOW.
+                - **avg_shock_loc_color (CVColor, tuple)**: Color of average shock location line. Defaults to CVColor.CYAN.
                 - :func:`Inclind angle tracking parameters <ShockOscillationAnalysis.inc_tracking.inc_tracking.InclinedShockTracking.InclinedShockTracking>`:
                     - **Confidance**: ``nPnts``, ``conf_interval``, ``residual_preview``
                     - **Preview**: ``avg_preview_mode``, ``points_opacity``, ``points_size``, ``avg_lin_color``
@@ -428,9 +433,16 @@ class SliceListGenerator(SOA):
         M = cv2.getRotationMatrix2D((avg_shock_loc[0], Ref_y1), 90-avg_angle, 1.0)
         new_img = cv2.warpAffine(img, M, (shp[1], shp[0]))
 
-        new_img = PreviewCVPlots(new_img, Ref_x0, Ref_y=Ref_y1,
-                                 tk=[lower_bounds, upper_bounds],
-                                 avg_shock_loc=avg_shock_loc[0], **kwargs)
+        Ref_x0_color = kwargs.get('Ref_x0_color', CVColor.GREEN)
+        Ref_y0_color = kwargs.get('Ref_y0_color', CVColor.YELLOW)
+        Ref_y00_color = kwargs.get('Ref_y00_color', CVColor.MAGENTA)
+        Ref_y1_color = kwargs.get('Ref_y1_color', CVColor.FUCHSIPINK)
+        tk_color = kwargs.get('tk_color', CVColor.GREENBLUE)
+        new_img = PreviewCVPlots(new_img, Ref_x0, Ref_y00, Ref_y0, tk=[lower_bounds, upper_bounds],
+                                 avg_shock_loc=avg_shock_loc[0], Ref_x0_color=Ref_x0_color,
+                                 Ref_y2_color=Ref_y0_color, Ref_y00_color=Ref_y00_color,
+                                 Ref_y1_color=Ref_y1_color, tk_color=tk_color
+                                 )
 
         if avg_angle != 90 and preview:
             cv2.imshow('Final investigation domain', new_img)

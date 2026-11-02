@@ -220,9 +220,12 @@ def plot_review(ax:plt.axes, img: np.ndarray, shp:tuple[int],
     ax.plot(uncertain, uncertain_y, 'o',
             color=uncertain_point_color, ms=points_size, alpha=points_opacity)
 
-def PreviewCVPlots(img:np.ndarray, Ref_x0:list[int]=None,
+def PreviewCVPlots(img:np.ndarray, Ref_x0:list[int]=None, Ref_y00:list[int]=None,
                    Ref_y:list[int]|int=None, tk:list[int]=None, avg_shock_loc:list[float]=None,
-                   **kwargs):
+                   Ref_x0_color:CVColor=CVColor.GREEN, Ref_y00_color:CVColor=CVColor.MAGENTA,
+                   tk_color:CVColor=CVColor.GREENBLUE, Ref_y1_color:CVColor=CVColor.FUCHSIPINK,
+                   Ref_y2_color:CVColor=CVColor.YELLOW, avg_shock_loc_color:CVColor=CVColor.CYAN
+                   ):
     """
     PreviewCVPlots function is used to overlay various plot elements on an image for
     visualization purposes.
@@ -233,45 +236,46 @@ def PreviewCVPlots(img:np.ndarray, Ref_x0:list[int]=None,
         - **Ref_y (list[int]|int)**: List of y-coordinates for reference lines.
         - **tk (list[int])**: List of y-coordinates for tk lines.
         - **avg_shock_loc (list[float])**: Average shock location.
-
-    Keyword Arguments:
-        - **Ref_x0_color (tuple)**: Color of reference x0 lines. Defaults to CVColor.GREEN.
-        - **tk_color (tuple)**: Color of tk lines. Defaults to CVColor.GREENBLUE.
-        - **Ref_y1_color (tuple)**: Color of reference y1 lines. Defaults to CVColor.FUCHSIPINK.
-        - **Ref_y2_color (tuple)**: Color of reference y2 lines. Defaults to CVColor.YELLOW.
-        - **avg_shock_loc_color (tuple)**: Color of average shock location line. Defaults to CVColor.CYAN.
+        - **Ref_x0_color (CVColor, tuple)**: Color of reference x0 lines. Defaults to CVColor.GREEN.
+        - **tk_color (CVColor, tuple)**: Color of tk lines. Defaults to CVColor.GREENBLUE.
+        - **Ref_y1_color (CVColor, tuple)**: Color of reference y1 lines. Defaults to CVColor.FUCHSIPINK.
+        - **Ref_y2_color (CVColor, tuple)**: Color of reference y2 lines. Defaults to CVColor.YELLOW.
+        - **avg_shock_loc_color (CVColor, tuple)**: Color of average shock location line. Defaults to CVColor.CYAN.
 
     Returns:
         **np.ndarray**: Image with overlaid plot elements.
     """
 
     shp = img.shape
-    if Ref_x0 is not None:
-        Ref_x0_color = kwargs.get('Ref_x0_color', CVColor.GREEN)
+
+    # Ref_x0 = kwargs.get('Ref_x0', None)  
+    if Ref_x0 is not None and Ref_x0[1]-Ref_x0[0] > 0:
+        # Ref_x0_color = kwargs.get('Ref_x0_color', CVColor.GREEN)
         cv2.line(img, (Ref_x0[0],0), (Ref_x0[0],shp[0]), Ref_x0_color, 1)
         cv2.line(img, (Ref_x0[1],0), (Ref_x0[1],shp[0]), Ref_x0_color, 1)
     
-    Ref_y00 = kwargs.get('Ref_y00', None)    
-    if Ref_y00 is not None:
-        Ref_y00_color = kwargs.get('Ref_y00_color', CVColor.MAGENTA)
+    # Ref_y00 = kwargs.get('Ref_y00', None)    
+    if Ref_y00 is not None and Ref_y00[1]-Ref_y00[0] > 0:
+        # Ref_y00_color = kwargs.get('Ref_y00_color', CVColor.MAGENTA)
         cv2.line(img, (0, Ref_y00[0]), (shp[1], Ref_y00[0]), Ref_y00_color, 1)
         cv2.line(img, (0, Ref_y00[1]), (shp[1], Ref_y00[1]), Ref_y00_color, 1)
 
     if tk is not None and len(tk) == 2:
-        tk_color = kwargs.get('tk_color', CVColor.GREENBLUE)
+        # tk_color = kwargs.get('tk_color', CVColor.GREENBLUE)
         cv2.line(img, (0, tk[0]), (shp[1], tk[0]), tk_color, 1)
         cv2.line(img, (0, tk[1]), (shp[1], tk[1]), tk_color, 1)
 
-    Ref_y1_color = kwargs.get('Ref_y1_color', CVColor.FUCHSIPINK)
+    # Ref_y = kwargs.get('Ref_y1', None)  
+    # Ref_y1_color = kwargs.get('Ref_y1_color', CVColor.FUCHSIPINK)
     if hasattr(Ref_y, "__len__"):
         if len(Ref_y) > 2: 
             cv2.line(img, (0,Ref_y[1]), (shp[1],Ref_y[1]), Ref_y1_color, 1)
         if Ref_y[0] > -1:
-            Ref_y0_color = kwargs.get('Ref_y2_color', CVColor.YELLOW)
-            cv2.line(img, (0,Ref_y[0]), (shp[1],Ref_y[0]), Ref_y0_color, 1)
+            # Ref_y0_color = kwargs.get('Ref_y2_color', CVColor.YELLOW)
+            cv2.line(img, (0,Ref_y[0]), (shp[1],Ref_y[0]), Ref_y2_color, 1)
     elif Ref_y > 0: cv2.line(img, (0,Ref_y), (shp[1],Ref_y), Ref_y1_color, 1)
 
-    avg_shock_loc_color = kwargs.get('avg_shock_loc_color', CVColor.CYAN)
+    # avg_shock_loc_color = kwargs.get('avg_shock_loc_color', CVColor.CYAN)
     if hasattr(avg_shock_loc, "__len__") and len(avg_shock_loc) > 2:
         cv2.line(img, avg_shock_loc[0], avg_shock_loc[1], avg_shock_loc_color, 1)
     else: cv2.line(img, (int(avg_shock_loc), 0), 
@@ -280,7 +284,7 @@ def PreviewCVPlots(img:np.ndarray, Ref_x0:list[int]=None,
     return img
 
 def residual_preview(error, margins, nSlices, count, log_dirc=''):
-    fig, ax = plt.subplots(figsize=(10, 8))
+    _, ax = plt.subplots(figsize=(10, 8))
     e_median, Q1, Q2, IQR = margins
     try:
         # Plot histogram
