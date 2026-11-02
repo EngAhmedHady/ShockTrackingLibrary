@@ -362,7 +362,7 @@ customization can be passed through this function.</p>
 </dd>
 <dt>Example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">ShockOscillationAnalysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">InclinedShockTracking</span> <span class="k">as</span> <span class="n">IncTrac</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">D</span> <span class="o">=</span> <span class="mi">60</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">imgPath</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;C:\Usersdmin\Pictures\*.png&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">imgPath</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;C:\Users\admin\Pictures\*.png&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">IncTrac</span> <span class="o">=</span> <span class="n">IncTrac</span><span class="p">(</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">IncTrac</span><span class="o">.</span><span class="n">ShockPointsTracking</span><span class="p">(</span><span class="n">imgPath</span><span class="p">,</span> <span class="n">scale_pixels</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="go">                                tracking_V_range = [5, 25],</span>
@@ -522,18 +522,20 @@ customization can be passed through this function.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.doNone">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">doNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.doNone" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">doNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.doNone" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.import_gray">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">import_gray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resize_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.import_gray" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">import_gray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resize_img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.import_gray" title="Link to this definition"></a></dt>
+<dd><p>Resize the image if needed and convert to gray scale</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.import_other">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">import_other</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resize_img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.import_other" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">import_other</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resize_img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.import_other" title="Link to this definition"></a></dt>
+<dd><p>Resize the image if needed</p>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.pearson_corr_coef">
@@ -652,7 +654,7 @@ sample size among the existed points</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="ShockOscillationAnalysis.inc_tracking.inc_tracking_support.rotate90">
-<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">rotate90</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.rotate90" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">ShockOscillationAnalysis.inc_tracking.inc_tracking_support.</span></span><span class="sig-name descname"><span class="pre">rotate90</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#ShockOscillationAnalysis.inc_tracking.inc_tracking_support.rotate90" title="Link to this definition"></a></dt>
 <dd><p>Rotate an image 90 degrees clockwise.</p>
 <p>This function transposes the image matrix (swaps rows and columns) and 
 flips it horizontally to achieve a 90-degree clockwise rotation.</p>

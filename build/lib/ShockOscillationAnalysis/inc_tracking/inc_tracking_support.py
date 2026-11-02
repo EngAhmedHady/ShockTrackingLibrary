@@ -43,7 +43,7 @@ def v_least_squares(xLoc: list[float], columnY:list[float], nSlices: int) -> lis
         - The slope :math:`m` is calculated using the formula:
           
           .. math::
-            m = \\frac{n \\cdot \\sum (y^2) - (\\sum y)^2}{n \\cdot \\sum (x \\cdot y) - (\sum x)(\sum y)}
+            m = \\frac{n \\cdot \\sum (y^2) - (\\sum y)^2}{n \\cdot \\sum (x \\cdot y) - (\\sum x)(\\sum y)}
 
           where :math:`n` is the number of points (slices).
     """

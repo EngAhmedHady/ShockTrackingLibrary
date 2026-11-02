@@ -43,7 +43,7 @@ def v_least_squares(xLoc: list[float], columnY:list[float], nSlices: int) -> lis
         - The slope :math:`m` is calculated using the formula:
           
           .. math::
-            m = \\frac{n \\cdot \\sum (y^2) - (\\sum y)^2}{n \\cdot \\sum (x \\cdot y) - (\sum x)(\sum y)}
+            m = \\frac{n \\cdot \\sum (y^2) - (\\sum y)^2}{n \\cdot \\sum (x \\cdot y) - (\\sum x)(\\sum y)}
 
           where :math:`n` is the number of points (slices).
     """
@@ -145,7 +145,6 @@ def ransac(x:np.ndarray, y:np.ndarray, threshold:float,
     y = y[valid_mask]
     
     best_model = None
-    # best_inliers = []
     best_inliers = np.array([], dtype=int)
     best_score = 0
     # e: estimated outlier ratio (n_outlaier/data_set_size)
@@ -186,7 +185,6 @@ def ransac(x:np.ndarray, y:np.ndarray, threshold:float,
         log_message(er, log_dirc)
         print(er, x, y, best_model, inliers)
         
-
 def pearson_corr_coef(xLoc: list[float], columnY:list[float], nSlices: int) -> list[float]:
 
     """
@@ -355,17 +353,17 @@ def shockDomain(Loc: str, P1: tuple[int], HalfSliceWidth: int, LineSlope: float,
     if preview_img is not None: cv2.line(preview_img, P1new, P2new, CVColor.RED, 1)
     return anew
 
-def import_gray(img, resize_img):
-    # Resize the image if needed and convert to gray scale
+def import_gray(img:np.ndarray, resize_img:tuple[int])->np.ndarray:
+    """ Resize the image if needed and convert to gray scale"""
     img = cv2.cvtColor(cv2.resize(img.astype('float32'), resize_img), cv2.COLOR_BGR2GRAY)
     return img
 
-def import_other(img, resize_img):
-    # Resize the image if needed
+def import_other(img:np.ndarray, resize_img:tuple[int])->np.ndarray:
+    """ Resize the image if needed"""
     img = cv2.resize(img.astype('float32'), resize_img)
     return img
 
-def rotate90(img):
+def rotate90(img:np.ndarray)->np.ndarray:
     """
     Rotate an image 90 degrees clockwise.
 
@@ -391,7 +389,7 @@ def rotate90(img):
     img = cv2.flip(img, 1)
     return img
 
-def doNone(img): return img
+def doNone(img:np.ndarray)->np.ndarray: return img
 
 def ImportingFiles(pathlist: list[str], indices_list: list[int], n_images: int, # Importing info.
                    imgs_shp: tuple[int], import_type = 'gray_scale',            # Images info.

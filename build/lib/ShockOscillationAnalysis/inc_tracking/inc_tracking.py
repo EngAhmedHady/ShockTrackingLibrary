@@ -654,7 +654,7 @@ class InclinedShockTracking(SOA):
         Example:
             >>> from ShockOscillationAnalysis import InclinedShockTracking as IncTrac
             >>> D = 60
-            >>> imgPath = r'C:\\Users\admin\Pictures\*.png'
+            >>> imgPath = r'C:\\Users\\admin\\Pictures\\*.png'
             >>> IncTrac = IncTrac(D = D)
             >>> IncTrac.ShockPointsTracking(imgPath, scale_pixels = True,
                                             tracking_V_range = [5, 25],

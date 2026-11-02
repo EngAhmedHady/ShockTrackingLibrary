@@ -356,11 +356,11 @@ def compute_weighted_average(slope: np.ndarray, Sm: np.ndarray, img_set_size: in
         - Weighted Average Slope has two conditions:
 
           .. math::
-            \overline{m_1}=\\frac{\sum_{i}^{N-r}\\frac{m_i}{Sm_i^2}}{\sum_{i}^{N-r}\\frac{1}{\\sigma_i^2}}\\forall\\ \\sigma_i>0,
+            \\overline{m_1}=\\frac{\\sum_{i}^{N-r}\\frac{m_i}{Sm_i^2}}{\\sum_{i}^{N-r}\\frac{1}{\\sigma_i^2}}\\forall\\ \\sigma_i>0,
             
-            \overline{m_2}=\\sum_{i}^{r}m_i\\forall\\ \\sigma_i=0
+            \\overline{m_2}=\\sum_{i}^{r}m_i\\forall\\ \\sigma_i=0
 
-          where :math:`\\sigma_i=\\frac{s}{\\sqrt{\\sum\left(Y_j-\\overline{Y}\\right)^2}}`, 
+          where :math:`\\sigma_i=\\frac{s}{\\sqrt{\\sum\\left(Y_j-\\overline{Y}\\right)^2}}`, 
           :math:`s` is the standard error. :math:`Y_j` is the slice location,  
           :math:`\\overline{Y}` is the mean $y$-location of the slices,
           :math:`N` is the total number of images, and

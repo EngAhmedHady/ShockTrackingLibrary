@@ -38,7 +38,7 @@ def angle_txt(ax, X, avg_txt_Yloc, angle,
         ax.add_patch(avg_ang_arc)
 
         # Add the text annotation for the angle
-        ax.text(txt_xloc, txt_yloc , f'${{{angle:0.2f}}}^\circ$',
+        ax.text(txt_xloc, txt_yloc , rf'${{{angle:0.2f}}}^\circ$',
                 color=lin_color, fontsize=avg_txt_size)
         # Plot a horizontal line at the text annotation location to compare the inclination angle
         ax.plot(xline, yline, lw=1, color=lin_color, alpha=lin_opacity)
@@ -196,7 +196,7 @@ def plot_review(ax:plt.axes, img: np.ndarray, shp:tuple[int],
             ylen = np.sin(inflow_dir_rad[i])
             local_ang = AngleFromSlope(m)
             inflow_ang = local_ang + inflow_dir_deg[i]
-            ax.text(p1[0]+40 ,p1[1]- 5, f'${{{inflow_ang:0.2f}}}^\circ$', 
+            ax.text(p1[0]+40 ,p1[1]- 5, rf'${{{inflow_ang:0.2f}}}^\circ$', 
                     size=M1_txt_size, color=M1_color)
             ax.plot([p1[0]-arw_len*xlen,p1[0]+60*xlen], 
                     [p1[1]-arw_len*ylen,p1[1]+60*ylen], color=M1_color, lw=1)
@@ -248,34 +248,25 @@ def PreviewCVPlots(img:np.ndarray, Ref_x0:list[int]=None, Ref_y00:list[int]=None
 
     shp = img.shape
 
-    # Ref_x0 = kwargs.get('Ref_x0', None)  
     if Ref_x0 is not None and Ref_x0[1]-Ref_x0[0] > 0:
-        # Ref_x0_color = kwargs.get('Ref_x0_color', CVColor.GREEN)
         cv2.line(img, (Ref_x0[0],0), (Ref_x0[0],shp[0]), Ref_x0_color, 1)
         cv2.line(img, (Ref_x0[1],0), (Ref_x0[1],shp[0]), Ref_x0_color, 1)
     
-    # Ref_y00 = kwargs.get('Ref_y00', None)    
     if Ref_y00 is not None and Ref_y00[1]-Ref_y00[0] > 0:
-        # Ref_y00_color = kwargs.get('Ref_y00_color', CVColor.MAGENTA)
         cv2.line(img, (0, Ref_y00[0]), (shp[1], Ref_y00[0]), Ref_y00_color, 1)
         cv2.line(img, (0, Ref_y00[1]), (shp[1], Ref_y00[1]), Ref_y00_color, 1)
 
     if tk is not None and len(tk) == 2:
-        # tk_color = kwargs.get('tk_color', CVColor.GREENBLUE)
         cv2.line(img, (0, tk[0]), (shp[1], tk[0]), tk_color, 1)
         cv2.line(img, (0, tk[1]), (shp[1], tk[1]), tk_color, 1)
 
-    # Ref_y = kwargs.get('Ref_y1', None)  
-    # Ref_y1_color = kwargs.get('Ref_y1_color', CVColor.FUCHSIPINK)
     if hasattr(Ref_y, "__len__"):
         if len(Ref_y) > 2: 
             cv2.line(img, (0,Ref_y[1]), (shp[1],Ref_y[1]), Ref_y1_color, 1)
         if Ref_y[0] > -1:
-            # Ref_y0_color = kwargs.get('Ref_y2_color', CVColor.YELLOW)
             cv2.line(img, (0,Ref_y[0]), (shp[1],Ref_y[0]), Ref_y2_color, 1)
     elif Ref_y > 0: cv2.line(img, (0,Ref_y), (shp[1],Ref_y), Ref_y1_color, 1)
 
-    # avg_shock_loc_color = kwargs.get('avg_shock_loc_color', CVColor.CYAN)
     if hasattr(avg_shock_loc, "__len__") and len(avg_shock_loc) > 2:
         cv2.line(img, avg_shock_loc[0], avg_shock_loc[1], avg_shock_loc_color, 1)
     else: cv2.line(img, (int(avg_shock_loc), 0), 
